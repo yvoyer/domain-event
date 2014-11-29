@@ -21,6 +21,8 @@ use Star\Component\DomainEvent\Fixtures\StuffToDoListener;
  */
 final class EventStoreTest extends \PHPUnit_Framework_TestCase
 {
+    use EventMock;
+
     /**
      * @var EventStore
      */

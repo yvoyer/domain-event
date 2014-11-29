@@ -10,6 +10,9 @@
         }
     ],
     "autoload": {
+        "files": [
+            "tests/EventMock.php"
+        ],
         "psr-4": {
             "Star\\Component\\DomainEvent\\": "src/DomainEvent"
         }
@@ -20,7 +23,7 @@
         }
     },
     "require": {
-        "php": ">=5.3.3",
+        "php": ">=5.4.0",
         "symfony/event-dispatcher": "~2.5"
     },
     "require-dev": {
