@@ -28,6 +28,8 @@ abstract class Event extends BaseEvent
      */
     public static function name()
     {
-        throw new \RuntimeException('You need to define a name for this event by overriding this method.');
+        $currentEvent = get_called_class();
+        $method = __METHOD__;
+        throw new \RuntimeException("You need to define a name for Event '{$currentEvent}' by overriding the method '{$method}'.");
     }
 }
