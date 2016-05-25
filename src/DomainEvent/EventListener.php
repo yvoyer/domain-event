@@ -7,15 +7,21 @@
 
 namespace Star\Component\DomainEvent;
 
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-
 /**
- * Class EventListener
- *
  * @author  Yannick Voyer (http://github.com/yvoyer)
- *
- * @package Star\Component\DomainEvent
  */
-interface EventListener extends EventSubscriberInterface
+interface EventListener
 {
+    /**
+     * Key value map, where key is the event full class name and the map is the method
+     * to call when the event is triggered.
+     *
+     * ie.
+     * array(
+     *     "Full\Path\To\Event" => 'onEvent',
+     * )
+     *
+     * @return array
+     */
+    public function listensTo();
 }
