@@ -8,11 +8,7 @@
 namespace Star\Component\DomainEvent;
 
 /**
- * Class EventPublisher
- *
  * @author  Yannick Voyer (http://github.com/yvoyer)
- *
- * @package Star\Component\DomainEvent
  */
 interface EventPublisher
 {
@@ -22,7 +18,12 @@ interface EventPublisher
     public function subscribe(EventListener $listener);
 
     /**
-     * @param Event $event
+     * @param DomainEvent $event
      */
-    public function publish(Event $event);
+    public function publish(DomainEvent $event);
+
+    /**
+     * @param DomainEvent[] $events
+     */
+    public function publishChanges(array $events);
 }

@@ -8,11 +8,7 @@
 namespace Star\Component\DomainEvent;
 
 /**
- * Class EventMock
- *
  * @author  Yannick Voyer (http://github.com/yvoyer)
- *
- * @package Star\Component\DomainEvent
  */
 trait EventMock
 {
@@ -21,7 +17,7 @@ trait EventMock
      */
     protected function getMockDomainEvent()
     {
-        return $this->getMock('Star\Component\DomainEvent\Event');
+        return $this->getMock(DomainEvent::class);
     }
 
     /**
@@ -29,7 +25,7 @@ trait EventMock
      */
     protected function getMockDomainEventPublisher()
     {
-        return $this->getMock('Star\Component\DomainEvent\EventPublisher');
+        return $this->getMock(EventPublisher::class);
     }
 
     /**
@@ -37,6 +33,6 @@ trait EventMock
      */
     protected function getMockDomainEventListener()
     {
-        return $this->getMock('Star\Component\DomainEvent\EventListener');
+        return $this->getMock(EventListener::class);
     }
 }

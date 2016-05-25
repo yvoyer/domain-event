@@ -26,9 +26,4 @@
             <directory>src</directory>
         </whitelist>
     </filter>
-
-    <!-- Enable the coverage -->
-    <!-- <logging>
-         <log type="coverage-html" target="/tmp/coverage/domain-event.local" charset="UTF-8"/>
-    </logging> -->
 </phpunit>
