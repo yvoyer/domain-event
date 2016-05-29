@@ -37,7 +37,7 @@ class Product extends AggregateRoot
     }
 }
 
-class ProductWasCreated implement DomainEvent
+class ProductWasCreated implements DomainEvent
 {
     private $name;
 
