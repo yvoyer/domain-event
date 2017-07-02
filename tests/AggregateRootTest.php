@@ -26,11 +26,36 @@ final class AggregateRootTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf(ValidEvent::class, $events[0]);
         $this->assertCount(0, $aggregate->uncommitedEvents());
     }
+
+    public function test_it_should_apply_events_in_order_of_execution_when_event_triggers_another_event()
+    {
+        $aggregate = StubAggregate::fromStream([new MultipleEventWereTriggered()]);
+
+        $events = $aggregate->uncommitedEvents();
+        $this->assertCount(3, $events);
+        $this->assertInstanceOf(MultipleEventWereTriggered::class, $events[0]);
+        $this->assertInstanceOf(EventOneWasTriggered::class, $events[1]);
+        $this->assertInstanceOf(EventTwoWasTriggered::class, $events[2]);
+    }
 }
 
 final class StubAggregate extends AggregateRoot
 {
     public function onValidEvent(ValidEvent $event)
+    {
+    }
+
+    protected function onMultipleEventWereTriggered($event)
+    {
+        $this->mutate(new EventOneWasTriggered());
+    }
+
+    public function onEventOneWasTriggered($event)
+    {
+        $this->mutate(new EventTwoWasTriggered());
+    }
+
+    public function onEventTwoWasTriggered($event)
     {
     }
 }
@@ -40,5 +65,17 @@ final class MissingMethodEvent implements DomainEvent
 }
 
 final class ValidEvent implements DomainEvent
+{
+}
+
+final class MultipleEventWereTriggered implements DomainEvent
+{
+}
+
+final class EventOneWasTriggered implements DomainEvent
+{
+}
+
+final class EventTwoWasTriggered implements DomainEvent
 {
 }

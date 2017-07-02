@@ -60,8 +60,8 @@ abstract class AggregateRoot
             throw AggregateRootException::missingMutationOnAggregate($this, $method);
         }
 
-        $this->$method($event);
         $this->mutations[] = $event;
+        $this->$method($event);
     }
 
     /**
