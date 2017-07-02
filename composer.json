@@ -31,5 +31,8 @@
     },
     "suggest": {
         "symfony/event-dispatcher": "Allows the usage of the SymfonyPublisher adapter provided by the star/domain-event."
+    },
+    "config": {
+        "bin-dir": "bin"
     }
 }
