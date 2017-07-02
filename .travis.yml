@@ -9,4 +9,4 @@ php:
 
 script:
   - composer install
-  - vendor/bin/phpunit
+  - bin/phpunit
