@@ -76,7 +76,7 @@ class ProductWasCreated implements DomainEvent
 ```
 
 ```php
-class DoSomethingProductCreated implements EventPublisher
+class DoSomethingProductCreated implements EventListener
 {
     // methods on listener can be anything, it is configured by listensTo
     public function doSomething(ProductWasCreated $event)
@@ -113,7 +113,7 @@ The events method on `AggregateRoot` children must be prefixed with `on` and fol
 the event name. ie. For an event class named `StuffWasDone` the aggregate should have a method:
 
 ```php
-protected function onStuffWasDone(StuffWasDone $event);
+protected function onStuffWasDone(StuffWasDone $event): void;
 ```
 
 Note: The callback method can be changed to another format, by overriding the `AggregateRoot::getEventMethod()`.
