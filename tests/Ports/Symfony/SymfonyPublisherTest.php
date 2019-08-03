@@ -5,9 +5,10 @@
  * (c) Yannick Voyer <star.yvoyer@gmail.com> (http://github.com/yvoyer)
  */
 
-namespace Star\Component\DomainEvent\Symfony;
+namespace Star\Component\DomainEvent\Ports\Symfony;
 
 use PHPUnit\Framework\TestCase;
+use Star\Component\DomainEvent\BadMethodCallException;
 use Star\Component\DomainEvent\EventListener;
 use Star\Component\DomainEvent\Fixtures\Blog\Event\BlogWasCreated;
 use Star\Component\DomainEvent\Fixtures\Blog\Event\UserWasRegistered;
@@ -32,12 +33,12 @@ final class SymfonyPublisherTest extends TestCase implements EventListener
         $this->publisher = new SymfonyPublisher(new EventDispatcher());
     }
 
-    /**
-     * @expectedException        \Star\Component\DomainEvent\BadMethodCallException
-     * @expectedExceptionMessage The method 'onBadMethodCall' do not exists on listener 'Star\Component\DomainEvent\Symfony\MissingMethodListener'.
-     */
     public function test_it_should_throw_exception_when_method_of_listener_do_not_exists(): void
     {
+        $this->expectException(BadMethodCallException::class);
+        $this->expectExceptionMessage(
+            "The method 'onBadMethodCall' do not exists on listener '" . MissingMethodListener::class
+        );
         $this->publisher->subscribe(new MissingMethodListener());
     }
 
@@ -57,17 +58,6 @@ final class SymfonyPublisherTest extends TestCase implements EventListener
         $this->triggered = true;
     }
 
-    /**
-     * Key value map, where key is the event full class name and the map is the method
-     * to call when the event is triggered.
-     *
-     * ie.
-     * array(
-     *     "Full\Path\To\Event" => 'onEvent',
-     * )
-     *
-     * @return array
-     */
     public function listensTo(): array
     {
         return [
@@ -78,17 +68,6 @@ final class SymfonyPublisherTest extends TestCase implements EventListener
 
 final class MissingMethodListener implements EventListener
 {
-    /**
-     * Key value map, where key is the event full class name and the map is the method
-     * to call when the event is triggered.
-     *
-     * ie.
-     * array(
-     *     "Full\Path\To\Event" => 'onEvent',
-     * )
-     *
-     * @return array
-     */
     public function listensTo(): array
     {
         return [
