@@ -11,7 +11,7 @@ The `AggregateRoot` implementation triggers events that can be collected for pub
 
 ```
 "require": {
-    "star/domain-event": "^1.0"
+    "star/domain-event": "^2.0"
 }
 ```
 
