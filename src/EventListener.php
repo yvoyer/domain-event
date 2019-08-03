@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * This file is part of the StarDomainEvent project.
  *
@@ -23,5 +23,5 @@ interface EventListener
      *
      * @return array
      */
-    public function listensTo();
+    public function listensTo(): array;
 }

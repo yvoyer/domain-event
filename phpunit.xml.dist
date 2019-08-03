@@ -11,8 +11,6 @@
         forceCoversAnnotation       = "true"
         processIsolation            = "false"
         stopOnFailure               = "false"
-        syntaxCheck                 = "false"
-        strict                      = "true"
         bootstrap                   = "vendor/autoload.php" >
 
     <testsuites>

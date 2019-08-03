@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * This file is part of the php-ddd project.
  *
@@ -31,9 +31,9 @@ final class SymfonyPublisher implements EventPublisher
     /**
      * @param DomainEvent $event
      */
-    public function publish(DomainEvent $event)
+    public function publish(DomainEvent $event): void
     {
-        $this->dispatcher->dispatch(get_class($event), new EventAdapter($event));
+        $this->dispatcher->dispatch(\get_class($event), new EventAdapter($event));
     }
 
     /**
@@ -42,14 +42,14 @@ final class SymfonyPublisher implements EventPublisher
      * @param string $method
      * @throws \Star\Component\DomainEvent\BadMethodCallException
      */
-    private function addListener($eventClassName, EventListener $listener, $method)
+    private function addListener(string $eventClassName, EventListener $listener, string $method): void
     {
-        if (! method_exists($listener, $method)) {
+        if (! \method_exists($listener, $method)) {
             throw BadMethodCallException::methodNotDefinedOnListener($method, $listener);
         }
 
         $transformer = function (EventAdapter $adapter) use ($listener, $method) {
-            call_user_func([$listener, $method], $adapter->getWrappedEvent());
+            $listener->{$method}($adapter->getWrappedEvent());
         };
 
         $this->dispatcher->addListener($eventClassName, $transformer);
@@ -58,7 +58,7 @@ final class SymfonyPublisher implements EventPublisher
     /**
      * @param EventListener $listener
      */
-    public function subscribe(EventListener $listener)
+    public function subscribe(EventListener $listener): void
     {
         foreach ($listener->listensTo() as $eventClass => $method) {
             $this->addListener($eventClass, $listener, $method);
@@ -68,7 +68,7 @@ final class SymfonyPublisher implements EventPublisher
     /**
      * @param DomainEvent[] $events
      */
-    public function publishChanges(array $events)
+    public function publishChanges(array $events): void
     {
         foreach ($events as $event) {
             $this->publish($event);

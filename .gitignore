@@ -1,4 +1,7 @@
+/bin
 /vendor
 phpunit.xml
 composer.lock
 /*ide*
+.phpcs-cache
+infection-log.txt

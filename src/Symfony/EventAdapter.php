@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * This file is part of the php-ddd project.
  *
@@ -31,7 +31,7 @@ final class EventAdapter extends Event
     /**
      * @return DomainEvent
      */
-    public function getWrappedEvent()
+    public function getWrappedEvent(): DomainEvent
     {
         return $this->event;
     }

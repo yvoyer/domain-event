@@ -2,56 +2,80 @@
 
 [![Build Status](https://travis-ci.org/yvoyer/domain-event.svg)](https://travis-ci.org/yvoyer/domain-event)
 
-Small implementation of domain events in aggregate root to implement event sourcing.
-The aggregate implementation triggers events that can be collected for publishing
-by an implementation of `EventPublisher`.
+Small implementation of the aggregate root in [ddd](https://en.wikipedia.org/wiki/Domain-driven_design). 
+The `AggregateRoot` implementation triggers events that can be collected for publishing by an implementation of `EventPublisher`.
 
 ## Installation
 
 * Add the package using [composer](https://getcomposer.org/) in your `composer.json`
 
-```
-"require": {
-    "star/domain-event": "~1.0"
-}
-```
+`composer require star/domain-event`
 
 ## Usage
 
-* Make your class inherit the `AggregateRoot` class.
+1. Make your class inherit the `AggregateRoot` class.
 
 ```php
-// Aggregate
+// Product.php
 class Product extends AggregateRoot
 {
-    public static function create($name)
-    {
-        return new self([new ProductWasCreated($name)]);
-    }
-
-
-    // Define methods named according to the convention for each events.
-    protected function onProductWasCreated(ProductWasCreated $event)
-    {
-        $this->name = $event->name();
-    }
 }
+```
 
+2. Create the event for the mutation.
+
+```php
 class ProductWasCreated implements DomainEvent
 {
     private $name;
 
-    public function __construct($name)
+    public function __construct(string $name)
     {
         $this->name = $name;
     }
 
-    public function name()
+    public function name(): string
     {
         return $this->name;
     }
 }
+```
 
+3. Create a named constructor (static method), or a mutation method.
+
+```php
+// Product.php
+    /**
+     * Static construct, since the __construct() is protected
+     *
+     * @param string $name
+     * @return Product
+     */
+    public static function draftProduct(string $name): Product
+    {
+        return new self([new ProductWasCreated($name)]);
+    }
+    
+    /**
+     * Mutation method that handles the business logic of your aggregate
+     */
+    public function confirm(): void
+    {
+        $this->mutate(new ProductWasConfirmed($this->getId()));
+    }
+```
+
+4. Create the [callback](#naming-standard) method on the `AggregateRoot` that would be used to set the state after an event mutation.
+
+```php
+    protected function onProductWasCreated(ProductWasCreated $event): void
+    {
+        $this->name = $event->name();
+    }
+}
+```
+
+```php
 class DoSomethingProductCreated implements EventPublisher
 {
     // methods on listener can be anything, it is configured by listensTo
@@ -69,6 +93,8 @@ class DoSomethingProductCreated implements EventPublisher
 }
 ```
 
+## Listening to an event
+
 ```php
 $publisher = new SymfonyPublisher(new EventDispatcher());
 $publisher->subscribe(new DoSomethingProductCreated()); // This is a subscriber that listens to the ProductWasCreated event
@@ -82,5 +108,11 @@ $publisher->publishChanges($product->uncommitedEvents()); // will notify the lis
 ## Naming standard
 
 The events method on `AggregateRoot` children must be prefixed with `on` and followed by
-the event name. ie. For an event class named `StuffWasDone` the aggregate should have a method
-`protected function onStuffWasDone(StuffWasDone $event);`.
+the event name. ie. For an event class named `StuffWasDone` the aggregate should have a method:
+
+```php
+protected function onStuffWasDone(StuffWasDone $event);
+```
+
+Note: The callback method can be changed to another format, by overriding the `AggregateRoot::getEventMethod()`.
+
