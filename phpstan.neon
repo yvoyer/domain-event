@@ -6,7 +6,3 @@ parameters:
     --level: max
     excludes_analyse:
         - '%rootDir%/tests/'
-#    ignoreErrors:
-#        - '#get() on Symfony\Component\DependencyInjection\ContainerInterface|null#'
-#        - '#Cannot call method fetch() on Doctrine\DBAL\Driver\Statement|int.#'
-#        - '#Method [a-zA-Z\\]+Status::[a-zA-Z]+\(\) should return [a-zA-Z\\]+Status but returns Star\\Component\\State\\StateMetadata.#'

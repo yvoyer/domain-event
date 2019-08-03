@@ -13,6 +13,5 @@
     <file>src/</file>
     <file>tests/</file>
     <exclude-pattern>Test.php</exclude-pattern>
-    <exclude-pattern>Version*.php</exclude-pattern>
 
 </ruleset>
