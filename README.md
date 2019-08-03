@@ -105,6 +105,8 @@ $product = Product::create('lightsaber');
 $publisher->publishChanges($product->uncommitedEvents()); // will notify the listener and call the DoSomethingProductCreated::doSomething() method
 ```
 
+We currently support [third party](/docs/ports.md) adapters to allow you to plug-in the library into your infrastructure.
+
 ## Naming standard
 
 The events method on `AggregateRoot` children must be prefixed with `on` and followed by

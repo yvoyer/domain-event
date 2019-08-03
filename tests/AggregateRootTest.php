@@ -11,12 +11,12 @@ use PHPUnit\Framework\TestCase;
 
 final class AggregateRootTest extends TestCase
 {
-    /**
-     * @expectedException        \Star\Component\DomainEvent\AggregateRootException
-     * @expectedExceptionMessage The mutation 'onMissingMethodEvent' do not exists on aggregate 'Star\Component\DomainEvent\StubAggregate'.
-     */
     public function test_it_should_throw_exception_when_method_is_missing(): void
     {
+        $this->expectException(AggregateRootException::class);
+        $this->expectExceptionMessage(
+            "The mutation 'onMissingMethodEvent' do not exists on aggregate 'Star\Component\DomainEvent\StubAggregate'."
+        );
         StubAggregate::fromStream([new MissingMethodEvent()]);
     }
 

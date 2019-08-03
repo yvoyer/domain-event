@@ -5,7 +5,7 @@
  * (c) Yannick Voyer <star.yvoyer@gmail.com> (http://github.com/yvoyer)
  */
 
-namespace Star\Component\DomainEvent\Symfony;
+namespace Star\Component\DomainEvent\Ports\Symfony;
 
 use Star\Component\DomainEvent\BadMethodCallException;
 use Star\Component\DomainEvent\DomainEvent;
