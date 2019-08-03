@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * This file is part of the StarDomainEvent project.
  *
@@ -24,7 +24,8 @@ abstract class AggregateRoot
     /**
      * @return DomainEvent[]
      */
-    public function uncommitedEvents() {
+    public function uncommitedEvents(): array
+    {
         $mutations = $this->mutations;
         $this->mutations = [];
 
@@ -36,10 +37,10 @@ abstract class AggregateRoot
      *
      * @return static
      */
-    public static function fromStream(array $events)
+    public static function fromStream(array $events): self
     {
         /**
-         * @var $aggregate AggregateRoot
+         * @var AggregateRoot $aggregate
          */
         $aggregate = new static();
         foreach ($events as $event) {
@@ -53,10 +54,10 @@ abstract class AggregateRoot
      * @param DomainEvent $event
      * @throws AggregateRootException
      */
-    protected function mutate(DomainEvent $event)
+    protected function mutate(DomainEvent $event): void
     {
         $method = $this->getEventMethod($event);
-        if (! method_exists($this, $method)) {
+        if (! \method_exists($this, $method)) {
             throw AggregateRootException::missingMutationOnAggregate($this, $method);
         }
 
@@ -65,15 +66,17 @@ abstract class AggregateRoot
     }
 
     /**
+     * You can override this method to change the method format. Default: "onMyEvent" when $event class is "MyEvent".
+     *
      * @param DomainEvent $event
      *
      * @return string
      */
-    private function getEventMethod(DomainEvent $event)
+    protected function getEventMethod(DomainEvent $event): string
     {
-        $class = get_class($event);
-        $parts = explode('\\', $class);
-        $name = array_pop($parts);
+        $class = \get_class($event);
+        $parts = \explode('\\', $class);
+        $name = \array_pop($parts);
         $method = 'on' . $name;
 
         return $method;

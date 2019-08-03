@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * This file is part of the StarDomainEvent project.
  *
@@ -20,28 +20,17 @@ final class Blog extends AggregateRoot
      */
     private $name;
 
-    public function name()
+    public function name(): string
     {
         return $this->name;
     }
 
-    /**
-     * @param string $blogName
-     *
-     * @return Blog
-     */
-    public static function createBlog($blogName)
+    public static function createBlog(string $blogName): self
     {
-        $blog = new Blog();
-        $blog->mutate(new BlogWasCreated($blogName));
-
-        return $blog;
+        return self::fromStream([new BlogWasCreated($blogName)]);
     }
 
-    /**
-     * @param BlogWasCreated $event
-     */
-    public function onBlogWasCreated(BlogWasCreated $event)
+    public function onBlogWasCreated(BlogWasCreated $event): void
     {
         $this->name = $event->blogName();
     }

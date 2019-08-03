@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * This file is part of the StarDomainEvent project.
  *
@@ -30,7 +30,7 @@ final class CreateBlogOnUserRegister implements EventListener
         $this->publisher = $publisher;
     }
 
-    public function onUserWasRegistered(UserWasRegistered $event)
+    public function onUserWasRegistered(UserWasRegistered $event): void
     {
         $blog = Blog::createBlog($event->blogName());
         $this->publisher->publishChanges($blog->uncommitedEvents());
@@ -47,7 +47,7 @@ final class CreateBlogOnUserRegister implements EventListener
      *
      * @return array
      */
-    public function listensTo()
+    public function listensTo(): array
     {
         return [
             UserWasRegistered::class => 'onUserWasRegistered',

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * This file is part of the StarDomainEvent project.
  *
@@ -15,9 +15,9 @@ final class BadMethodCallException extends \InvalidArgumentException
      *
      * @return BadMethodCallException
      */
-    public static function methodNotDefinedOnListener($method, EventListener $listener)
+    public static function methodNotDefinedOnListener(string $method, EventListener $listener): self
     {
-        $listenerClass = get_class($listener);
+        $listenerClass = \get_class($listener);
 
         return new self("The method '{$method}' do not exists on listener '{$listenerClass}'.");
     }

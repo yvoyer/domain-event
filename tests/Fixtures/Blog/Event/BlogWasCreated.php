@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * This file is part of the StarDomainEvent project.
  *
@@ -14,12 +14,17 @@ use Star\Component\DomainEvent\DomainEvent;
  */
 final class BlogWasCreated implements DomainEvent
 {
-    private $blogName = 'My blog name';
-
     /**
-     * @return string
+     * @var string
      */
-    public function blogName()
+    private $blogName;
+
+    public function __construct(string $blogName)
+    {
+        $this->blogName = $blogName;
+    }
+
+    public function blogName(): string
     {
         return $this->blogName;
     }

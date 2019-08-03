@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * This file is part of the StarDomainEvent project.
  *
@@ -15,9 +15,9 @@ final class AggregateRootException extends \Exception
      *
      * @return AggregateRootException
      */
-    public static function missingMutationOnAggregate(AggregateRoot $aggregate, $method)
+    public static function missingMutationOnAggregate(AggregateRoot $aggregate, string $method): self
     {
-        $class = get_class($aggregate);
+        $class = \get_class($aggregate);
 
         return new self("The mutation '{$method}' do not exists on aggregate '{$class}'.");
     }

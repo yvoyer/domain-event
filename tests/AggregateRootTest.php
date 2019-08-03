@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * This file is part of the StarDomainEvent project.
  *
@@ -7,18 +7,20 @@
 
 namespace Star\Component\DomainEvent;
 
-final class AggregateRootTest extends \PHPUnit_Framework_TestCase
+use PHPUnit\Framework\TestCase;
+
+final class AggregateRootTest extends TestCase
 {
     /**
      * @expectedException        \Star\Component\DomainEvent\AggregateRootException
      * @expectedExceptionMessage The mutation 'onMissingMethodEvent' do not exists on aggregate 'Star\Component\DomainEvent\StubAggregate'.
      */
-    public function test_it_should_throw_exception_when_method_is_missing()
+    public function test_it_should_throw_exception_when_method_is_missing(): void
     {
         StubAggregate::fromStream([new MissingMethodEvent()]);
     }
 
-    public function test_it_should_reset_uncommited_events_when_fetched()
+    public function test_it_should_reset_uncommited_events_when_fetched(): void
     {
         $aggregate = StubAggregate::fromStream([new ValidEvent()]);
         $events = $aggregate->uncommitedEvents();
@@ -27,7 +29,7 @@ final class AggregateRootTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(0, $aggregate->uncommitedEvents());
     }
 
-    public function test_it_should_apply_events_in_order_of_execution_when_event_triggers_another_event()
+    public function test_it_should_apply_events_in_order_of_execution_when_event_triggers_another_event(): void
     {
         $aggregate = StubAggregate::fromStream([new MultipleEventWereTriggered()]);
 
@@ -37,25 +39,31 @@ final class AggregateRootTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf(EventOneWasTriggered::class, $events[1]);
         $this->assertInstanceOf(EventTwoWasTriggered::class, $events[2]);
     }
+
+    public function test_it_should_allow_child_class_to_call_construct(): void
+    {
+        $root = RootWithConstruct::fromStream([]);
+        $this->assertCount(0, $root->uncommitedEvents());
+    }
 }
 
 final class StubAggregate extends AggregateRoot
 {
-    public function onValidEvent(ValidEvent $event)
+    public function onValidEvent(ValidEvent $event): void
     {
     }
 
-    protected function onMultipleEventWereTriggered($event)
+    protected function onMultipleEventWereTriggered($event): void
     {
         $this->mutate(new EventOneWasTriggered());
     }
 
-    public function onEventOneWasTriggered($event)
+    public function onEventOneWasTriggered($event): void
     {
         $this->mutate(new EventTwoWasTriggered());
     }
 
-    public function onEventTwoWasTriggered($event)
+    public function onEventTwoWasTriggered($event): void
     {
     }
 }
@@ -78,4 +86,12 @@ final class EventOneWasTriggered implements DomainEvent
 
 final class EventTwoWasTriggered implements DomainEvent
 {
+}
+
+final class RootWithConstruct extends AggregateRoot
+{
+    protected function __construct()
+    {
+        parent::__construct();
+    }
 }

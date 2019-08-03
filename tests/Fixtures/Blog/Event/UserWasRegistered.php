@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * This file is part of the StarDomainEvent project.
  *
@@ -19,7 +19,7 @@ final class UserWasRegistered implements DomainEvent
     /**
      * @return string
      */
-    public function blogName()
+    public function blogName(): string
     {
         return $this->blogName;
     }
