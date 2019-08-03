@@ -2,18 +2,14 @@
 
 [![Build Status](https://travis-ci.org/yvoyer/domain-event.svg)](https://travis-ci.org/yvoyer/domain-event)
 
-Small implementation of the aggregate root in [ddd](). 
+Small implementation of the aggregate root in [ddd](https://en.wikipedia.org/wiki/Domain-driven_design). 
 The `AggregateRoot` implementation triggers events that can be collected for publishing by an implementation of `EventPublisher`.
 
 ## Installation
 
 * Add the package using [composer](https://getcomposer.org/) in your `composer.json`
 
-```
-"require": {
-    "star/domain-event": "^2.0"
-}
-```
+`composer require star/domain-event`
 
 ## Usage
 
@@ -45,17 +41,31 @@ class ProductWasCreated implements DomainEvent
 }
 ```
 
-3. Create a named constructor (static method).
+3. Create a named constructor (static method), or a mutation method.
 
 ```php
 // Product.php
+    /**
+     * Static construct, since the __construct() is protected
+     *
+     * @param string $name
+     * @return Product
+     */
     public static function draftProduct(string $name): Product
     {
         return new self([new ProductWasCreated($name)]);
     }
+    
+    /**
+     * Mutation method that handles the business logic of your aggregate
+     */
+    public function confirm(): void
+    {
+        $this->mutate(new ProductWasConfirmed($this->getId()));
+    }
 ```
 
-4. Create the [callback](/#naming-standard) method on the `AggregateRoot` that would be used to set the state after an event mutation.
+4. Create the [callback](#naming-standard) method on the `AggregateRoot` that would be used to set the state after an event mutation.
 
 ```php
     protected function onProductWasCreated(ProductWasCreated $event): void
