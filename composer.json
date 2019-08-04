@@ -16,7 +16,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Star\\Component\\DomainEvent\\": "tests"
+            "Star\\Component\\DomainEvent\\": "tests",
+            "Star\\Example\\": "examples"
         }
     },
     "require": {
