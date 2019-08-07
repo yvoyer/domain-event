@@ -4,6 +4,7 @@
 
 * Upgrade/php version bump (**BC break**).
 * Add compiler pass to use in symfony application (**BC break**).
+* Add message buses utility
 
 **Note**: This release introduce the following **BC breaks**:
 
