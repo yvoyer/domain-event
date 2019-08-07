@@ -1,8 +1,9 @@
 <?php declare(strict_types=1);
+
 /**
- * This file is part of the php-ddd project.
+ * (c) Yannick Voyer (http://github.com/yvoyer)
  *
- * (c) Yannick Voyer <star.yvoyer@gmail.com> (http://github.com/yvoyer)
+ * @since 1.0
  */
 
 namespace Star\Component\DomainEvent\Ports\Symfony;
