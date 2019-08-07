@@ -75,16 +75,20 @@ class ProductWasCreated implements DomainEvent
 }
 ```
 
+## Listening to an event
+
+When you wish to perform an operation after an event was dispatched by the `EventPublisher`, you need to define your listener:
+ 
 ```php
 class DoSomethingProductCreated implements EventListener
 {
     // methods on listener can be anything, it is configured by listensTo
-    public function doSomething(ProductWasCreated $event)
+    public function doSomething(ProductWasCreated $event): void
     {
         // do something with the event
     }
 
-    public function listensTo()
+    public function listensTo(): array
     {
         return [
             ProductWasCreated::class => 'doSomething',
@@ -93,23 +97,23 @@ class DoSomethingProductCreated implements EventListener
 }
 ```
 
-## Listening to an event
+The listener needs to be given to the publisher, so that he can send the event.
 
 ```php
 $publisher = new SymfonyPublisher(new EventDispatcher());
 $publisher->subscribe(new DoSomethingProductCreated()); // This is a subscriber that listens to the ProductWasCreated event
 
 $product = Product::create('lightsaber');
-
-// be advised that events will be removed from aggregate once collected, to avoid republishing the same event twice
 $publisher->publishChanges($product->uncommitedEvents()); // will notify the listener and call the DoSomethingProductCreated::doSomething() method
 ```
+
+**Warning**: Be advised that events will be removed from aggregate once collected, to avoid republishing the same event twice.
 
 We currently support [third party](/docs/ports.md) adapters to allow you to plug-in the library into your infrastructure.
 
 ## Naming standard
 
-The events method on `AggregateRoot` children must be prefixed with `on` and followed by
+The events method on the `AggregateRoot` children must be prefixed with `on` and followed by
 the event name. ie. For an event class named `StuffWasDone` the aggregate should have a method:
 
 ```php
@@ -118,3 +122,16 @@ protected function onStuffWasDone(StuffWasDone $event): void;
 
 Note: The callback method can be changed to another format, by overriding the `AggregateRoot::getEventMethod()`.
 
+# Message bus
+
+The package adds the ability to dispatch messages (`Command` and `Query`). Compared to the `EventPubliser`, the
+ `CommandBus` and `QueryBus` have different usages.
+ 
+* Command bus: Responsible to dispatch an operation that returns nothing. 
+* Query bus: Responsible to fetch some information. The returned information is recommended to be returned in a readonly format.
+
+([Example of usage](/examples/Blog/Application/Http/Controller/PostController.php))
+ 
+# Example
+
+The [blog](/examples/blog.phpt) example shows a use case for a blog application.

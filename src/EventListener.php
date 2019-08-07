@@ -1,15 +1,13 @@
 <?php declare(strict_types=1);
+
 /**
- * This file is part of the StarDomainEvent project.
- *
  * (c) Yannick Voyer (http://github.com/yvoyer)
+ *
+ * @since 1.0
  */
 
 namespace Star\Component\DomainEvent;
 
-/**
- * @author  Yannick Voyer (http://github.com/yvoyer)
- */
 interface EventListener
 {
     /**

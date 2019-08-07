@@ -3,9 +3,9 @@
 namespace Star\Component\DomainEvent\Ports\Symfony\DependencyInjection;
 
 use PHPUnit\Framework\TestCase;
+use Star\Component\DomainEvent\DomainEvent;
 use Star\Component\DomainEvent\EventListener;
 use Star\Component\DomainEvent\EventPublisher;
-use Star\Component\DomainEvent\Fixtures\Blog\Event\BlogWasCreated;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -65,23 +65,41 @@ final class MyController
         $this->publisher = $publisher;
     }
 
-    public function doAction(string $name): void
+    public function doAction(string $action): void
     {
-        $this->publisher->publish(new BlogWasCreated($name));
+        $this->publisher->publish(new SomethingWasDone($action));
     }
 }
 
 final class SomeListener implements EventListener
 {
-    public function onBlogCreate(BlogWasCreated $event): void
+    public function onSomethingWasDone(SomethingWasDone $event): void
     {
-        throw new \RuntimeException($event->blogName() . ' works!!');
+        throw new \RuntimeException($event->action() . ' works!!');
     }
 
     public function listensTo(): array
     {
         return [
-            BlogWasCreated::class => 'onBlogCreate',
+            SomethingWasDone::class => 'onSomethingWasDone',
         ];
+    }
+}
+
+final class SomethingWasDone implements DomainEvent
+{
+    /**
+     * @var string
+     */
+    private $action;
+
+    public function __construct(string $action)
+    {
+        $this->action = $action;
+    }
+
+    public function action(): string
+    {
+        return $this->action;
     }
 }
