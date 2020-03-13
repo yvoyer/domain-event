@@ -44,7 +44,7 @@ abstract class AggregateRoot
     /**
      * @param DomainEvent[] $events
      *
-     * @return static
+     * @return AggregateRoot|static
      */
     public static function fromStream(array $events): AggregateRoot
     {

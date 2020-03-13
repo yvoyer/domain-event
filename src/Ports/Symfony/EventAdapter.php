@@ -9,31 +9,11 @@
 namespace Star\Component\DomainEvent\Ports\Symfony;
 
 use Star\Component\DomainEvent\DomainEvent;
-use Symfony\Component\EventDispatcher\Event;
 
 /**
  * @internal Adapter used internally by the SymfonyPublisher.
  */
-final class EventAdapter extends Event
+interface EventAdapter
 {
-    /**
-     * @var DomainEvent
-     */
-    private $event;
-
-    /**
-     * @param DomainEvent $event
-     */
-    public function __construct(DomainEvent $event)
-    {
-        $this->event = $event;
-    }
-
-    /**
-     * @return DomainEvent
-     */
-    public function getWrappedEvent(): DomainEvent
-    {
-        return $this->event;
-    }
+    public function getWrappedEvent(): DomainEvent;
 }

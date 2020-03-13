@@ -13,6 +13,7 @@ use Star\Component\DomainEvent\DomainEvent;
 use Star\Component\DomainEvent\EventListener;
 use Star\Component\DomainEvent\EventPublisher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as ContractInteface;
 
 final class SymfonyPublisher implements EventPublisher
 {
@@ -34,7 +35,50 @@ final class SymfonyPublisher implements EventPublisher
      */
     public function publish(DomainEvent $event): void
     {
-        $this->dispatcher->dispatch(\get_class($event), new EventAdapter($event));
+        if ($this->dispatcher instanceof ContractInteface) {
+            // support for symfon >= 5 while keeping BC
+            $args = [
+                \get_class($event),
+                new class($event) extends \Symfony\Contracts\EventDispatcher\Event implements EventAdapter {
+                    /**
+                     * @var DomainEvent
+                     */
+                    private $event;
+
+                    public function __construct(DomainEvent $event)
+                    {
+                        $this->event = $event;
+                    }
+
+                    public function getWrappedEvent(): DomainEvent
+                    {
+                        return $this->event;
+                    }
+                },
+            ];
+        } else {
+            $args = [
+                \get_class($event),
+                new class($event) extends \Symfony\Component\EventDispatcher\Event implements EventAdapter {
+                    /**
+                     * @var DomainEvent
+                     */
+                    private $event;
+
+                    public function __construct(DomainEvent $event)
+                    {
+                        $this->event = $event;
+                    }
+
+                    public function getWrappedEvent(): DomainEvent
+                    {
+                        return $this->event;
+                    }
+                },
+            ];
+        }
+
+        $this->dispatcher->dispatch(...$args);
     }
 
     /**
