@@ -9,7 +9,8 @@
 namespace Star\Component\DomainEvent\Ports\Symfony;
 
 use Star\Component\DomainEvent\DomainEvent;
-use Symfony\Component\EventDispatcher\Event;
+// use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * @internal Adapter used internally by the SymfonyPublisher.

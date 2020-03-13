@@ -34,7 +34,8 @@ final class SymfonyPublisher implements EventPublisher
      */
     public function publish(DomainEvent $event): void
     {
-        $this->dispatcher->dispatch(\get_class($event), new EventAdapter($event));
+        // $this->dispatcher->dispatch(\get_class($event), new EventAdapter($event));
+        $this->dispatcher->dispatch(new EventAdapter($event), \get_class($event));
     }
 
     /**
