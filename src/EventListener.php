@@ -19,7 +19,7 @@ interface EventListener
      *     "Full\Path\To\Event" => 'onEvent',
      * )
      *
-     * @return array
+     * @return string[]
      */
     public function listensTo(): array;
 }

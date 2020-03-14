@@ -45,4 +45,16 @@ final class ObjectQueryTest extends TestCase
         $query((object) []);
         $this->assertInstanceOf(\stdClass::class, $query->getResult());
     }
+
+    public function test_it_should_allow_subclass_of_object(): void
+    {
+        $query = new class extends ObjectQuery {
+            protected function getObjectType(): string
+            {
+                return \DateTimeInterface::class;
+            }
+        };
+        $query(new \DateTimeImmutable());
+        $this->assertInstanceOf(\DateTimeInterface::class, $query->getResult());
+    }
 }

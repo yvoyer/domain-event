@@ -39,6 +39,7 @@ final class AggregateRootTest extends TestCase
     {
         $root = RootWithConstruct::fromStream([]);
         $this->assertCount(0, $root->uncommitedEvents());
+        $this->assertSame(12, $root->id);
     }
 }
 
@@ -85,8 +86,10 @@ final class EventTwoWasTriggered implements DomainEvent
 
 final class RootWithConstruct extends AggregateRoot
 {
-    protected function __construct()
+    public $id;
+
+    protected function configure(): void
     {
-        parent::__construct();
+        $this->id = 12;
     }
 }

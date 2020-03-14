@@ -18,7 +18,7 @@ use Symfony\Component\DependencyInjection\Reference;
 
 final class QueryBusPass implements CompilerPassInterface
 {
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         $definition = new Definition(MessageMapBus::class);
         foreach ($container->findTaggedServiceIds('star.query_handler') as $serviceId => $tags) {

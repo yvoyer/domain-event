@@ -18,7 +18,15 @@ abstract class AggregateRoot
     /**
      * Protected, define a static constructor (Factory method)
      */
-    protected function __construct()
+    final protected function __construct()
+    {
+        $this->configure();
+    }
+
+    /**
+     * This method allows child classes to define properties while keeping construct final
+     */
+    protected function configure(): void
     {
     }
 
@@ -38,10 +46,10 @@ abstract class AggregateRoot
      *
      * @return static
      */
-    public static function fromStream(array $events): self
+    public static function fromStream(array $events): AggregateRoot
     {
         /**
-         * @var AggregateRoot $aggregate
+         * @var static $aggregate
          */
         $aggregate = new static();
         foreach ($events as $event) {

@@ -20,11 +20,18 @@ abstract class ObjectQuery implements Query
 
     abstract protected function getObjectType(): string;
 
+    /**
+     * @param mixed $result
+     */
     final public function __invoke($result): void
     {
+        /**
+         * @var class-string<object> $class
+         */
+        $class = $this->getObjectType();
         Assert::isInstanceOf(
             $result,
-            $this->getObjectType(),
+            $class,
             'Query "' . static::class . '" expected an instance of "%2$s". Got: "%s".'
         );
         $this->result = $result;
