@@ -14,10 +14,13 @@ use Webmozart\Assert\Assert;
 abstract class CollectionQuery implements Query
 {
     /**
-     * @var array
+     * @var mixed[]
      */
     private $result = [];
 
+    /**
+     * @param mixed[] $result
+     */
     final public function __invoke($result): void
     {
         $this->validateResult($result);
@@ -28,10 +31,16 @@ abstract class CollectionQuery implements Query
         $this->result = $result;
     }
 
+    /**
+     * @param mixed $result
+     */
     protected function validateResult($result): void
     {
     }
 
+    /**
+     * @return mixed[]
+     */
     public function getResult(): array
     {
         return $this->result;

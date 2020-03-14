@@ -10,6 +10,9 @@ namespace Star\Component\DomainEvent\Messaging;
 
 interface Query extends Message
 {
+    /**
+     * @param mixed $result
+     */
     public function __invoke($result): void;
 
     /**
