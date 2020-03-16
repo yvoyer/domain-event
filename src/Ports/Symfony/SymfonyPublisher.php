@@ -36,7 +36,8 @@ final class SymfonyPublisher implements EventPublisher
     public function publish(DomainEvent $event): void
     {
         if ($this->dispatcher instanceof ContractInterface) {
-            // support for symfon >= 5 while keeping BC
+            // support for symfony >= 5 while keeping BC
+            // todo remove conditional when upgrading dependency to current version
             $args = [
                 \get_class($event),
                 new class($event) extends \Symfony\Contracts\EventDispatcher\Event implements EventAdapter {
