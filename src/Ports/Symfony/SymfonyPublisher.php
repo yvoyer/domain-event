@@ -13,7 +13,7 @@ use Star\Component\DomainEvent\DomainEvent;
 use Star\Component\DomainEvent\EventListener;
 use Star\Component\DomainEvent\EventPublisher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as ContractInteface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as ContractInterface;
 
 final class SymfonyPublisher implements EventPublisher
 {
@@ -35,7 +35,7 @@ final class SymfonyPublisher implements EventPublisher
      */
     public function publish(DomainEvent $event): void
     {
-        if ($this->dispatcher instanceof ContractInteface) {
+        if ($this->dispatcher instanceof ContractInterface) {
             // support for symfon >= 5 while keeping BC
             $args = [
                 \get_class($event),
