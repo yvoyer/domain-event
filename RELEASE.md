@@ -1,6 +1,6 @@
 # Release notes
 
-# 3.0.0
+# 2.0.1
 
 * Update composer dependencies
 * Add support for symfony event dispatcher api >-5.0
