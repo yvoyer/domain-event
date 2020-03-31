@@ -53,7 +53,7 @@ class ProductWasCreated implements DomainEvent
      */
     public static function draftProduct(string $name): Product
     {
-        return new self([new ProductWasCreated($name)]);
+        return self::fromStream([new ProductWasCreated($name)]);
     }
     
     /**
@@ -100,10 +100,10 @@ class DoSomethingProductCreated implements EventListener
 The listener needs to be given to the publisher, so that he can send the event.
 
 ```php
-$publisher = new SymfonyPublisher(new EventDispatcher());
+$publisher = new class() implements EventPublisher {}; // your implementation choice
 $publisher->subscribe(new DoSomethingProductCreated()); // This is a subscriber that listens to the ProductWasCreated event
 
-$product = Product::create('lightsaber');
+$product = Product::draftProduct('lightsaber');
 $publisher->publishChanges($product->uncommitedEvents()); // will notify the listener and call the DoSomethingProductCreated::doSomething() method
 ```
 
