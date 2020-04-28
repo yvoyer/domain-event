@@ -8,6 +8,8 @@ use Star\Component\DomainEvent\DomainEvent;
 use Star\Component\DomainEvent\EventListener;
 use Star\Example\Blog\Domain\Event\Post\PostWasDrafted;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface as ComponentDispatcher;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as ContractDispatcher;
 
 final class SymfonyPublisherTest extends TestCase implements EventListener
 {
@@ -56,6 +58,33 @@ final class SymfonyPublisherTest extends TestCase implements EventListener
         return [
             SomethingOccurred::class => 'onEventOccurred',
         ];
+    }
+
+    public function test_it_should_publish_event_with_contract_dispatcher(): void
+    {
+        if (! \interface_exists(ContractDispatcher::class)) {
+            $this->markTestSkipped('Interface "' . ContractDispatcher::class . '" is not defined.');
+        }
+        $dispatcher = $this->createMock(ContractDispatcher::class);
+        $dispatcher
+            ->expects($this->once())
+            ->method('dispatch')
+            ->with($this->isInstanceOf(EventAdapter::class));
+        $publisher = new SymfonyPublisher($dispatcher);
+        $publisher->publish(new class() implements DomainEvent {});
+    }
+
+    public function test_it_should_publish_event_with_component_dispatcher(): void
+    {
+        if (! \interface_exists(ComponentDispatcher::class)) {
+            $this->markTestSkipped('Interface "' . ComponentDispatcher::class . '" is not defined.');
+        }
+        $dispatcher = $this->createMock(ComponentDispatcher::class);
+        $dispatcher
+            ->expects($this->once())
+            ->method('dispatch');
+        $publisher = new SymfonyPublisher($dispatcher);
+        $publisher->publish(new class() implements DomainEvent {});
     }
 }
 
