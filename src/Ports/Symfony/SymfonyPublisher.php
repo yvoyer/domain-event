@@ -12,20 +12,20 @@ use Star\Component\DomainEvent\BadMethodCallException;
 use Star\Component\DomainEvent\DomainEvent;
 use Star\Component\DomainEvent\EventListener;
 use Star\Component\DomainEvent\EventPublisher;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as ContractInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface as ComponentDispatcher;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as ContractDispatcher;
 
 final class SymfonyPublisher implements EventPublisher
 {
     /**
-     * @var EventDispatcherInterface
+     * @var ComponentDispatcher|ContractDispatcher
      */
     private $dispatcher;
 
     /**
-     * @param EventDispatcherInterface $dispatcher
+     * @param ComponentDispatcher|ContractDispatcher $dispatcher
      */
-    public function __construct(EventDispatcherInterface $dispatcher)
+    public function __construct(/* todo uncomment in major version EventDispatcherInterface */$dispatcher)
     {
         $this->dispatcher = $dispatcher;
     }
@@ -35,11 +35,10 @@ final class SymfonyPublisher implements EventPublisher
      */
     public function publish(DomainEvent $event): void
     {
-        if ($this->dispatcher instanceof ContractInterface) {
+        if ($this->dispatcher instanceof ContractDispatcher) {
             // support for symfony >= 5 while keeping BC
             // todo remove conditional when upgrading dependency to current version
             $args = [
-                \get_class($event),
                 new class($event) extends \Symfony\Contracts\EventDispatcher\Event implements EventAdapter {
                     /**
                      * @var DomainEvent
@@ -56,6 +55,7 @@ final class SymfonyPublisher implements EventPublisher
                         return $this->event;
                     }
                 },
+                \get_class($event),
             ];
         } else {
             $args = [
