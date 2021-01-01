@@ -2,7 +2,9 @@
 
 namespace Star\Example\Blog\Domain\Model;
 
-final class BlogId
+use Star\Component\DomainEvent\Serialization\SerializableAttribute;
+
+final class BlogId implements SerializableAttribute
 {
     /**
      * @var string
@@ -17,5 +19,10 @@ final class BlogId
     public function toString(): string
     {
         return $this->name;
+    }
+
+    public function toSerializableString(): string
+    {
+        return $this->toString();
     }
 }
