@@ -19,11 +19,9 @@ jobs:
     - name: "Symfony +5.0"
       script: composer require symfony/event-dispatcher:~5.0.0 && php bin/phpunit
 
+before_script:
+  - phpenv config-rm xdebug.ini
+
 script:
-    - phpenv config-rm xdebug.ini
     - composer install
     - php bin/build.sh
-
-#env:
- # global:
-#    - XDEBUG_MODE=off
