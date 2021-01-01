@@ -22,3 +22,7 @@ jobs:
 script:
     - composer install
     - php bin/build.sh
+
+env:
+  global:
+    - XDEBUG_MODE=off
