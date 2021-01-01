@@ -2,7 +2,7 @@
 
 # 2.2.0
 
-* [#20](/pull/20) Add DBAL event store
+* [#20](https://github.com/yvoyer/domain-event/pull/20) Add DBAL event store
 
 # 2.1.1
 
