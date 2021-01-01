@@ -1,5 +1,9 @@
 # Release notes
 
+# 2.2.0
+
+* [#20](https://github.com/yvoyer/domain-event/pull/20) Add DBAL event store
+
 # 2.1.1
 
 * Fix bad order for `dispatch()` method see #19 
