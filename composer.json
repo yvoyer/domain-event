@@ -24,7 +24,7 @@
         "php": ">=7.1"
     },
     "require-dev": {
-        "doctrine/dbal": "^3.0",
+        "doctrine/dbal": "^2.0|^3.0",
         "phpstan/phpstan": "*",
         "phpstan/phpstan-phpunit": "*",
         "phpunit/php-file-iterator": "^2.0",
