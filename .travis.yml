@@ -20,6 +20,7 @@ jobs:
       script: composer require symfony/event-dispatcher:~5.0.0 && php bin/phpunit
 
 script:
+    - phpenv config-rm xdebug.ini
     - composer install
     - php bin/build.sh
 
