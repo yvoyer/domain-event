@@ -2,7 +2,9 @@
 
 namespace Star\Example\Blog\Domain\Model\Post;
 
-final class PostId
+use Star\Component\DomainEvent\Serialization\SerializableAttribute;
+
+final class PostId implements SerializableAttribute
 {
     /**
      * @var string
@@ -17,6 +19,11 @@ final class PostId
     public function toString(): string
     {
         return $this->value;
+    }
+
+    public function toSerializableString(): string
+    {
+        return $this->toString();
     }
 
     public static function fromString(string $id): self
