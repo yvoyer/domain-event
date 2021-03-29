@@ -47,11 +47,15 @@ abstract class DBALEventStore
         $this->serializer = $serializer;
     }
 
-    protected abstract function tableName(): string;
+    abstract protected function tableName(): string;
 
-    protected abstract function createAggregateFromStream(array $events): AggregateRoot;
+    /**
+     * @param DomainEvent[] $events
+     * @return AggregateRoot
+     */
+    abstract protected function createAggregateFromStream(array $events): AggregateRoot;
 
-    protected abstract function handleNoEventFound(string $id): void;
+    abstract protected function handleNoEventFound(string $id): void;
 
     protected function getAggregateWithId(string $id): AggregateRoot
     {
@@ -153,35 +157,35 @@ abstract class DBALEventStore
                 Types::STRING,
                 [
                     'length' => 50,
-#                    'not_null' => false,
+                    #'not_null' => false,
                 ]
             );
             $table->addColumn(
                 self::COLUMN_EVENT_NAME,
                 Types::STRING,
                 [
- #                   'not_null' => false,
+                    #'not_null' => false,
                 ]
             );
             $table->addColumn(
                 self::COLUMN_PAYLOAD,
                 Types::ARRAY,
                 [
-  #                  'not_null' => false,
+                    #'not_null' => false,
                 ]
             );
             $table->addColumn(
                 self::COLUMN_PUSHED_ON,
                 Types::DATETIME_IMMUTABLE,
                 [
-   #                 'not_null' => false,
+                    #'not_null' => false,
                 ]
             );
             $table->addColumn(
                 self::COLUMN_VERSION,
                 Types::BIGINT,
                 [
-    #                'not_null' => false,
+                    #'not_null' => false,
                 ]
             );
 

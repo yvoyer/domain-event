@@ -8,6 +8,7 @@
 
 namespace Star\Component\DomainEvent\Ports\Symfony\DependencyInjection;
 
+use InvalidArgumentException;
 use Star\Component\DomainEvent\Messaging\MessageMapBus;
 use Star\Component\DomainEvent\Messaging\Query;
 use Star\Component\DomainEvent\Messaging\QueryBus;
@@ -22,26 +23,38 @@ final class QueryBusPass implements CompilerPassInterface
     {
         $definition = new Definition(MessageMapBus::class);
         foreach ($container->findTaggedServiceIds('star.query_handler') as $serviceId => $tags) {
-            $handlerDefinition = $container->getDefinition($serviceId);
-            $message = (string) $handlerDefinition->getClass();
-            $class = \substr($message, 0, (int) \strrpos($message, 'Handler'));
-            if (! \is_subclass_of($class, Query::class)) {
-                throw new \RuntimeException(
-                    \sprintf(
-                        'The query handler "%s" must have a "Handler" suffix and a query matching '
-                        . 'the handler name without the suffix.',
-                        $message
-                    )
+            foreach ($tags as $tag) {
+                $handlerDefinition = $container->getDefinition($serviceId);
+                $handlerClass = (string) $handlerDefinition->getClass();
+                $queryClass = \substr($handlerClass, 0, (int) \strrpos($handlerClass, 'Handler'));
+                if (\strlen($queryClass) === 0) {
+                    throw new InvalidArgumentException(
+                        \sprintf('The query handler "%s" must have a "Handler" suffix.', $handlerClass)
+                    );
+                }
+
+                if (isset($tag['message'])) {
+                    $queryClass = $tag['message'];
+                }
+
+                if (! \is_subclass_of($queryClass, Query::class)) {
+                    throw new \RuntimeException(
+                        \sprintf(
+                            'The query "%s" must implement the "%s" interface.',
+                            $queryClass,
+                            Query::class
+                        )
+                    );
+                }
+
+                $definition->addMethodCall(
+                    'registerHandler',
+                    [
+                        $queryClass,
+                        new Reference($serviceId),
+                    ]
                 );
             }
-
-            $definition->addMethodCall(
-                'registerHandler',
-                [
-                    $class,
-                    new Reference($serviceId),
-                ]
-            );
         };
 
         $container->setDefinition('star.query_bus_default', $definition);
