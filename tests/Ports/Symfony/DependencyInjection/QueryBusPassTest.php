@@ -99,6 +99,11 @@ final class QueryBusPassTest extends TestCase
         $controller->dispatchQuery($query);
         self::assertSame('result', $query->getResult());
     }
+
+    public function test_it_should_use_symfony_logger(): void
+    {
+        $this->fail('todo');
+    }
 }
 final class QueryController
 {

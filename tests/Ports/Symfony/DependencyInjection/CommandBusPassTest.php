@@ -98,6 +98,11 @@ final class CommandBusPassTest extends TestCase
         $this->expectExceptionMessage('Command: ' . \get_class($command));
         $controller->dispatch($command);
     }
+
+    public function test_it_should_use_symfony_logger(): void
+    {
+        $this->fail('todo');
+    }
 }
 
 final class CommandController

@@ -51,6 +51,11 @@ final class EventPublisherPassTest extends TestCase
         $this->expectExceptionMessage('My blog works!!');
         $service->doAction('My blog');
     }
+
+    public function test_it_should_use_symfony_logger(): void
+    {
+        $this->fail('todo');
+    }
 }
 
 final class MyController
