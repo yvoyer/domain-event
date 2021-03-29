@@ -41,7 +41,7 @@ final class PayloadFromReflection implements PayloadSerializer
 
     /**
      * @param class-string $eventName
-     * @param array $payload
+     * @param mixed[] $payload
      * @return DomainEvent
      */
     public function createEvent(string $eventName, array $payload): DomainEvent

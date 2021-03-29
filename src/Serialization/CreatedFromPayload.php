@@ -6,5 +6,9 @@ use Star\Component\DomainEvent\DomainEvent;
 
 interface CreatedFromPayload extends DomainEvent
 {
+    /**
+     * @param mixed[] $payload
+     * @return CreatedFromPayload
+     */
     public static function fromPayload(array $payload): CreatedFromPayload;
 }
