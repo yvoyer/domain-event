@@ -75,7 +75,24 @@ final class CommandBusPassTest extends TestCase
         $builder->compile();
     }
 
-    public function test_it_should_allow_to_define_custom_path(): void
+    public function test_it_should_throw_exception_when_message_is_not_a_class(): void
+    {
+        $builder = new ContainerBuilder();
+        $builder->register(CommandController::class, CommandController::class)
+            ->addArgument(new Reference('star.command_bus'))
+            ->setPublic(true);
+        $builder
+            ->register('my_handler', 'WhateverHandler')
+            ->addTag('star.command_handler', ['message' => 'bad-command'])
+        ;
+        $builder->addCompilerPass(new CommandBusPass());
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('The command "bad-command" must be a class implementing interface');
+        $builder->compile();
+    }
+
+    public function test_it_should_allow_to_define_custom_path_for_message(): void
     {
         $command = new class implements Command {};
         $builder = new ContainerBuilder();
@@ -97,11 +114,6 @@ final class CommandBusPassTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Command: ' . \get_class($command));
         $controller->dispatch($command);
-    }
-
-    public function test_it_should_use_symfony_logger(): void
-    {
-        $this->fail('todo');
     }
 }
 

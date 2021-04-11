@@ -19,10 +19,13 @@ use Symfony\Component\DependencyInjection\Reference;
 
 final class QueryBusPass implements CompilerPassInterface
 {
+    const TAG_NAME = 'star.query_handler';
+    const ATTRIBUTE_MESSAGE = 'message';
+
     public function process(ContainerBuilder $container): void
     {
         $definition = new Definition(MessageMapBus::class);
-        foreach ($container->findTaggedServiceIds('star.query_handler') as $serviceId => $tags) {
+        foreach ($container->findTaggedServiceIds(self::TAG_NAME) as $serviceId => $tags) {
             foreach ($tags as $tag) {
                 $handlerDefinition = $container->getDefinition($serviceId);
                 $handlerClass = (string) $handlerDefinition->getClass();
@@ -33,8 +36,18 @@ final class QueryBusPass implements CompilerPassInterface
                     );
                 }
 
-                if (isset($tag['message'])) {
-                    $queryClass = $tag['message'];
+                if (isset($tag[self::ATTRIBUTE_MESSAGE])) {
+                    $queryClass = $tag[self::ATTRIBUTE_MESSAGE];
+                }
+
+                if (! \class_exists($queryClass)) {
+                    throw new InvalidArgumentException(
+                        \sprintf(
+                            'The query "%s" do not exists. Did you may define the attribute "message" '
+                            . 'in the tag or use the same namespace than the handler, without the "Handler" suffix?',
+                            $queryClass
+                        )
+                    );
                 }
 
                 if (! \is_subclass_of($queryClass, Query::class)) {
