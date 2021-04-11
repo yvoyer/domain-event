@@ -29,6 +29,6 @@ final class DoSomething implements Command, Query
 
     public function getResult()
     {
-        throw new \RuntimeException(__METHOD__ . ' not implemented yet.');
+        return $this->action;
     }
 }

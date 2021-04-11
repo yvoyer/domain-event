@@ -131,7 +131,6 @@ final class SymfonyIntegrationTest extends TestCase
             ->setPublic(true);
         $builder
             ->register(DoNothingOnInvokeHandler::class)
-            ->addArgument(new Reference(LoggerInterface::class))
             ->addTag('star.command_handler', ['message' => DoSomething::class]);
 
         $builder->compile();
@@ -150,7 +149,7 @@ final class SymfonyIntegrationTest extends TestCase
             [
                 [
                     'level' => 'debug',
-                    'message' => '',
+                    'message' => 'Dispatching the command "Star\Component\DomainEvent\Ports\Stub\DoSomething".',
                     'context' => [],
                 ],
             ],
@@ -160,7 +159,49 @@ final class SymfonyIntegrationTest extends TestCase
 
     public function test_it_should_use_loggable_query_bus(): void
     {
-        $this->fail('todo');
+        $extension = new DomainEventExtension();
+        $configs = [
+            'domain-event' => [
+                'logging' => [
+                    'logger_id' => LoggerInterface::class,
+                ],
+            ],
+        ];
+        $extension->load($configs, $builder = new ContainerBuilder());
+        $builder->addCompilerPass(new QueryBusPass());
+        $builder
+            ->register(LoggerInterface::class, TestLogger::class)
+            ->setPublic(true);
+        $builder
+            ->register(TestQueryController::class)
+            ->addArgument(new Reference(QueryBus::class))
+            ->setPublic(true);
+        $builder
+            ->register(DoNothingOnInvokeHandler::class)
+            ->addTag('star.query_handler', ['message' => DoSomething::class]);
+
+        $builder->compile();
+
+        /**
+         * @var TestQueryController $controller
+         */
+        $controller = $builder->get(TestQueryController::class);
+        $controller->doQuery(new DoSomething('action'));
+
+        /**
+         * @var TestLogger $logger
+         */
+        $logger = $builder->get(LoggerInterface::class);
+        self::assertSame(
+            [
+                [
+                    'level' => 'debug',
+                    'message' => 'Dispatching the query "Star\Component\DomainEvent\Ports\Stub\DoSomething".',
+                    'context' => [],
+                ],
+            ],
+            $logger->records
+        );
     }
 
     public function test_it_should_use_loggable_publisher(): void

@@ -12,9 +12,9 @@ use InvalidArgumentException;
 use Star\Component\DomainEvent\Messaging\Command;
 use Star\Component\DomainEvent\Messaging\CommandBus;
 use Star\Component\DomainEvent\Messaging\MessageMapBus;
+use Star\Component\DomainEvent\Ports\Logging\LoggableCommandBus;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
 final class CommandBusPass implements CompilerPassInterface
@@ -24,7 +24,7 @@ final class CommandBusPass implements CompilerPassInterface
 
     public function process(ContainerBuilder $container): void
     {
-        $definition = new Definition(MessageMapBus::class);
+        $definition = $container->register(MessageMapBus::class, MessageMapBus::class);
         foreach ($container->findTaggedServiceIds(self::TAG_NAME) as $serviceId => $tags) {
             foreach ($tags as $tag) {
                 $handlerDefinition = $container->getDefinition($serviceId);
@@ -59,6 +59,10 @@ final class CommandBusPass implements CompilerPassInterface
                 );
             }
         };
+
+        if ($container->hasDefinition(LoggableCommandBus::class)) {
+            $definition = $container->getDefinition(LoggableCommandBus::class);
+        }
 
         $container->setDefinition('star.command_bus_default', $definition);
         $container->setAlias('star.command_bus', 'star.command_bus_default');
