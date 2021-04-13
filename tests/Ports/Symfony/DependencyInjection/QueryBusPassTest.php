@@ -66,6 +66,23 @@ final class QueryBusPassTest extends TestCase
         $builder->compile();
     }
 
+    public function test_it_should_throw_exception_when_query_class_do_not_exists(): void
+    {
+        $builder = new ContainerBuilder();
+        $builder->register(QueryController::class, QueryController::class)
+            ->addArgument(new Reference('star.query_bus'))
+            ->setPublic(true);
+        $builder
+            ->register('my_handler', 'WhateverHandler')
+            ->addTag('star.query_handler')
+        ;
+        $builder->addCompilerPass(new QueryBusPass());
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('The query "Whatever" do not exists.');
+        $builder->compile();
+    }
+
     public function test_it_should_allow_custom_class_message(): void
     {
         $query = new class implements Query {
