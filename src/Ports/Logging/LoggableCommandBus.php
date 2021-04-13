@@ -11,19 +11,19 @@ use function sprintf;
 final class LoggableCommandBus implements CommandBus
 {
     /**
-     * @var CommandBus
-     */
-    private $bus;
-
-    /**
      * @var LoggerInterface
      */
     private $logger;
 
-    public function __construct(CommandBus $bus, LoggerInterface $logger)
+    /**
+     * @var CommandBus
+     */
+    private $bus;
+
+    public function __construct(LoggerInterface $logger, CommandBus $bus)
     {
-        $this->bus = $bus;
         $this->logger = $logger;
+        $this->bus = $bus;
     }
 
     public function dispatchCommand(Command $command): void

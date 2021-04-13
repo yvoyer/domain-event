@@ -9,7 +9,7 @@ use RuntimeException;
 use Star\Component\DomainEvent\EventPublisher;
 use Star\Component\DomainEvent\Messaging\CommandBus;
 use Star\Component\DomainEvent\Messaging\QueryBus;
-use Star\Component\DomainEvent\Ports\Logging\LoggablePublisher;
+use Star\Component\DomainEvent\Messaging\Results\CollectionQuery;
 use Star\Component\DomainEvent\Ports\Stub\ActionWasDone;
 use Star\Component\DomainEvent\Ports\Stub\DoSomething;
 use Star\Component\DomainEvent\Ports\Stub\DoNothingOnInvokeHandler;
@@ -24,11 +24,14 @@ use Star\Component\DomainEvent\Ports\Symfony\DependencyInjection\CommandBusPass;
 use Star\Component\DomainEvent\Ports\Symfony\DependencyInjection\DomainEventExtension;
 use Star\Component\DomainEvent\Ports\Symfony\DependencyInjection\EventPublisherPass;
 use Star\Component\DomainEvent\Ports\Symfony\DependencyInjection\QueryBusPass;
-use Star\Component\DomainEvent\Ports\Symfony\DependencyInjection\SomethingWasDone;
+use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\HttpKernel\Kernel;
+use function array_map;
+use function ob_get_clean;
+use function ob_start;
 
 final class SymfonyIntegrationTest extends TestCase
 {
@@ -250,50 +253,160 @@ final class SymfonyIntegrationTest extends TestCase
         );
     }
 
-    public function test_it_should_send_event_dispatched_inside_command_handler_to_other_listeners(): void {
-        $builder = new ContainerBuilder();
-        $builder->register('other_dispatcher', EventDispatcher::class);
-        $builder->addCompilerPass(
-            new EventPublisherPass(
-                'other_dispatcher',
-                new Definition(LoggablePublisher::class, [new Reference('logger'), new Reference(Sy)])
-            )
-        );
-        $builder->addCompilerPass(new CommandBusPass());
-        $builder->addCompilerPass(new QueryBusPass());
+    public function test_it_should_log_all_actions_with_all_passes_registered(): void {
+        $kernel = new class('test', true) extends Kernel {
+            protected function build(ContainerBuilder $container)
+            {
+                $container->register($serviceId = EventDispatcher::class, EventDispatcher::class);
+                $container->addCompilerPass(new EventPublisherPass($serviceId));
+                $container->addCompilerPass(new CommandBusPass());
+                $container->addCompilerPass(new QueryBusPass());
+                $container->loadFromExtension(
+                    'domain_event',
+                    [
+                        'logging' => [
+                            'logger_id' => LoggerInterface::class,
+                        ],
+                    ]
+                );
 
-        $builder
-            ->register(TestCommandController::class)
-            ->addArgument(new Reference(CommandBus::class))
-            ->setPublic(true);
-        $builder
-            ->register(DoSomethingHandler::class)
-            ->addArgument(new Reference(EventStoreStub::class))
-            ->addTag('star.command_handler');
-        $builder
-            ->register(EventStoreStub::class)
-            ->addArgument(new Reference('star.event_publisher'));
-        $builder
-            ->register('processor.one', ProcessorStub::class)
-            ->setArguments([new Reference(CommandBus::class), 'one', 'two'])
-            ->addTag('star.event_listener');
-        $builder
-            ->register('processor.two', ProcessorStub::class)
-            ->setArguments([new Reference(CommandBus::class), 'one.two', 'three'])
-            ->addTag('star.event_listener');
-        $builder
-            ->register('processor.three', ProcessorStub::class)
-            ->setArguments([new Reference(CommandBus::class), 'one.two.three', 'final'])
-            ->addTag('star.event_listener');
-        $builder->compile();
+                $container
+                    ->register(CompleteStuffController::class)
+                    ->setArguments(
+                        [
+                            new Reference(CommandBus::class),
+                            new Reference(QueryBus::class),
+                        ]
+                    )
+                    ->setPublic(true);
+                $container
+                    ->register(DoSomethingHandler::class)
+                    ->addArgument(new Reference(EventStoreStub::class))
+                    ->addTag('star.command_handler');
+                $container
+                    ->register(EventStoreStub::class)
+                    ->addArgument(new Reference('star.event_publisher'));
+                $container
+                    ->register('processor.one', ProcessorStub::class)
+                    ->setArguments([new Reference(CommandBus::class), 'one', 'two'])
+                    ->addTag('star.event_listener');
+                $container
+                    ->register('processor.two', ProcessorStub::class)
+                    ->setArguments([new Reference(CommandBus::class), 'one.two', 'three'])
+                    ->addTag('star.event_listener');
+                $container
+                    ->register('processor.three', ProcessorStub::class)
+                    ->setArguments([new Reference(CommandBus::class), 'one.two.three', 'final'])
+                    ->addTag('star.event_listener');
+                $container
+                    ->register(SearchForLogsHandler::class)
+                    ->setArguments(
+                        [
+                            new Reference(LoggerInterface::class),
+                        ]
+                    )
+                    ->addTag('star.query_handler')
+                ;
+            }
+
+            public function registerBundles(): array
+            {
+                return [new DomainEventBundle()];
+            }
+
+            public function registerContainerConfiguration(LoaderInterface $loader): ContainerBuilder
+            {
+                $builder = new ContainerBuilder();
+                $builder->register('event_dispatcher', EventDispatcher::class);
+                $builder->register(LoggerInterface::class, TestLogger::class);
+
+                return $builder;
+            }
+        };
+        $kernel->boot();
+        $container = $kernel->getContainer();
 
         /**
-         * @var TestCommandController $service
+         * @var CompleteStuffController $service
          */
-        $service = $builder->get(TestCommandController::class);
-        \ob_start();
-        $service->doAction('one');
-        $result = \ob_get_clean();
-        $this->assertSame('one=>two;one.two=>three;one.two.three=>final;', $result);
+        $service = $container->get(CompleteStuffController::class);
+        ob_start();
+        $result = $service->doStuff();
+        ob_get_clean();
+
+        self::assertSame(
+            [
+                'Listener "Star\Component\DomainEvent\Ports\Stub\ProcessorStub" was registered for subscribing to events.',
+                'Listener "Star\Component\DomainEvent\Ports\Stub\ProcessorStub" was registered for subscribing to events.',
+                'Listener "Star\Component\DomainEvent\Ports\Stub\ProcessorStub" was registered for subscribing to events.',
+                'Dispatching the command "Star\Component\DomainEvent\Ports\Stub\DoSomething".',
+                'Event "Star\Component\DomainEvent\Ports\Stub\ActionWasDone" was published.',
+                'Dispatching the command "Star\Component\DomainEvent\Ports\Stub\DoSomething".',
+                'Event "Star\Component\DomainEvent\Ports\Stub\ActionWasDone" was published.',
+                'Dispatching the command "Star\Component\DomainEvent\Ports\Stub\DoSomething".',
+                'Event "Star\Component\DomainEvent\Ports\Stub\ActionWasDone" was published.',
+                'Dispatching the command "Star\Component\DomainEvent\Ports\Stub\DoSomething".',
+                'Event "Star\Component\DomainEvent\Ports\Stub\ActionWasDone" was published.',
+                'Dispatching the query "Star\Component\DomainEvent\Ports\Symfony\SearchForLogs".',
+            ],
+            $result
+        );
+    }
+}
+
+final class SearchForLogs extends CollectionQuery {
+}
+
+final class SearchForLogsHandler
+{
+    /**
+     * @var TestLogger
+     */
+    private $logger;
+
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
+    public function __invoke(SearchForLogs $query): void
+    {
+        $query(
+            array_map(
+                function (array $row): string {
+                    return $row['message'];
+                },
+                $this->logger->recordsByLevel['debug']
+            )
+        );
+    }
+}
+
+final class CompleteStuffController
+{
+    /**
+     * @var CommandBus
+     */
+    private $commands;
+
+    /**
+     * @var QueryBus
+     */
+    private $queries;
+
+    public function __construct(
+        CommandBus $commands,
+        QueryBus $queries
+    ) {
+        $this->commands = $commands;
+        $this->queries = $queries;
+    }
+
+    public function doStuff(): array
+    {
+        $this->commands->dispatchCommand(new DoSomething('one'));
+        $this->queries->dispatchQuery($query = new SearchForLogs());
+
+        return $query->getResult();
     }
 }

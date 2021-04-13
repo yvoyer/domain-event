@@ -7,6 +7,7 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\Test\TestLogger;
 use Star\Component\DomainEvent\Messaging\Command;
 use Star\Component\DomainEvent\Messaging\CommandBus;
+use function get_class;
 use function sprintf;
 
 final class LoggableCommandBusTest extends TestCase
@@ -16,13 +17,13 @@ final class LoggableCommandBusTest extends TestCase
         $command = $this->createMock(Command::class);
         $wrapped = $this->createMock(CommandBus::class);
         $logger = new TestLogger();
-        $bus = new LoggableCommandBus($wrapped, $logger);
+        $bus = new LoggableCommandBus($logger, $wrapped);
         $bus->dispatchCommand($command);
 
         $records = $logger->records;
         $this->assertCount(1, $records);
         $this->assertSame(
-            sprintf('Dispatching the command "%s".', \get_class($command)), $records[0]['message']
+            sprintf('Dispatching the command "%s".', get_class($command)), $records[0]['message']
         );
     }
 
@@ -37,7 +38,7 @@ final class LoggableCommandBusTest extends TestCase
         $wrapped = $this->createMock(CommandBus::class);
         $logger = new TestLogger();
 
-        $bus = new LoggableCommandBus($wrapped, $logger);
+        $bus = new LoggableCommandBus($logger, $wrapped);
         $bus->dispatchCommand($command);
 
         $records = $logger->records;

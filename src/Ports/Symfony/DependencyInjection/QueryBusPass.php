@@ -16,6 +16,7 @@ use Star\Component\DomainEvent\Messaging\QueryBus;
 use Star\Component\DomainEvent\Ports\Logging\LoggableQueryBus;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 use function class_exists;
 use function is_subclass_of;
@@ -31,7 +32,7 @@ final class QueryBusPass implements CompilerPassInterface
 
     public function process(ContainerBuilder $container): void
     {
-        $definition = $container->register(MessageMapBus::class, MessageMapBus::class);
+        $definition = new Definition(MessageMapBus::class);
         foreach ($container->findTaggedServiceIds(self::TAG_NAME) as $serviceId => $tags) {
             foreach ($tags as $tag) {
                 $handlerDefinition = $container->getDefinition($serviceId);
@@ -78,7 +79,9 @@ final class QueryBusPass implements CompilerPassInterface
         };
 
         if ($container->hasDefinition(LoggableQueryBus::class)) {
-            $definition = $container->getDefinition(LoggableQueryBus::class);
+            $definition = $container
+                ->getDefinition(LoggableQueryBus::class)
+                ->setArgument(1, $definition);
         }
 
         $container->setDefinition('star.query_bus_default', $definition);

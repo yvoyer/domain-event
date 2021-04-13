@@ -7,6 +7,7 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\Test\TestLogger;
 use Star\Component\DomainEvent\Messaging\Query;
 use Star\Component\DomainEvent\Messaging\QueryBus;
+use function get_class;
 use function sprintf;
 
 final class LoggableQueryBusTest extends TestCase
@@ -16,13 +17,13 @@ final class LoggableQueryBusTest extends TestCase
         $query = $this->createMock(Query::class);
         $wrapped = $this->createMock(QueryBus::class);
         $logger = new TestLogger();
-        $bus = new LoggableQueryBus($wrapped, $logger);
+        $bus = new LoggableQueryBus($logger, $wrapped);
         $bus->dispatchQuery($query);
 
         $records = $logger->records;
         $this->assertCount(1, $records);
         $this->assertSame(
-            sprintf('Dispatching the query "%s".', \get_class($query)), $records[0]['message']
+            sprintf('Dispatching the query "%s".', get_class($query)), $records[0]['message']
         );
     }
 
@@ -46,7 +47,7 @@ final class LoggableQueryBusTest extends TestCase
         };
         $wrapped = $this->createMock(QueryBus::class);
         $logger = new TestLogger();
-        $bus = new LoggableQueryBus($wrapped, $logger);
+        $bus = new LoggableQueryBus($logger, $wrapped);
         $bus->dispatchQuery($query);
 
         $records = $logger->records;

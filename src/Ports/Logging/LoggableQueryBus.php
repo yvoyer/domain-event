@@ -11,19 +11,19 @@ use function sprintf;
 final class LoggableQueryBus implements QueryBus
 {
     /**
-     * @var QueryBus
-     */
-    private $bus;
-
-    /**
      * @var LoggerInterface
      */
     private $logger;
 
-    public function __construct(QueryBus $bus, LoggerInterface $logger)
+    /**
+     * @var QueryBus
+     */
+    private $bus;
+
+    public function __construct(LoggerInterface $logger, QueryBus $bus)
     {
-        $this->bus = $bus;
         $this->logger = $logger;
+        $this->bus = $bus;
     }
 
     public function dispatchQuery(Query $query): void

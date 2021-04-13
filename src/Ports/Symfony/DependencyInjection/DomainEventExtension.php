@@ -3,7 +3,6 @@
 namespace Star\Component\DomainEvent\Ports\Symfony\DependencyInjection;
 
 use Star\Component\DomainEvent\EventPublisher;
-use Star\Component\DomainEvent\Messaging\MessageMapBus;
 use Star\Component\DomainEvent\Ports\Logging\LoggableCommandBus;
 use Star\Component\DomainEvent\Ports\Logging\LoggablePublisher;
 use Star\Component\DomainEvent\Ports\Logging\LoggableQueryBus;
@@ -33,21 +32,11 @@ final class DomainEventExtension extends Extension
                 );
             $container
                 ->register(LoggableCommandBus::class, LoggableCommandBus::class)
-                ->setArguments(
-                    [
-                        new Reference(MessageMapBus::class),
-                        new Reference($loggingConfig['logger_id'])
-                    ]
-                )
+                ->setArgument(0, new Reference($loggingConfig['logger_id']))
             ;
             $container
                 ->register(LoggableQueryBus::class, LoggableQueryBus::class)
-                ->setArguments(
-                    [
-                        new Reference(MessageMapBus::class),
-                        new Reference($loggingConfig['logger_id'])
-                    ]
-                )
+                ->setArgument(0, new Reference($loggingConfig['logger_id']))
             ;
         }
 
