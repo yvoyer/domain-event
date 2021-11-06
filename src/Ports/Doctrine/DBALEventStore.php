@@ -4,7 +4,9 @@ namespace Star\Component\DomainEvent\Ports\Doctrine;
 
 use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Result;
 use Doctrine\DBAL\Types\Types;
+use RuntimeException;
 use Star\Component\DomainEvent\AggregateRoot;
 use Star\Component\DomainEvent\DomainEvent;
 use Star\Component\DomainEvent\EventPublisher;
@@ -63,7 +65,7 @@ abstract class DBALEventStore
 
         $qb = $this->connection->createQueryBuilder();
         $expr = $qb->expr();
-        $stream = $qb
+        $result = $qb
             ->select(
                 [
                     'alias.' . self::COLUMN_AGGREGATE_ID,
@@ -75,8 +77,13 @@ abstract class DBALEventStore
             ->andWhere($expr->eq('alias.' . self::COLUMN_AGGREGATE_ID, ':aggregate_id'))
             ->addOrderBy('alias.' . self::COLUMN_VERSION, 'ASC')
             ->setParameter('aggregate_id', $id)
-            ->execute()
-            ->fetchAll();
+            ->execute();
+
+        if (! $result instanceof Result) {
+            throw new RuntimeException('An error occurred while executing statement.');
+        }
+
+        $stream = $result->fetchAll();
 
         if (count($stream) === 0) {
             $this->handleNoEventFound($id);
@@ -101,14 +108,18 @@ abstract class DBALEventStore
 
         $versionQb = $this->connection->createQueryBuilder();
         $expr = $versionQb->expr();
-        $version = (int) $versionQb
+        $result = $versionQb
             ->select(sprintf('count(%s)', self::COLUMN_AGGREGATE_ID))
             ->from($this->tableName(), 'alias')
             ->andWhere($expr->eq('alias.' . self::COLUMN_AGGREGATE_ID, ':aggregate_id'))
             ->setParameter('aggregate_id', $id)
-            ->execute()
-            ->fetchFirstColumn()[0];
+            ->execute();
 
+        if (!$result instanceof Result) {
+            throw new RuntimeException('An error occurred while executing statement.');
+        }
+
+        $version = (int) $result->fetchFirstColumn()[0];
         $events = $aggregate->uncommitedEvents();
         foreach ($events as $event) {
             $version++;
@@ -123,6 +134,12 @@ abstract class DBALEventStore
         }
     }
 
+    /**
+     * @param string $id
+     * @param int $version
+     * @param string $eventName
+     * @param string[]|int[]|bool[]|float[] $payload
+     */
     private function persistEvent(string $id, int $version, string $eventName, array $payload): void
     {
         $this->connection->insert(
@@ -157,36 +174,23 @@ abstract class DBALEventStore
                 Types::STRING,
                 [
                     'length' => 50,
-                    #'not_null' => false,
                 ]
             );
             $table->addColumn(
                 self::COLUMN_EVENT_NAME,
-                Types::STRING,
-                [
-                    #'not_null' => false,
-                ]
+                Types::STRING
             );
             $table->addColumn(
                 self::COLUMN_PAYLOAD,
-                Types::ARRAY,
-                [
-                    #'not_null' => false,
-                ]
+                Types::ARRAY
             );
             $table->addColumn(
                 self::COLUMN_PUSHED_ON,
-                Types::DATETIME_IMMUTABLE,
-                [
-                    #'not_null' => false,
-                ]
+                Types::DATETIME_IMMUTABLE
             );
             $table->addColumn(
                 self::COLUMN_VERSION,
-                Types::BIGINT,
-                [
-                    #'not_null' => false,
-                ]
+                Types::BIGINT
             );
 
             $sqlStrings = $originalSchema->getMigrateToSql($newSchema, $this->connection->getDatabasePlatform());

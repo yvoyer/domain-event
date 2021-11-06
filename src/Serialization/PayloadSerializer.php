@@ -10,13 +10,13 @@ interface PayloadSerializer
 
     /**
      * @param DomainEvent $event
-     * @return mixed[]
+     * @return string[]|int[]|float[]|bool[]
      */
     public function createPayload(DomainEvent $event): array;
 
     /**
      * @param string $eventName
-     * @param mixed[] $payload
+     * @param SerializableAttribute[]|string[]|int[]|bool[]|float[] $payload
      * @return DomainEvent
      */
     public function createEvent(string $eventName, array $payload): DomainEvent;

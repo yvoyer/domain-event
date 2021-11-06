@@ -13,6 +13,10 @@ use function sprintf;
 
 final class PayloadFromReflection implements PayloadSerializer
 {
+    /**
+     * @param DomainEvent $event
+     * @return string[]|int[]|float[]|bool[]
+     */
     public function createPayload(DomainEvent $event): array
     {
         $reflection = new ReflectionClass($event);
@@ -29,7 +33,7 @@ final class PayloadFromReflection implements PayloadSerializer
                 $value = $value->toSerializableString();
             }
 
-            if (! is_scalar($value) && ! is_bool($value)) {
+            if (! is_bool($value) && ! is_scalar($value)) {
                 throw new NotSupportedTypeInPayload($attribute, $value);
             }
 
@@ -41,7 +45,7 @@ final class PayloadFromReflection implements PayloadSerializer
 
     /**
      * @param class-string $eventName
-     * @param mixed[] $payload
+     * @param SerializableAttribute[]|string[]|int[]|bool[]|float[] $payload
      * @return DomainEvent
      */
     public function createEvent(string $eventName, array $payload): DomainEvent

@@ -3,6 +3,7 @@
 namespace Star\Example\Blog\Domain\Event\Post;
 
 use Star\Component\DomainEvent\Serialization\CreatedFromPayload;
+use Star\Component\DomainEvent\Serialization\SerializableAttribute;
 use Star\Example\Blog\Domain\Model\BlogId;
 use Star\Example\Blog\Domain\Model\Post\PostId;
 use Star\Example\Blog\Domain\Model\Post\PostTitle;
@@ -49,6 +50,10 @@ final class PostWasDrafted implements CreatedFromPayload
         return $this->blogId;
     }
 
+    /**
+     * @param SerializableAttribute[]|string[]|int[]|bool[]|float[] $payload
+     * @return CreatedFromPayload
+     */
     public static function fromPayload(array $payload): CreatedFromPayload
     {
         return new self(
