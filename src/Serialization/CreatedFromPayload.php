@@ -7,7 +7,7 @@ use Star\Component\DomainEvent\DomainEvent;
 interface CreatedFromPayload extends DomainEvent
 {
     /**
-     * @param mixed[] $payload
+     * @param SerializableAttribute[]|string[]|int[]|bool[]|float[] $payload
      * @return CreatedFromPayload
      */
     public static function fromPayload(array $payload): CreatedFromPayload;

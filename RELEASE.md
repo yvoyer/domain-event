@@ -1,5 +1,9 @@
 # Release notes
 
+# 2.3.0
+
+* [#24](https://github.com/yvoyer/domain-event/pull/24) Add in-memory event store
+
 # 2.2.0
 
 * [#20](https://github.com/yvoyer/domain-event/pull/20) Add DBAL event store
