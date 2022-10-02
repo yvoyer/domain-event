@@ -52,7 +52,7 @@ abstract class EventStoreCollection implements Countable
         return count(\array_keys($this->events));
     }
 
-    final private function aggregateExists(string $id): bool
+    private function aggregateExists(string $id): bool
     {
         return array_key_exists($id, $this->events);
     }
