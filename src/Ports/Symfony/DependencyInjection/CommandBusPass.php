@@ -12,6 +12,7 @@ use InvalidArgumentException;
 use Star\Component\DomainEvent\Messaging\Command;
 use Star\Component\DomainEvent\Messaging\CommandBus;
 use Star\Component\DomainEvent\Messaging\MessageMapBus;
+use Star\Component\DomainEvent\Ports\Logging\LoggableCommandBus;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -19,10 +20,13 @@ use Symfony\Component\DependencyInjection\Reference;
 
 final class CommandBusPass implements CompilerPassInterface
 {
+    const TAG_NAME = 'star.command_handler';
+    const TAG_ATTRIBUTE_MESSAGE = 'message';
+
     public function process(ContainerBuilder $container): void
     {
         $definition = new Definition(MessageMapBus::class);
-        foreach ($container->findTaggedServiceIds('star.command_handler') as $serviceId => $tags) {
+        foreach ($container->findTaggedServiceIds(self::TAG_NAME) as $serviceId => $tags) {
             foreach ($tags as $tag) {
                 $handlerDefinition = $container->getDefinition($serviceId);
                 $handlerClass = (string) $handlerDefinition->getClass();
@@ -33,8 +37,8 @@ final class CommandBusPass implements CompilerPassInterface
                     );
                 }
 
-                if (isset($tag['message'])) {
-                    $command = (string) $tag['message'];
+                if (isset($tag[self::TAG_ATTRIBUTE_MESSAGE])) {
+                    $command = (string) $tag[self::TAG_ATTRIBUTE_MESSAGE];
                 }
 
                 if (! \is_subclass_of($command, Command::class)) {
@@ -56,6 +60,12 @@ final class CommandBusPass implements CompilerPassInterface
                 );
             }
         };
+
+        if ($container->hasDefinition(LoggableCommandBus::class)) {
+            $definition = $container
+                ->getDefinition(LoggableCommandBus::class)
+                ->setArgument(1, $definition);
+        }
 
         $container->setDefinition('star.command_bus_default', $definition);
         $container->setAlias('star.command_bus', 'star.command_bus_default');
