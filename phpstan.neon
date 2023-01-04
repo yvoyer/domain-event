@@ -3,6 +3,7 @@ includes:
     - vendor/phpstan/phpstan-phpunit/rules.neon
 
 parameters:
+    reportUnmatchedIgnoredErrors: false
     paths:
         - src
     level: max

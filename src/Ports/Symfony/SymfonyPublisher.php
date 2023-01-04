@@ -60,7 +60,8 @@ final class SymfonyPublisher implements EventPublisher
         } else { // @phpstan-ignore-line
             $args = [
                 \get_class($event),
-                new class($event) extends \Symfony\Component\EventDispatcher\Event implements EventAdapter {
+                new class($event) extends \Symfony\Component\EventDispatcher\Event implements EventAdapter
+                {
                     /**
                      * @var DomainEvent
                      */
