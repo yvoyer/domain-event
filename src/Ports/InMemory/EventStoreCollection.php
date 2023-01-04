@@ -6,6 +6,7 @@ use Countable;
 use Star\Component\DomainEvent\AggregateRoot;
 use Star\Component\DomainEvent\DomainEvent;
 use Star\Component\DomainEvent\EventPublisher;
+use function array_filter;
 
 abstract class EventStoreCollection implements Countable
 {
@@ -45,6 +46,31 @@ abstract class EventStoreCollection implements Countable
         $aggregate->uncommitedEvents(); // remove events since we replayed them
 
         return $aggregate;
+    }
+
+    /**
+     * @param callable $callable
+     * @return AggregateRoot[] Indexed by id
+     */
+    protected function filter(callable $callable): array
+    {
+        $aggregates = [];
+        foreach ($this->events as $aggregateId => $events) {
+            $aggregates[$aggregateId] = $this->loadAggregate($aggregateId);
+        }
+
+        return array_filter($aggregates, $callable);
+    }
+
+    protected function exists(callable $callable): bool
+    {
+        foreach ($this->events as $aggregateId => $events) {
+            if ($callable($this->loadAggregate($aggregateId))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     final public function count(): int
