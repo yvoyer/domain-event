@@ -19,7 +19,7 @@ jobs:
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-versions: '7.1'
+        php-version: '7.1'
 
     - name: Cache Composer packages
       id: composer-cache
@@ -68,7 +68,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-versions: '7.2'
+          php-version: '7.2'
 
       - name: Cache Composer packages
         id: composer-cache
@@ -117,7 +117,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-versions: '7.3'
+          php-version: '7.3'
 
       - name: Cache Composer packages
         id: composer-cache
@@ -166,7 +166,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-versions: '7.4'
+          php-version: '7.4'
 
       - name: Cache Composer packages
         id: composer-cache
