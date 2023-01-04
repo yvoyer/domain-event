@@ -6,6 +6,7 @@ use InvalidArgumentException;
 use function get_class;
 use function gettype;
 use function implode;
+use function is_object;
 use function sprintf;
 
 final class NotSupportedTypeInPayload extends InvalidArgumentException
@@ -17,7 +18,7 @@ final class NotSupportedTypeInPayload extends InvalidArgumentException
     public function __construct(string $attribute, $value)
     {
         $type = sprintf('%s', gettype($value));
-        if ($type === 'object') {
+        if (is_object($value)) {
             $type = sprintf('object(%s)', get_class($value));
         }
 

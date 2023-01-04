@@ -91,8 +91,14 @@ abstract class DBALEventStore
 
         $aggregate = $this->createAggregateFromStream(
             array_map(
-                function (array $eventRow): DomainEvent {
-                    return $this->serializer->createEvent($eventRow['event_name'], unserialize($eventRow['payload']));
+                /**
+                 * @param array{"event_name":string, "payload":string} $eventRow
+                 */
+                function (array $eventRow): DomainEvent { // @phpstan-ignore-line
+                    return $this->serializer->createEvent(
+                        $eventRow['event_name'],
+                        unserialize($eventRow['payload']) // @phpstan-ignore-line
+                    );
                 },
                 $stream
             )
@@ -109,7 +115,7 @@ abstract class DBALEventStore
         $versionQb = $this->connection->createQueryBuilder();
         $expr = $versionQb->expr();
         $result = $versionQb
-            ->select(sprintf('count(%s)', self::COLUMN_AGGREGATE_ID))
+            ->select(sprintf('COUNT(%s)', self::COLUMN_AGGREGATE_ID))
             ->from($this->tableName(), 'alias')
             ->andWhere($expr->eq('alias.' . self::COLUMN_AGGREGATE_ID, ':aggregate_id'))
             ->setParameter('aggregate_id', $id)
@@ -119,7 +125,7 @@ abstract class DBALEventStore
             throw new RuntimeException('An error occurred while executing statement.');
         }
 
-        $version = (int) $result->fetchFirstColumn()[0];
+        $version = (int) $result->fetchFirstColumn()[0]; // @phpstan-ignore-line
         $events = $aggregate->uncommitedEvents();
         foreach ($events as $event) {
             $version++;

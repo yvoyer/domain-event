@@ -57,7 +57,7 @@ final class SymfonyPublisher implements EventPublisher
                 },
                 \get_class($event),
             ];
-        } else {
+        } else { // @phpstan-ignore-line
             $args = [
                 \get_class($event),
                 new class($event) extends \Symfony\Component\EventDispatcher\Event implements EventAdapter {
@@ -79,7 +79,7 @@ final class SymfonyPublisher implements EventPublisher
             ];
         }
 
-        $this->dispatcher->dispatch(...$args);
+        $this->dispatcher->dispatch(...$args); // @phpstan-ignore-line
     }
 
     /**
@@ -98,7 +98,7 @@ final class SymfonyPublisher implements EventPublisher
             $listener->{$method}($adapter->getWrappedEvent());
         };
 
-        $this->dispatcher->addListener($eventClassName, $transformer);
+        $this->dispatcher->addListener($eventClassName, $transformer); // @phpstan-ignore-line
     }
 
     /**
