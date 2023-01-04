@@ -8,8 +8,8 @@
 
 namespace Star\Component\DomainEvent\Messaging\Results;
 
+use Assert\Assertion;
 use Star\Component\DomainEvent\Messaging\Query;
-use Webmozart\Assert\Assert;
 
 abstract class ObjectQuery implements Query
 {
@@ -21,7 +21,9 @@ abstract class ObjectQuery implements Query
     abstract protected function getObjectType(): string;
 
     /**
-     * @param mixed $result
+     * @param object $result
+     * @return void
+     * @throws \Assert\AssertionFailedException
      */
     final public function __invoke($result): void
     {
@@ -29,7 +31,7 @@ abstract class ObjectQuery implements Query
          * @var class-string<object> $class
          */
         $class = $this->getObjectType();
-        Assert::isInstanceOf(
+        Assertion::isInstanceOf(
             $result,
             $class,
             'Query "' . static::class . '" expected an instance of "%2$s". Got: "%s".'

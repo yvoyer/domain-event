@@ -1,5 +1,6 @@
 # domain-event
 
+![Build Status](https://github.com/yvoyer/domain-event/actions/workflows/php.yml/badge.svg)
 [![Build Status](https://travis-ci.org/yvoyer/domain-event.svg)](https://travis-ci.org/yvoyer/domain-event)
 
 Small implementation of the aggregate root in [ddd](https://en.wikipedia.org/wiki/Domain-driven_design). 

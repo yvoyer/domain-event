@@ -11,7 +11,7 @@ final class ScalarQueryTest extends TestCase
         $query = new class extends ScalarQuery {};
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage(' expected a scalar, got: "array".');
+        $this->expectExceptionMessage(' expected a scalar, got: "<ARRAY>".');
         $query([]);
     }
 

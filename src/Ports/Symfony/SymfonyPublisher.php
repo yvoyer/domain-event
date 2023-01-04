@@ -14,6 +14,8 @@ use Star\Component\DomainEvent\EventListener;
 use Star\Component\DomainEvent\EventPublisher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface as ComponentDispatcher;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as ContractDispatcher;
+use Symfony\Contracts\EventDispatcher\Event as ContractEvent;
+use Symfony\Component\EventDispatcher\Event as LegacyEvent;
 
 final class SymfonyPublisher implements EventPublisher
 {
@@ -39,7 +41,7 @@ final class SymfonyPublisher implements EventPublisher
             // support for symfony >= 5 while keeping BC
             // todo remove conditional when upgrading dependency to current version
             $args = [
-                new class($event) extends \Symfony\Contracts\EventDispatcher\Event implements EventAdapter {
+                new class($event) extends ContractEvent implements EventAdapter {
                     /**
                      * @var DomainEvent
                      */
@@ -60,7 +62,8 @@ final class SymfonyPublisher implements EventPublisher
         } else {
             $args = [
                 \get_class($event),
-                new class($event) extends \Symfony\Component\EventDispatcher\Event implements EventAdapter {
+                new class($event) extends LegacyEvent implements EventAdapter
+                {
                     /**
                      * @var DomainEvent
                      */

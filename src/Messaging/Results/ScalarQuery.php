@@ -8,8 +8,8 @@
 
 namespace Star\Component\DomainEvent\Messaging\Results;
 
+use Assert\Assertion;
 use Star\Component\DomainEvent\Messaging\Query;
-use Webmozart\Assert\Assert;
 
 abstract class ScalarQuery implements Query
 {
@@ -18,9 +18,14 @@ abstract class ScalarQuery implements Query
      */
     private $result;
 
+    /**
+     * @param bool|float|int|string $result
+     * @return void
+     * @throws \Assert\AssertionFailedException
+     */
     public function __invoke($result): void
     {
-        Assert::scalar($result, 'Query "' . static::class . '" expected a scalar, got: "%s".');
+        Assertion::scalar($result, 'Query "' . static::class . '" expected a scalar, got: "%s".');
         $this->result = $result;
     }
 

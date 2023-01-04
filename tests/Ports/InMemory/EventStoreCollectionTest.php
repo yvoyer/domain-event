@@ -64,6 +64,29 @@ final class EventStoreCollectionTest extends TestCase
 
         self::assertSame(2, $store->getAggregate('id')->counter);
     }
+
+    public function test_it_should_allow_to_filter_result(): void
+    {
+        $collection = new StubCollection($this->createMock(EventPublisher::class));
+        $collection->saveStub('one', StubAggregate::fromStream([new StubEvent()]));
+        $collection->saveStub('two', StubAggregate::fromStream([new StubEvent(), new StubEvent()]));
+        $collection->saveStub('three', StubAggregate::fromStream([new StubEvent(), new StubEvent(), new StubEvent()]));
+
+        self::assertCount(3, $collection);
+        self::assertCount(1, $collection->filterByCount(2));
+        self::assertCount(0, $collection->filterByCount(99));
+    }
+
+    public function test_it_should_allow_to_check_if_exists(): void
+    {
+        $collection = new StubCollection($this->createMock(EventPublisher::class));
+        $collection->saveStub('one', StubAggregate::fromStream([new StubEvent()]));
+        $collection->saveStub('two', StubAggregate::fromStream([new StubEvent(), new StubEvent()]));
+        $collection->saveStub('three', StubAggregate::fromStream([new StubEvent(), new StubEvent(), new StubEvent()]));
+
+        self::assertTrue($collection->counterExists(3));
+        self::assertFalse($collection->counterExists(99));
+    }
 }
 
 final class StubEvent implements DomainEvent
@@ -108,5 +131,19 @@ final class StubCollection extends EventStoreCollection
     protected function createAggregate(DomainEvent ...$events): AggregateRoot
     {
         return StubAggregate::fromStream($events);
+    }
+
+    public function filterByCount(int $count): array
+    {
+        return $this->filter(function (StubAggregate $aggregate) use ($count): bool {
+            return $aggregate->counter === $count;
+        });
+    }
+
+    public function counterExists(int $count): bool
+    {
+        return $this->exists(function (StubAggregate $aggregate) use ($count): bool {
+            return $aggregate->counter === $count;
+        });
     }
 }
