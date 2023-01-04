@@ -12,8 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-versions: ['7.1', '7.2', '7.3', '7.4', '8.0', '8.1', '8.2']
-        dispatcher-version: ['2.5.0', '3.0.0', '4.0.0', '5.0.0', '6.0.0']
+        php-versions: ['7.1', '7.2', '7.3', '7.4']
     steps:
     - uses: actions/checkout@v2
 
@@ -37,8 +36,16 @@ jobs:
     - name: Install dependencies
       run: composer install --no-progress --prefer-dist
 
-    - name: Revert event dispatcher
-      run: composer require symfony/event-dispatcher:~${{ matrix.dispatcher-version }}
+    - name: Event dispatcher 2.5.0
+      run: composer require --dev symfony/event-dispatcher:~2.5.0
+    - name: Event dispatcher 3.0.0
+      run: composer require --dev symfony/event-dispatcher:~3.0.0
+    - name: Event dispatcher 4.0.0
+      run: composer require --dev symfony/event-dispatcher:~4.0.0
+    - name: Event dispatcher 5.0.0
+      run: composer require --dev symfony/event-dispatcher:~5.0.0
+    - name: Event dispatcher 6.0.0
+      run: composer require --dev symfony/event-dispatcher:~6.0.0
 
     - name: Validate composer.json and composer.lock
       run: composer validate --strict
