@@ -8,8 +8,6 @@ parameters:
     level: max
     reportUnmatchedIgnoredErrors: false
     ignoreErrors:
-        -
-            message: '#Anonymous class extends unknown class Symfony\\Component\\EventDispatcher\\Event.#'
-            path: '%rootDir%/src/Ports/Symfony/SymfonyPublisher.php'
+        - '#Anonymous class extends unknown class Symfony\\Component\\EventDispatcher\\Event.#'
     excludes_analyse:
         - '%rootDir%/tests/'
