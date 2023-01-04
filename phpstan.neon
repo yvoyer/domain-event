@@ -3,9 +3,13 @@ includes:
     - vendor/phpstan/phpstan-phpunit/rules.neon
 
 parameters:
-    reportUnmatchedIgnoredErrors: false
     paths:
         - src
     level: max
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        -
+            message: '#Anonymous class extends unknown class Symfony\\Component\\EventDispatcher\\Event.#'
+            path: '%rootDir%/src/Ports/Symfony/SymfonyPublisher.php'
     excludes_analyse:
         - '%rootDir%/tests/'
