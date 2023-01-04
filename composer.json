@@ -22,7 +22,8 @@
     },
     "require": {
         "php": "^7.1|^8.0",
-        "beberlei/assert": "^3.3"
+        "beberlei/assert": "^3.3",
+        "webmozart/assert": "^1.11"
     },
     "require-dev": {
         "doctrine/dbal": "^2.0|^3.0",
