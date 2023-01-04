@@ -6,8 +6,5 @@ parameters:
     paths:
         - src
     level: max
-    reportUnmatchedIgnoredErrors: false
-    ignoreErrors:
-        - '#Anonymous class extends unknown class Symfony\\Component\\EventDispatcher\\Event.#'
-    excludes_analyse:
-        - '%rootDir%/tests/'
+    excludePaths:
+        - src/Ports/Symfony/SymfonyPublisher.php

@@ -59,10 +59,10 @@ final class SymfonyPublisher implements EventPublisher
                 },
                 \get_class($event),
             ];
-        } else { // @phpstan-ignore-line
+        } else {
             $args = [
                 \get_class($event),
-                new class($event) extends LegacyEvent implements EventAdapter // @phpstan-ignore-line
+                new class($event) extends LegacyEvent implements EventAdapter
                 {
                     /**
                      * @var DomainEvent
@@ -82,7 +82,7 @@ final class SymfonyPublisher implements EventPublisher
             ];
         }
 
-        $this->dispatcher->dispatch(...$args); // @phpstan-ignore-line
+        $this->dispatcher->dispatch(...$args);
     }
 
     /**
@@ -101,7 +101,7 @@ final class SymfonyPublisher implements EventPublisher
             $listener->{$method}($adapter->getWrappedEvent());
         };
 
-        $this->dispatcher->addListener($eventClassName, $transformer); // @phpstan-ignore-line
+        $this->dispatcher->addListener($eventClassName, $transformer);
     }
 
     /**
