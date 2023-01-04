@@ -30,7 +30,10 @@ jobs:
           ${{ runner.os }}-php-
 
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress && composer require symfony/event-dispatcher:~${{ matrix.dispatcher-version }}
+      run: composer install --no-progress --prefer-dist
+
+    - name: Revert event dispatcher
+      run: composer require symfony/event-dispatcher:~${{ matrix.dispatcher-version }}
 
     - name: Validate composer.json and composer.lock
       run: composer validate --strict
