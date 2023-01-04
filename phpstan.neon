@@ -3,6 +3,8 @@ includes:
     - vendor/phpstan/phpstan-phpunit/rules.neon
 
 parameters:
+    paths:
+        - src
     level: max
     excludes_analyse:
         - '%rootDir%/tests/'
