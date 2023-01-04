@@ -1,7 +1,16 @@
 # Release notes
 
+# 2.3.2
+
+* [#26](https://github.com/yvoyer/domain-event/pull/26) Add new collection method
+
+# 2.3.1
+
+* [#25](https://github.com/yvoyer/domain-event/pull/25) Remove final keyword from private method
+
 # 2.3.0
 
+* [#22](https://github.com/yvoyer/domain-event/pull/22) Add configurable mapping for query and command
 * [#24](https://github.com/yvoyer/domain-event/pull/24) Add in-memory event store
 
 # 2.2.0
