@@ -1,7 +1,6 @@
 # domain-event
 
 ![Build Status](https://github.com/yvoyer/domain-event/actions/workflows/php.yml/badge.svg)
-[![Build Status](https://travis-ci.org/yvoyer/domain-event.svg)](https://travis-ci.org/yvoyer/domain-event)
 
 Small implementation of the aggregate root in [ddd](https://en.wikipedia.org/wiki/Domain-driven_design). 
 The `AggregateRoot` implementation triggers events that can be collected for publishing by an implementation of `EventPublisher`.
@@ -136,3 +135,44 @@ The package adds the ability to dispatch messages (`Command` and `Query`). Compa
 # Example
 
 The [blog](/examples/blog.phpt) example shows a use case for a blog application.
+
+# Symfony usage
+
+Using a Symfony application, you may use the provided compiler passes to use the buses.
+
+```php
+
+use Star\Component\DomainEvent\Ports\Symfony\DependencyInjection\CommandBusPass;
+use Star\Component\DomainEvent\Ports\Symfony\DependencyInjection\EventPublisherPass;
+use Star\Component\DomainEvent\Ports\Symfony\DependencyInjection\QueryBusPass;
+
+// Kernel.php
+public function build(ContainerBuilder $container): void {
+    $container->addCompilerPass(new CommandBusPass());
+    $container->addCompilerPass(new QueryBusPass());
+    $container->addCompilerPass(new EventPublisherPass());
+}
+```
+
+Once registered, three new tags will be available:
+
+* `star.command_handler`
+* `star.query_handler`
+* `star.event_publisher`
+
+The tags `star.command_handler` and `star.query_handler` have an optional attribute `message` to specify the
+ message FQCN that will be mapped to this handler. By default the system will try to resolve the same FQCN as the
+ handler, without the `Handler` suffix.
+
+```
+// services.yaml
+services:
+    Path/For/My/Project/DoStuffHandler:
+      tags:
+        - { name star.command_handler, message: Path/For/My/Project/DoStuff }
+
+    Path/For/My/Project/FetchStuffHandler:
+      tags:
+        - { name star.query_handler, message: Path\For\My\Project\FetchStuff }
+```
+*Note*: In both cases, omitting the message attributes would result in the same behavior.
