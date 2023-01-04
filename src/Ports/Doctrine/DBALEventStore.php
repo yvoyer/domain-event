@@ -89,20 +89,17 @@ abstract class DBALEventStore
             $this->handleNoEventFound($id);
         }
 
-        $aggregate = $this->createAggregateFromStream(
-            array_map(
-                /**
-                 * @param array{"event_name":string, "payload":string} $eventRow
-                 */
-                function (array $eventRow): DomainEvent { // @phpstan-ignore-line
-                    return $this->serializer->createEvent(
-                        $eventRow['event_name'],
-                        unserialize($eventRow['payload']) // @phpstan-ignore-line
-                    );
-                },
-                $stream
-            )
-        );
+        /**
+         * @param array{"event_name":string, "payload":string} $eventRow
+         */
+        $callback = function (array $eventRow): DomainEvent {
+            return $this->serializer->createEvent(
+                $eventRow['event_name'],
+                unserialize($eventRow['payload']) // @phpstan-ignore-line
+            );
+        };
+
+        $aggregate = $this->createAggregateFromStream(array_map($callback, $stream)); // @phpstan-ignore-line
         $aggregate->uncommitedEvents(); // reset on load
 
         return $aggregate;
