@@ -15,7 +15,10 @@ jobs:
         php-versions: ['7.1', '7.2', '7.3', '7.4', '8.0', '8.1', '8.2']
         dispatcher-version: ['2.5.0', '3.0.0', '4.0.0', '5.0.0', '6.0.0']
     steps:
-    - uses: actions/checkout@v2
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-versions }}
 
     - name: Validate composer.json and composer.lock
       run: composer validate --strict
@@ -30,7 +33,7 @@ jobs:
           ${{ runner.os }}-php-
 
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress && composer require symfony/event-dispatcher:~{{ dispatcher-version }}
+      run: composer install --prefer-dist --no-progress && composer require symfony/event-dispatcher:~${{ matrix.dispatcher-version }}
 
     - name: PHPUnit
       run: bin/phpunit
