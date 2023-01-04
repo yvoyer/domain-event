@@ -16,7 +16,7 @@ final class ObjectQueryTest extends TestCase
         };
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage(' expected an instance of "stdClass". Got: "string".');
+        $this->expectExceptionMessage(' expected an instance of "stdClass". Got: "invalid".');
         $query('invalid');
     }
 
