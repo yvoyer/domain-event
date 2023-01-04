@@ -94,7 +94,8 @@ abstract class DBALEventStore
                 /**
                  * @param array{"event_name":string, "payload":string} $eventRow
                  */
-                function (array $eventRow): DomainEvent { // @phpstan-ignore-line
+                function (array $eventRow): DomainEvent // @phpstan-ignore-line
+                {
                     return $this->serializer->createEvent(
                         $eventRow['event_name'],
                         unserialize($eventRow['payload']) // @phpstan-ignore-line
