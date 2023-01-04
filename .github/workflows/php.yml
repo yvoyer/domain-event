@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  PHP_7_1:
+  PHP-7-1:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
