@@ -133,10 +133,27 @@ final class PayloadFromReflectionTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage(
             sprintf(
-                'Event with name "stdClass" must implement interface "%s" in order to be re-created.',
-                CreatedFromPayload::class
+                'Event with name "stdClass" must implement interface "%s" or "%s" in order to be re-created.',
+                CreatedFromPayload::class,
+                CreatedFromTypedPayload::class
             )
         );
         $serializer->createEvent(stdClass::class, []);
+    }
+
+    public function test_it_should_allow_creating_event_using_new_payload_object(): void
+    {
+        $serializer = new PayloadFromReflection();
+        $class = new class() implements CreatedFromTypedPayload {
+            public static function fromPayload(Payload $payload): DomainEvent
+            {
+                return new self();
+            }
+        };
+
+        self::assertInstanceOf(
+            get_class($class),
+            $serializer->createEvent(get_class($class), [])
+        );
     }
 }
