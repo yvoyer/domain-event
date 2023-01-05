@@ -2,17 +2,7 @@
 
 namespace Star\Component\DomainEvent\Serialization;
 
-use Assert\Assertion;
-use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
-use function array_key_exists;
-use function gettype;
-use function in_array;
-use function is_numeric;
-use function is_string;
-use function json_encode;
-use function sprintf;
 
 final class PayloadTest extends TestCase
 {
@@ -101,7 +91,7 @@ final class PayloadTest extends TestCase
     public function test_it_should_use_specified_strategy_when_expected_string_value_is_not_valid(): void
     {
         $this->expectException(UnexpectedTypeForPayloadKey::class);
-        $this->expectExceptionMessage('Value "1" for key "key" is not of expected type "string", got "boolean".');
+        $this->expectExceptionMessage('Value "<TRUE>" for key "key" is not of expected type "string", got "boolean".');
         Payload::fromArray(['key' => true])->getString('key');
     }
 

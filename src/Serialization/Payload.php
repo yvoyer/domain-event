@@ -78,7 +78,7 @@ final class Payload
     /**
      * @param string $key
      * @param PayloadFailureStrategy $strategy
-     * @return bool|float|int|string
+     * @return SerializableAttribute|bool|float|int|string
      */
     private function getValue(string $key, PayloadFailureStrategy $strategy)
     {
