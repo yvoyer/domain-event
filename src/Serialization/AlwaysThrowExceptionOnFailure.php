@@ -25,7 +25,7 @@ final class AlwaysThrowExceptionOnFailure implements PayloadFailureStrategy
     }
 
     /**
-     * @param mixed $value
+     * @param string $value
      * @return string
      */
     public function transformRawValueToString($value): string
@@ -35,7 +35,7 @@ final class AlwaysThrowExceptionOnFailure implements PayloadFailureStrategy
     }
 
     /**
-     * @param mixed $value
+     * @param int $value
      * @return int
      */
     public function transformRawValueToInt($value): int
@@ -45,7 +45,7 @@ final class AlwaysThrowExceptionOnFailure implements PayloadFailureStrategy
     }
 
     /**
-     * @param mixed $value
+     * @param float $value
      * @return float
      */
     public function transformRawValueToFloat($value): float
@@ -55,7 +55,7 @@ final class AlwaysThrowExceptionOnFailure implements PayloadFailureStrategy
     }
 
     /**
-     * @param mixed $value
+     * @param bool $value
      * @return bool
      */
     public function transformRawValueToBoolean($value): bool
@@ -66,7 +66,7 @@ final class AlwaysThrowExceptionOnFailure implements PayloadFailureStrategy
 
     /**
      * @param string $key
-     * @param mixed $value
+     * @param string $value
      * @return string
      */
     public function handleInvalidStringValue(string $key, $value): string
@@ -76,7 +76,7 @@ final class AlwaysThrowExceptionOnFailure implements PayloadFailureStrategy
 
     /**
      * @param string $key
-     * @param mixed $value
+     * @param int $value
      * @return int
      */
     public function handleInvalidIntegerValue(string $key, $value): int
@@ -86,7 +86,7 @@ final class AlwaysThrowExceptionOnFailure implements PayloadFailureStrategy
 
     /**
      * @param string $key
-     * @param mixed $value
+     * @param float $value
      * @return float
      */
     public function handleInvalidFloatValue(string $key, $value): float
@@ -96,7 +96,7 @@ final class AlwaysThrowExceptionOnFailure implements PayloadFailureStrategy
 
     /**
      * @param string $key
-     * @param mixed $value
+     * @param bool $value
      * @return bool
      */
     public function handleInvalidBooleanValue(string $key, $value): bool

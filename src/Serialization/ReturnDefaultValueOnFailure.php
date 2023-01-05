@@ -71,7 +71,7 @@ final class ReturnDefaultValueOnFailure implements PayloadFailureStrategy
 
     /**
      * @param string $key
-     * @param mixed $value
+     * @param string $value
      * @return string
      */
     public function handleInvalidStringValue(string $key, $value): string
@@ -81,7 +81,7 @@ final class ReturnDefaultValueOnFailure implements PayloadFailureStrategy
 
     /**
      * @param string $key
-     * @param mixed $value
+     * @param int $value
      * @return int
      */
     public function handleInvalidIntegerValue(string $key, $value): int
@@ -91,7 +91,7 @@ final class ReturnDefaultValueOnFailure implements PayloadFailureStrategy
 
     /**
      * @param string $key
-     * @param mixed $value
+     * @param float $value
      * @return float
      */
     public function handleInvalidFloatValue(string $key, $value): float
@@ -101,7 +101,7 @@ final class ReturnDefaultValueOnFailure implements PayloadFailureStrategy
 
     /**
      * @param string $key
-     * @param mixed $value
+     * @param bool $value
      * @return bool
      */
     public function handleInvalidBooleanValue(string $key, $value): bool
