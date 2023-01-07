@@ -31,24 +31,23 @@ final class ReturnDefaultValueOnFailure implements PayloadFailureStrategy
     }
 
     /**
-     * @param mixed $value
+     * @param string $value
      * @return string
      */
     public function transformRawValueToString($value): string
     {
         Assertion::string($value);
+
         return (string) $value;
     }
 
     /**
-     * @param mixed $value
+     * @param int $value
      * @return int
      */
     public function transformRawValueToInt($value): int
     {
-        if (!is_numeric($value)) {
-            Assertion::numeric($value);
-        }
+        Assertion::numeric($value);
 
         return (int) $value;
     }
@@ -59,9 +58,7 @@ final class ReturnDefaultValueOnFailure implements PayloadFailureStrategy
      */
     public function transformRawValueToFloat($value): float
     {
-        if (!is_numeric($value)) {
-            Assertion::numeric($value);
-        }
+        Assertion::numeric($value);
 
         return (float) $value;
     }
@@ -73,6 +70,7 @@ final class ReturnDefaultValueOnFailure implements PayloadFailureStrategy
     public function transformRawValueToBoolean($value): bool
     {
         Assertion::inArray($value, ['0', '1', 0, 1, true, false]);
+
         return (bool) $value;
     }
 
