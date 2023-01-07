@@ -1,6 +1,6 @@
 # Release notes
 
-# 2.3.3
+# 2.4.0
 
 * [#28](https://github.com/yvoyer/domain-event/pull/28) Add Payload object to event reconstruction
 
