@@ -3,6 +3,7 @@
 namespace Star\Component\DomainEvent\Serialization;
 
 use Assert\Assertion;
+use function is_numeric;
 
 final class ReturnDefaultValueOnFailure implements PayloadFailureStrategy
 {
@@ -36,7 +37,7 @@ final class ReturnDefaultValueOnFailure implements PayloadFailureStrategy
     public function transformRawValueToString($value): string
     {
         Assertion::string($value);
-        return $value;
+        return (string) $value;
     }
 
     /**
@@ -45,7 +46,10 @@ final class ReturnDefaultValueOnFailure implements PayloadFailureStrategy
      */
     public function transformRawValueToInt($value): int
     {
-        Assertion::numeric($value);
+        if (!is_numeric($value)) {
+            Assertion::numeric($value);
+        }
+
         return (int) $value;
     }
 
@@ -55,7 +59,10 @@ final class ReturnDefaultValueOnFailure implements PayloadFailureStrategy
      */
     public function transformRawValueToFloat($value): float
     {
-        Assertion::numeric($value);
+        if (!is_numeric($value)) {
+            Assertion::numeric($value);
+        }
+
         return (float) $value;
     }
 
