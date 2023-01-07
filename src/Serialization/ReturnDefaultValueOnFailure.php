@@ -53,7 +53,7 @@ final class ReturnDefaultValueOnFailure implements PayloadFailureStrategy
     }
 
     /**
-     * @param mixed $value
+     * @param float $value
      * @return float
      */
     public function transformRawValueToFloat($value): float
