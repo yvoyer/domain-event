@@ -50,17 +50,22 @@ final class PayloadFromReflection implements PayloadSerializer
      */
     public function createEvent(string $eventName, array $payload): DomainEvent
     {
-        if (! is_subclass_of($eventName, CreatedFromPayload::class)) {
-            throw new InvalidArgumentException(
-                sprintf(
-                    'Event with name "%s" must implement interface "%s" in order to be re-created. ',
-                    $eventName,
-                    CreatedFromPayload::class
-                )
-            );
+        if (is_subclass_of($eventName, CreatedFromPayload::class)) {
+            return $eventName::fromPayload($payload);
         }
 
-        return $eventName::fromPayload($payload);
+        if (is_subclass_of($eventName, CreatedFromTypedPayload::class)) {
+            return $eventName::fromPayload(Payload::fromArray($payload));
+        }
+
+        throw new InvalidArgumentException(
+            sprintf(
+                'Event with name "%s" must implement interface "%s" or "%s" in order to be re-created. ',
+                $eventName,
+                CreatedFromPayload::class,
+                CreatedFromTypedPayload::class
+            )
+        );
     }
 
     public function createEventName(DomainEvent $event): string
