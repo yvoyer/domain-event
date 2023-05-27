@@ -39,14 +39,31 @@ abstract class DBALEventStore
      */
     private $serializer;
 
+    /**
+     * The columns to use int the fetch of the events. (Default = "version")
+     *
+     * @var string[]
+     */
+    private $orderColumns;
+
+    /**
+     * @param Connection $connection
+     * @param EventPublisher $publisher
+     * @param PayloadSerializer $serializer
+     * @param string[] $orderColumns
+     */
     public function __construct(
         Connection $connection,
         EventPublisher $publisher,
-        PayloadSerializer $serializer
+        PayloadSerializer $serializer,
+        array $orderColumns = [
+            self::COLUMN_VERSION,
+        ]
     ) {
         $this->connection = $connection;
         $this->publisher = $publisher;
         $this->serializer = $serializer;
+        $this->orderColumns = $orderColumns;
     }
 
     abstract protected function tableName(): string;
@@ -59,13 +76,23 @@ abstract class DBALEventStore
 
     abstract protected function handleNoEventFound(string $id): void;
 
+    /**
+     * The columns to use int the fetch of the events.
+     *
+     * @return string[]
+     */
+    protected function getOrderColumns(): array
+    {
+        return $this->orderColumns;
+    }
+
     protected function getAggregateWithId(string $id): AggregateRoot
     {
         $this->ensureTableExists();
 
         $qb = $this->connection->createQueryBuilder();
         $expr = $qb->expr();
-        $result = $qb
+        $qb
             ->select(
                 [
                     'alias.' . self::COLUMN_AGGREGATE_ID,
@@ -75,15 +102,16 @@ abstract class DBALEventStore
             )
             ->from($this->tableName(), 'alias')
             ->andWhere($expr->eq('alias.' . self::COLUMN_AGGREGATE_ID, ':aggregate_id'))
-            ->addOrderBy('alias.' . self::COLUMN_VERSION, 'ASC')
-            ->setParameter('aggregate_id', $id)
-            ->execute();
+            ->setParameter('aggregate_id', $id);
+        foreach ($this->getOrderColumns() as $column) {
+            $qb->addOrderBy($column, 'ASC');
+        }
 
+        $result = $qb->execute();
         if (! $result instanceof Result) {
             throw new RuntimeException('An error occurred while executing statement.');
         }
-
-        $stream = $result->fetchAll();
+        $stream = $result->fetchAllAssociative();
 
         if (count($stream) === 0) {
             $this->handleNoEventFound($id);
@@ -99,7 +127,7 @@ abstract class DBALEventStore
             );
         };
 
-        $aggregate = $this->createAggregateFromStream(array_map($callback, $stream)); // @phpstan-ignore-line
+        $aggregate = $this->createAggregateFromStream(array_map($callback, $stream));
         $aggregate->uncommitedEvents(); // reset on load
 
         return $aggregate;
@@ -118,7 +146,7 @@ abstract class DBALEventStore
             ->setParameter('aggregate_id', $id)
             ->execute();
 
-        if (!$result instanceof Result) {
+        if (! $result instanceof Result) {
             throw new RuntimeException('An error occurred while executing statement.');
         }
 
@@ -166,6 +194,7 @@ abstract class DBALEventStore
 
     private function ensureTableExists(): void
     {
+        // todo remove this automatic stuff
         $manager = $this->connection->getSchemaManager();
         if (!$manager->tablesExist([$this->tableName()])) {
             $originalSchema = $manager->createSchema();

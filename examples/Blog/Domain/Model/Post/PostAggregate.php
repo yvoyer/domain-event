@@ -2,7 +2,9 @@
 
 namespace Star\Example\Blog\Domain\Model\Post;
 
+use DateTimeInterface;
 use Star\Component\DomainEvent\AggregateRoot;
+use Star\Example\Blog\Domain\Event\Post\PostTitleWasChanged;
 use Star\Example\Blog\Domain\Event\Post\PostWasDrafted;
 use Star\Example\Blog\Domain\Event\Post\PostWasPublished;
 use Star\Example\Blog\Domain\Model\BlogId;
@@ -29,9 +31,25 @@ final class PostAggregate extends AggregateRoot
         return $this->id;
     }
 
+    final public function getTitle(): PostTitle
+    {
+        return $this->title;
+    }
+
     public function publish(\DateTimeInterface $publishedAt, string $publishedBy): void
     {
         $this->mutate(new PostWasPublished($this->id, $publishedAt, $publishedBy));
+    }
+
+    public function changeTitle(string $title, DateTimeInterface $date): void
+    {
+        $this->mutate(
+            new PostTitleWasChanged(
+                $this->id,
+                $this->title,
+                new PostTitle($title)
+            )
+        );
     }
 
     public static function draftPost(PostId $id, PostTitle $title, BlogId $blogId): self
@@ -48,5 +66,10 @@ final class PostAggregate extends AggregateRoot
 
     protected function onPostWasPublished(PostWasPublished $event): void
     {
+    }
+
+    protected function onPostTitleWasChanged(PostTitleWasChanged $event): void
+    {
+        $this->title = $event->newTitle();
     }
 }

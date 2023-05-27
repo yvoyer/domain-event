@@ -25,4 +25,9 @@ final class BlogId implements SerializableAttribute
     {
         return $this->toString();
     }
+
+    public static function asUuid(): self
+    {
+        return new self(\uniqid('blog-uuid-'));
+    }
 }
