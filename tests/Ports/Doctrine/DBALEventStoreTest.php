@@ -2,6 +2,7 @@
 
 namespace Star\Component\DomainEvent\Ports\Doctrine;
 
+use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use PHPUnit\Framework\TestCase;
@@ -74,6 +75,66 @@ final class DBALEventStoreTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Aggregate "not-found" not found.');
         $store->loadAggregate('not-found');
+    }
+
+    public function test_it_should_allow_to_order_events_by_custom_field(): void
+    {
+        $post = PostAggregate::draftPost(
+            $postId = PostId::asUUID(),
+            new PostTitle('Old'),
+            BlogId::asUuid()
+        );
+        self::assertSame('Old', $post->getTitle()->toString());
+
+        $post->changeTitle('Title in 2000', new DateTimeImmutable('2000-01-01'));
+        $post->changeTitle('Title in 2001', new DateTimeImmutable('2001-01-01'));
+        $post->changeTitle('Title in 2002', new DateTimeImmutable('2002-01-01'));
+
+        self::assertSame('Title in 2002', $post->getTitle()->toString());
+
+        $store = new PostEventStore(
+            $this->connection,
+            $this->createMock(EventPublisher::class),
+            new PayloadFromReflection()
+        );
+        $store->saveAggregate($post);
+
+        $qb = $this->connection->createQueryBuilder();
+        $expr = $qb->expr();
+        $qb
+            ->update(DBALEventStoreTest::TABLE_NAME)
+            ->set('pushed_on', ':new_date')
+            ->where($expr->like('payload', ':pattern'))
+            ->setParameter('new_date', '2000-01-01 00:00:00')
+            ->setParameter('pattern', '%Title in 2002%')
+            ->execute();
+
+        $storeByVersion = new PostEventStore(
+            $this->connection,
+            $this->createMock(EventPublisher::class),
+            new PayloadFromReflection()
+        );
+        $after = $storeByVersion->loadAggregate($postId->toString());
+        self::assertSame(
+            'Title in 2002',
+            $after->getTitle()->toString(),
+            'Should order by the version by default'
+        );
+
+        $storeByDate = new PostEventStore(
+            $this->connection,
+            $this->createMock(EventPublisher::class),
+            new PayloadFromReflection(),
+            [
+                'pushed_on',
+            ]
+        );
+        $after = $storeByDate->loadAggregate($postId->toString());
+        self::assertSame(
+            'Title in 2001',
+            $after->getTitle()->toString(),
+            'Should order by the date instead of version'
+        );
     }
 }
 

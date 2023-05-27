@@ -122,7 +122,7 @@ protected function onStuffWasDone(StuffWasDone $event): void;
 
 Note: The callback method can be changed to another format, by overriding the `AggregateRoot::getEventMethod()`.
 
-# Message bus
+## Message bus
 
 The package adds the ability to dispatch messages (`Command` and `Query`). Compared to the `EventPubliser`, the
  `CommandBus` and `QueryBus` have different usages.
@@ -132,11 +132,11 @@ The package adds the ability to dispatch messages (`Command` and `Query`). Compa
 
 ([Example of usage](/examples/Blog/Application/Http/Controller/PostController.php))
  
-# Example
+## Example
 
 The [blog](/examples/blog.phpt) example shows a use case for a blog application.
 
-# Symfony usage
+## Symfony usage
 
 Using a Symfony application, you may use the provided compiler passes to use the buses.
 
@@ -176,3 +176,9 @@ services:
         - { name star.query_handler, message: Path\For\My\Project\FetchStuff }
 ```
 *Note*: In both cases, omitting the message attributes would result in the same behavior.
+
+## Event store
+
+Event stores are where your events will be persisted. You define which platform is used by extending the provided store.
+
+[Example](/docs/ports.md#doctrine-dbal) with `DBALEventStore`.
