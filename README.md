@@ -88,10 +88,27 @@ class DoSomethingProductCreated implements EventListener
         // do something with the event
     }
 
+    public function doSomethingAtFirst(PostWasPublished $event): void 
+    {
+    }
+
+    public function doSomethingInBetween(PostWasPublished $event): void 
+    {
+    }
+
+    public function doSomethingAtLast(PostWasPublished $event): void 
+    {
+    }
+    
     public function listensTo(): array
     {
         return [
-            ProductWasCreated::class => 'doSomething',
+            ProductWasCreated::class => 'doSomething', // priority will be assigned at runtime
+            PostWasPublished::class => [ // multiple methods may be assigned priority
+                100 => 'doSomethingAtFirst',
+                0 => 'doSomethingInBetween',
+                -20 => 'doSomethingAtLast',
+            ],
         ];
     }
 }
