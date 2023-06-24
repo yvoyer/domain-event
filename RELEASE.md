@@ -1,5 +1,9 @@
 # Release notes
 
+# 2.5.0
+
+* [#33](https://github.com/yvoyer/domain-event/pull/33) Add priority of listeners
+
 # 2.4.1
 
 * [#29](https://github.com/yvoyer/domain-event/pull/29) Add support for ordering on pushed_on column
