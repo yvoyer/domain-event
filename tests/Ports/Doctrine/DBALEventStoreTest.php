@@ -3,6 +3,7 @@
 namespace Star\Component\DomainEvent\Ports\Doctrine;
 
 use DateTimeImmutable;
+use DateTimeInterface;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use PHPUnit\Framework\TestCase;
@@ -10,11 +11,15 @@ use RuntimeException;
 use Star\Component\DomainEvent\AggregateRoot;
 use Star\Component\DomainEvent\EventPublisher;
 use Star\Component\DomainEvent\Serialization\PayloadFromReflection;
+use Star\Component\DomainEvent\Serialization\SerializableAttribute;
+use Star\Example\Blog\Domain\Event\Post\PostTitleWasChanged;
+use Star\Example\Blog\Domain\Event\Post\PostWasDrafted;
 use Star\Example\Blog\Domain\Model\BlogId;
 use Star\Example\Blog\Domain\Model\Post\PostAggregate;
 use Star\Example\Blog\Domain\Model\Post\PostId;
 use Star\Example\Blog\Domain\Model\Post\PostTitle;
 use function extension_loaded;
+use function key_exists;
 
 final class DBALEventStoreTest extends TestCase
 {
@@ -136,6 +141,68 @@ final class DBALEventStoreTest extends TestCase
             'Should order by the date instead of version'
         );
     }
+
+    public function test_it_should_allow_to_use_custom_date_when_persisting_event(): void
+    {
+        $store = new class(
+            $this->connection,
+            $this->createMock(EventPublisher::class),
+            new PayloadFromReflection()
+        ) extends DBALEventStore {
+            public function saveEvent(PostAggregate $aggregate): void
+            {
+                $this->persistAggregate($aggregate->getId()->toString(), $aggregate);
+            }
+
+            protected function createPushedOnDateFromPayload(array $payload): DateTimeImmutable
+            {
+                if (key_exists('changedAt', $payload)) {
+                    return new DateTimeImmutable($payload['changedAt']);
+                }
+
+                return parent::createPushedOnDateFromPayload($payload);
+            }
+
+            protected function tableName(): string
+            {
+                return DBALEventStoreTest::TABLE_NAME;
+            }
+
+            protected function createAggregateFromStream(array $events): AggregateRoot
+            {
+                throw new \RuntimeException(__METHOD__ . ' not implemented yet.');
+            }
+
+            protected function handleNoEventFound(string $id): void
+            {
+                throw new \RuntimeException(__METHOD__ . ' not implemented yet.');
+            }
+        };
+
+        $post = PostAggregate::draftPost(
+            PostId::asUUID(),
+            PostTitle::randomTitle(),
+            BlogId::asUuid()
+        );
+        $store->saveEvent($post);
+
+        $post->changeTitle(
+            'New title',
+            new DateTimeImmutable('2000-01-01')
+        );
+
+        $store->saveEvent($post);
+
+        $result = $this->connection->createQueryBuilder()
+            ->select('*')
+            ->from(self::TABLE_NAME)
+            ->execute()
+            ->fetchAll();
+        self::assertCount(2, $result);
+        self::assertSame(PostWasDrafted::class, $result[0]['event_name']);
+        self::assertSame(PostTitleWasChanged::class, $result[1]['event_name']);
+        self::assertSame('2000-01-01 00:00:00', $result[1]['pushed_on']);
+    }
 }
 
 final class PostEventStore extends DBALEventStore
@@ -163,5 +230,28 @@ final class PostEventStore extends DBALEventStore
     public function saveAggregate(PostAggregate $post): void
     {
         $this->persistAggregate($post->getId()->toString(), $post);
+    }
+}
+
+final class SerializableDateTime implements SerializableAttribute
+{
+    /**
+     * @var DateTimeInterface
+     */
+    private $dateTime;
+
+    public function __construct(DateTimeInterface $dateTime)
+    {
+        $this->dateTime = $dateTime;
+    }
+
+    public function toSerializableString(): string
+    {
+        return $this->dateTime->format('Y-m-d H:i:s.u');
+    }
+
+    final public function ToDateTime(): DateTimeInterface
+    {
+        return $this->dateTime;
     }
 }

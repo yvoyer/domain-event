@@ -166,20 +166,35 @@ abstract class DBALEventStore
     }
 
     /**
+     * This method allows to extract datetime value from payload, to use that date instead of a generated one.
+     *
+     * @param array<mixed> $payload
+     * @return DateTimeImmutable
+     */
+    protected function createPushedOnDateFromPayload(array $payload): DateTimeImmutable
+    {
+        return new DateTimeImmutable();
+    }
+
+    /**
      * @param string $id
      * @param int $version
      * @param string $eventName
      * @param string[]|int[]|bool[]|float[] $payload
      */
-    private function persistEvent(string $id, int $version, string $eventName, array $payload): void
-    {
+    private function persistEvent(
+        string $id,
+        int $version,
+        string $eventName,
+        array $payload
+    ): void {
         $this->connection->insert(
             $this->tableName(),
             [
                 self::COLUMN_AGGREGATE_ID => $id,
-                self::COLUMN_PAYLOAD => $payload,
-                self::COLUMN_EVENT_NAME => $eventName,
-                self::COLUMN_PUSHED_ON => new DateTimeImmutable(),
+                self::COLUMN_PAYLOAD => $payload, // todo allow serialization in other format than array (JSON)
+                self::COLUMN_EVENT_NAME => $eventName, // todo allow custom event_name (ie. "some_event_name")
+                self::COLUMN_PUSHED_ON => $this->createPushedOnDateFromPayload($payload),
                 self::COLUMN_VERSION => $version,
             ],
             [

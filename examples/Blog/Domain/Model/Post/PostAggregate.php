@@ -47,7 +47,8 @@ final class PostAggregate extends AggregateRoot
             new PostTitleWasChanged(
                 $this->id,
                 $this->title,
-                new PostTitle($title)
+                new PostTitle($title),
+                $date
             )
         );
     }

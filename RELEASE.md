@@ -1,5 +1,9 @@
 # Release notes
 
+# 2.5.1
+
+* [#35](https://github.com/yvoyer/domain-event/pull/35) Allow override of pushed_on value based on payload
+
 # 2.5.0
 
 * [#33](https://github.com/yvoyer/domain-event/pull/33) Add priority of listeners
