@@ -3,6 +3,7 @@
 namespace Star\Example\Blog\Domain\Model\Post;
 
 use Star\Component\DomainEvent\Serialization\SerializableAttribute;
+use function uniqid;
 
 final class PostTitle implements SerializableAttribute
 {
@@ -24,5 +25,10 @@ final class PostTitle implements SerializableAttribute
     public function toSerializableString(): string
     {
         return $this->toString();
+    }
+
+    public static function randomTitle(): self
+    {
+        return new self(uniqid('title '));
     }
 }
