@@ -2,7 +2,9 @@
 
 namespace Star\Example\Blog\Domain\Event\Post;
 
+use DateTimeInterface;
 use Star\Component\DomainEvent\DomainEvent;
+use Star\Component\DomainEvent\Serialization\SerializableDateTime;
 use Star\Example\Blog\Domain\Model\Post\PostId;
 
 final class PostWasPublished implements DomainEvent
@@ -13,7 +15,7 @@ final class PostWasPublished implements DomainEvent
     private $postId;
 
     /**
-     * @var \DateTimeInterface
+     * @var SerializableDateTime
      */
     private $publishedAt;
 
@@ -24,11 +26,11 @@ final class PostWasPublished implements DomainEvent
 
     public function __construct(
         PostId $postId,
-        \DateTimeInterface $publishedAt,
+        DateTimeInterface $publishedAt,
         string $publishedBy
     ) {
         $this->postId = $postId;
-        $this->publishedAt = $publishedAt;
+        $this->publishedAt = new SerializableDateTime($publishedAt);
         $this->publishedBy = $publishedBy;
     }
 
@@ -37,9 +39,9 @@ final class PostWasPublished implements DomainEvent
         return $this->postId;
     }
 
-    public function publishedAt(): \DateTimeInterface
+    public function publishedAt(): DateTimeInterface
     {
-        return $this->publishedAt;
+        return $this->publishedAt->ToDateTime();
     }
 
     public function publishedBy(): string

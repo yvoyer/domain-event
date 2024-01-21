@@ -4,6 +4,7 @@ namespace Star\Component\DomainEvent\Ports\Doctrine;
 
 use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Result;
 use Doctrine\DBAL\Types\Types;
 use RuntimeException;
@@ -13,7 +14,6 @@ use Star\Component\DomainEvent\EventPublisher;
 use Star\Component\DomainEvent\Serialization\PayloadSerializer;
 use function array_map;
 use function count;
-use function sprintf;
 use function unserialize;
 
 abstract class DBALEventStore
@@ -137,26 +137,10 @@ abstract class DBALEventStore
     {
         $this->ensureTableExists();
 
-        $versionQb = $this->connection->createQueryBuilder();
-        $expr = $versionQb->expr();
-        $result = $versionQb
-            ->select(sprintf('COUNT(%s)', self::COLUMN_AGGREGATE_ID))
-            ->from($this->tableName(), 'alias')
-            ->andWhere($expr->eq('alias.' . self::COLUMN_AGGREGATE_ID, ':aggregate_id'))
-            ->setParameter('aggregate_id', $id)
-            ->execute();
-
-        if (! $result instanceof Result) {
-            throw new RuntimeException('An error occurred while executing statement.');
-        }
-
-        $version = (int) $result->fetchFirstColumn()[0]; // @phpstan-ignore-line
         $events = $aggregate->uncommitedEvents();
         foreach ($events as $event) {
-            $version++;
             $this->persistEvent(
                 $id,
-                $version,
                 $this->serializer->createEventName($event),
                 $this->serializer->createPayload($event)
             );
@@ -168,7 +152,7 @@ abstract class DBALEventStore
     /**
      * This method allows to extract datetime value from payload, to use that date instead of a generated one.
      *
-     * @param array<mixed> $payload
+     * @param array<string, mixed> $payload
      * @return DateTimeImmutable
      */
     protected function createPushedOnDateFromPayload(array $payload): DateTimeImmutable
@@ -178,33 +162,49 @@ abstract class DBALEventStore
 
     /**
      * @param string $id
-     * @param int $version
      * @param string $eventName
-     * @param string[]|int[]|bool[]|float[] $payload
+     * @param array<string, string|int|bool|float> $payload
+     *
+     * @throws Exception
      */
     private function persistEvent(
         string $id,
-        int $version,
         string $eventName,
         array $payload
     ): void {
-        $this->connection->insert(
-            $this->tableName(),
-            [
-                self::COLUMN_AGGREGATE_ID => $id,
-                self::COLUMN_PAYLOAD => $payload, // todo allow serialization in other format than array (JSON)
-                self::COLUMN_EVENT_NAME => $eventName, // todo allow custom event_name (ie. "some_event_name")
-                self::COLUMN_PUSHED_ON => $this->createPushedOnDateFromPayload($payload),
-                self::COLUMN_VERSION => $version,
-            ],
-            [
-                self::COLUMN_AGGREGATE_ID => Types::STRING,
-                self::COLUMN_PAYLOAD => Types::ARRAY,
-                self::COLUMN_EVENT_NAME => Types::STRING,
-                self::COLUMN_PUSHED_ON => Types::DATETIME_IMMUTABLE,
-                self::COLUMN_VERSION => Types::INTEGER,
-            ]
-        );
+        $expr = $this->connection->createExpressionBuilder();
+        $this->connection->createQueryBuilder()
+            ->insert($this->tableName())
+            ->values(
+                [
+                    self::COLUMN_AGGREGATE_ID => ':aggregate_id',
+                    self::COLUMN_PAYLOAD => ':payload',
+                    self::COLUMN_EVENT_NAME => ':event',
+                    self::COLUMN_PUSHED_ON => ':pushed_on',
+                    self::COLUMN_VERSION => '(' . $this->connection->createQueryBuilder()
+                        ->select('COUNT(*) + 1')
+                        ->from($this->tableName())
+                        ->where($expr->eq(self::COLUMN_AGGREGATE_ID, ':aggregate_id'))
+                        ->getSQL() . ')'
+                ]
+            )
+            ->setParameters(
+                [
+                    'aggregate_id' => $id,
+                    'payload' => $payload, // todo allow serialization in other format than array (JSON)
+                    'event' => $eventName, // todo allow custom event_name (ie. "some_event_name")
+                    'pushed_on' => $this->createPushedOnDateFromPayload($payload),
+                ],
+                [
+                    self::COLUMN_AGGREGATE_ID => Types::STRING,
+                    self::COLUMN_PAYLOAD => Types::ARRAY,
+                    self::COLUMN_EVENT_NAME => Types::STRING,
+                    self::COLUMN_PUSHED_ON => Types::DATETIME_IMMUTABLE,
+                    self::COLUMN_VERSION => Types::INTEGER,
+                ]
+            )
+            ->setParameter('aggregate_id', $id)
+            ->executeQuery();
     }
 
     private function ensureTableExists(): void
