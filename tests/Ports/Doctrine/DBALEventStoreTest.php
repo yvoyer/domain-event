@@ -11,9 +11,9 @@ use RuntimeException;
 use Star\Component\DomainEvent\AggregateRoot;
 use Star\Component\DomainEvent\EventPublisher;
 use Star\Component\DomainEvent\Serialization\PayloadFromReflection;
-use Star\Component\DomainEvent\Serialization\SerializableAttribute;
 use Star\Example\Blog\Domain\Event\Post\PostTitleWasChanged;
 use Star\Example\Blog\Domain\Event\Post\PostWasDrafted;
+use Star\Example\Blog\Domain\Event\Post\PostWasPublished;
 use Star\Example\Blog\Domain\Model\BlogId;
 use Star\Example\Blog\Domain\Model\Post\PostAggregate;
 use Star\Example\Blog\Domain\Model\Post\PostId;
@@ -203,6 +203,39 @@ final class DBALEventStoreTest extends TestCase
         self::assertSame(PostTitleWasChanged::class, $result[1]['event_name']);
         self::assertSame('2000-01-01 00:00:00', $result[1]['pushed_on']);
     }
+
+    public function test_it_should_use_dynamic_version(): void
+    {
+        $store = new PostEventStore(
+            $this->connection,
+            $this->createMock(EventPublisher::class),
+            new PayloadFromReflection()
+        );
+        $post = PostAggregate::draftPostFixture();
+        $post->changeTitle('Change 1', new DateTimeImmutable());
+        $post->publish(new DateTimeImmutable(), 'Joe');
+        $post->changeTitle('Change 2', new DateTimeImmutable());
+
+        $store->saveAggregate($post);
+
+        /**
+         * @var array<int, array{ event_name: string, version: int }> $result
+         */
+        $result = $this->connection->createQueryBuilder()
+            ->select('*')
+            ->from(self::TABLE_NAME)
+            ->execute()
+            ->fetchAllAssociative();
+
+        self::assertSame(PostWasDrafted::class, $result[0]['event_name']);
+        self::assertSame(1, (int) $result[0]['version']);
+        self::assertSame(PostTitleWasChanged::class, $result[1]['event_name']);
+        self::assertSame(2, (int) $result[1]['version']);
+        self::assertSame(PostWasPublished::class, $result[2]['event_name']);
+        self::assertSame(3, (int) $result[2]['version']);
+        self::assertSame(PostTitleWasChanged::class, $result[3]['event_name']);
+        self::assertSame(4, (int) $result[3]['version']);
+    }
 }
 
 final class PostEventStore extends DBALEventStore
@@ -230,28 +263,5 @@ final class PostEventStore extends DBALEventStore
     public function saveAggregate(PostAggregate $post): void
     {
         $this->persistAggregate($post->getId()->toString(), $post);
-    }
-}
-
-final class SerializableDateTime implements SerializableAttribute
-{
-    /**
-     * @var DateTimeInterface
-     */
-    private $dateTime;
-
-    public function __construct(DateTimeInterface $dateTime)
-    {
-        $this->dateTime = $dateTime;
-    }
-
-    public function toSerializableString(): string
-    {
-        return $this->dateTime->format('Y-m-d H:i:s.u');
-    }
-
-    final public function ToDateTime(): DateTimeInterface
-    {
-        return $this->dateTime;
     }
 }

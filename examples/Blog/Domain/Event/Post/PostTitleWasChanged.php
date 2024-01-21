@@ -5,7 +5,7 @@ namespace Star\Example\Blog\Domain\Event\Post;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Star\Component\DomainEvent\DomainEvent;
-use Star\Component\DomainEvent\Ports\Doctrine\SerializableDateTime;
+use Star\Component\DomainEvent\Serialization\SerializableDateTime;
 use Star\Component\DomainEvent\Serialization\CreatedFromTypedPayload;
 use Star\Component\DomainEvent\Serialization\Payload;
 use Star\Example\Blog\Domain\Model\Post\PostId;
