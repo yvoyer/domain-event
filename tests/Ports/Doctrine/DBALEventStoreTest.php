@@ -224,17 +224,17 @@ final class DBALEventStoreTest extends TestCase
         $result = $this->connection->createQueryBuilder()
             ->select('*')
             ->from(self::TABLE_NAME)
-            ->executeQuery()
+            ->execute()
             ->fetchAllAssociative();
 
         self::assertSame(PostWasDrafted::class, $result[0]['event_name']);
-        self::assertSame(1, $result[0]['version']);
+        self::assertSame(1, (int) $result[0]['version']);
         self::assertSame(PostTitleWasChanged::class, $result[1]['event_name']);
-        self::assertSame(2, $result[1]['version']);
+        self::assertSame(2, (int) $result[1]['version']);
         self::assertSame(PostWasPublished::class, $result[2]['event_name']);
-        self::assertSame(3, $result[2]['version']);
+        self::assertSame(3, (int) $result[2]['version']);
         self::assertSame(PostTitleWasChanged::class, $result[3]['event_name']);
-        self::assertSame(4, $result[3]['version']);
+        self::assertSame(4, (int) $result[3]['version']);
     }
 }
 

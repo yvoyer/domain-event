@@ -172,7 +172,17 @@ abstract class DBALEventStore
         string $eventName,
         array $payload
     ): void {
-        $expr = $this->connection->createExpressionBuilder();
+        $expr = $this->connection->getExpressionBuilder();
+
+        /**
+         * Subquery hack to allow update of same table in same query for Mysql
+         * @see https://stackoverflow.com/questions/45494/mysql-error-1093-cant-specify-target-table-for-update-in-from-clause
+         */
+        $subQuery = $this->connection->createQueryBuilder()
+            ->select('COUNT(sub.version) + 1')
+            ->from($this->tableName(), 'sub')
+            ->where($expr->eq('sub.' . self::COLUMN_AGGREGATE_ID, ':aggregate_id'))
+            ->getSQL();
         $this->connection->createQueryBuilder()
             ->insert($this->tableName())
             ->values(
@@ -181,11 +191,7 @@ abstract class DBALEventStore
                     self::COLUMN_PAYLOAD => ':payload',
                     self::COLUMN_EVENT_NAME => ':event',
                     self::COLUMN_PUSHED_ON => ':pushed_on',
-                    self::COLUMN_VERSION => '(' . $this->connection->createQueryBuilder()
-                        ->select('COUNT(*) + 1')
-                        ->from($this->tableName())
-                        ->where($expr->eq(self::COLUMN_AGGREGATE_ID, ':aggregate_id'))
-                        ->getSQL() . ')'
+                    self::COLUMN_VERSION => '(' . $subQuery . ')'
                 ]
             )
             ->setParameters(
@@ -203,8 +209,8 @@ abstract class DBALEventStore
                     self::COLUMN_VERSION => Types::INTEGER,
                 ]
             )
-            ->setParameter('aggregate_id', $id)
-            ->executeQuery();
+            ->setParameter('aggregate_id', $id, Types::STRING)
+            ->execute();
     }
 
     private function ensureTableExists(): void

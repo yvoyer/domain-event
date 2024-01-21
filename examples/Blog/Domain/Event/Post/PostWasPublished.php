@@ -41,7 +41,7 @@ final class PostWasPublished implements DomainEvent
 
     public function publishedAt(): DateTimeInterface
     {
-        return $this->publishedAt->ToDateTime();
+        return $this->publishedAt->toDateTime();
     }
 
     public function publishedBy(): string

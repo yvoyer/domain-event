@@ -22,7 +22,7 @@ final class SerializableDateTime implements SerializableAttribute
         return $this->dateTime->format('Y-m-d H:i:s.u');
     }
 
-    final public function ToDateTime(): DateTimeInterface
+    final public function toDateTime(): DateTimeInterface
     {
         return $this->dateTime;
     }
