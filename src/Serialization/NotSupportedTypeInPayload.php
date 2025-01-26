@@ -3,6 +3,7 @@
 namespace Star\Component\DomainEvent\Serialization;
 
 use InvalidArgumentException;
+use Star\Component\DomainEvent\Serialization\Transformation\PropertyValueTransformer;
 use function get_class;
 use function gettype;
 use function implode;
@@ -24,10 +25,12 @@ final class NotSupportedTypeInPayload extends InvalidArgumentException
 
         parent::__construct(
             sprintf(
-                'Payload do not support having a value of type "%s" as attribute "%s", only "%s" are supported.',
+                'Payload do not support having a value of type "%s" as attribute "%s", ' .
+                'only "%s" are supported. You may register a "%s" to support your value.',
                 $type,
                 $attribute,
-                implode(', ', ['int', 'string', 'float', 'bool'])
+                implode('|', ['int', 'string', 'float', 'bool', 'SerializableAttribute']),
+                PropertyValueTransformer::class
             )
         );
     }
