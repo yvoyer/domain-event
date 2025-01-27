@@ -13,10 +13,6 @@ use function sprintf;
 
 final class PayloadFromReflection implements PayloadSerializer
 {
-    /**
-     * @param DomainEvent $event
-     * @return string[]|int[]|float[]|bool[]
-     */
     public function createPayload(DomainEvent $event): array
     {
         $reflection = new ReflectionClass($event);
@@ -43,13 +39,10 @@ final class PayloadFromReflection implements PayloadSerializer
         return $payload;
     }
 
-    /**
-     * @param class-string $eventName
-     * @param SerializableAttribute[]|string[]|int[]|bool[]|float[] $payload
-     * @return DomainEvent
-     */
-    public function createEvent(string $eventName, array $payload): DomainEvent
-    {
+    public function createEvent(
+        string $eventName,
+        array $payload
+    ): DomainEvent {
         if (is_subclass_of($eventName, CreatedFromPayload::class)) {
             return $eventName::fromPayload($payload);
         }
