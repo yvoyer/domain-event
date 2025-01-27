@@ -9,15 +9,16 @@ interface PayloadSerializer
     public function createEventName(DomainEvent $event): string;
 
     /**
-     * @param DomainEvent $event
-     * @return string[]|int[]|float[]|bool[]
+     * @return array<string, string|int|float|bool>
      */
     public function createPayload(DomainEvent $event): array;
 
     /**
-     * @param string $eventName
-     * @param SerializableAttribute[]|string[]|int[]|bool[]|float[] $payload
-     * @return DomainEvent
+     * @param string|class-string<DomainEvent> $eventName
+     * @param array<string, string|int|bool|float> $payload
      */
-    public function createEvent(string $eventName, array $payload): DomainEvent;
+    public function createEvent(
+        string $eventName,
+        array $payload
+    ): DomainEvent;
 }
