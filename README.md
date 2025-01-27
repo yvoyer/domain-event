@@ -27,7 +27,7 @@ class Product extends AggregateRoot
 ```php
 class ProductWasCreated implements DomainEvent
 {
-    private $name;
+    private string $name;
 
     public function __construct(string $name)
     {
@@ -41,7 +41,8 @@ class ProductWasCreated implements DomainEvent
 }
 ```
 
-3. Create a named constructor (static method), or a mutation method.
+3. Create a named constructor (static method), and a mutation method. The protected method will be invoked internally 
+ using the [naming standard](#naming-standard) of mutation methods. 
 
 ```php
 // Product.php
@@ -124,7 +125,8 @@ $product = Product::draftProduct('lightsaber');
 $publisher->publishChanges($product->uncommitedEvents()); // will notify the listener and call the DoSomethingProductCreated::doSomething() method
 ```
 
-**Warning**: Be advised that events will be removed from aggregate once collected, to avoid republishing the same event twice.
+**Warning**: Be advised that events will be removed from aggregate once collected and published,
+ to avoid republishing the same event twice.
 
 We currently support [third party](/docs/ports.md) adapters to allow you to plug-in the library into your infrastructure.
 
@@ -139,6 +141,14 @@ protected function onStuffWasDone(StuffWasDone $event): void;
 
 Note: The callback method can be changed to another format, by overriding the `AggregateRoot::getEventMethod()`.
 
+```php
+protected function getEventMethod(DomainEvent $event): string
+{
+    if ($event instanceof StuffWasDone) {
+        return 'whenYouDoStuff'; // the protected method whenYouDoStuff() would be invoked to apply the change to the aggregate
+    }
+}
+```
 ## Message bus
 
 The package adds the ability to dispatch messages (`Command` and `Query`). Compared to the `EventPubliser`, the
@@ -148,7 +158,15 @@ The package adds the ability to dispatch messages (`Command` and `Query`). Compa
 * Query bus: Responsible to fetch some information. The returned information is recommended to be returned in a readonly format.
 
 ([Example of usage](/examples/Blog/Application/Http/Controller/PostController.php))
- 
+
+## Serialization of events
+
+When persisting your event in a data store, you may use a [PayloadSerializer](src/Serialization/PayloadSerializer.php) instance to convert your event to a
+ serializable string.
+The current implementation [PayloadFromReflection](src/Serialization/PayloadFromReflection.php) allow you to:
+* register [PropertyValueTransformer](src/Serialization/Transformation/PropertyValueTransformer.php) to ensure your value objects are converted to a serializable format. 
+* Or implement the [SerializableAttribute interface](src/Serialization/SerializableAttribute.php) to contain the logic in each of your value objects.
+
 ## Example
 
 The [blog](/examples/blog.phpt) example shows a use case for a blog application.

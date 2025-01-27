@@ -5,6 +5,8 @@ namespace Star\Component\DomainEvent\Serialization;
 use InvalidArgumentException;
 use ReflectionClass;
 use Star\Component\DomainEvent\DomainEvent;
+use Star\Component\DomainEvent\Serialization\Transformation\PropertyValueTransformer;
+use Star\Component\DomainEvent\Serialization\Transformation\SerializableAttributeTransformer;
 use function get_class;
 use function is_bool;
 use function is_scalar;
@@ -13,6 +15,24 @@ use function sprintf;
 
 final class PayloadFromReflection implements PayloadSerializer
 {
+    /**
+     * @var array<int, PropertyValueTransformer>
+     */
+    private $transformers;
+
+    public function __construct()
+    {
+        $this->transformers = [
+            new SerializableAttributeTransformer(), // for BC
+        ];
+    }
+
+    public function registerTransformer(
+        PropertyValueTransformer $transformer
+    ): void {
+        $this->transformers[] = $transformer;
+    }
+
     public function createPayload(DomainEvent $event): array
     {
         $reflection = new ReflectionClass($event);
@@ -25,8 +45,8 @@ final class PayloadFromReflection implements PayloadSerializer
             $property->setAccessible(true);
             $value = $property->getValue($event);
             $attribute = $property->getName();
-            if ($value instanceof SerializableAttribute) {
-                $value = $value->toSerializableString();
+            foreach ($this->transformers as $transformer) {
+                $value = $transformer->eventPropertyToPayloadValue($attribute, $value);
             }
 
             if (! is_bool($value) && ! is_scalar($value)) {

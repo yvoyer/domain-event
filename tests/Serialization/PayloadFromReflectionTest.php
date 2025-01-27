@@ -2,9 +2,12 @@
 
 namespace Star\Component\DomainEvent\Serialization;
 
+use DateTimeImmutable;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Star\Component\DomainEvent\DomainEvent;
+use Star\Component\DomainEvent\Serialization\Transformation\DateTimeTransformer;
+use Star\Component\DomainEvent\Serialization\Transformation\PropertyValueTransformer;
 use Star\Example\Blog\Domain\Model\Post\PostId;
 use stdClass;
 use function get_class;
@@ -25,11 +28,7 @@ final class PayloadFromReflectionTest extends TestCase
     public function test_should_serialize_event_with_int_attribute(): void
     {
         $serializer = new PayloadFromReflection();
-        $payload = $serializer->createPayload(
-            new class implements DomainEvent {
-                private $attribute = 44;
-            }
-        );
+        $payload = $serializer->createPayload(new MixedEvent(44));
         $this->assertArrayHasKey('attribute', $payload);
         $this->assertSame(44, $payload['attribute']);
     }
@@ -37,11 +36,7 @@ final class PayloadFromReflectionTest extends TestCase
     public function test_should_serialize_event_with_string_attribute(): void
     {
         $serializer = new PayloadFromReflection();
-        $payload = $serializer->createPayload(
-            new class implements DomainEvent {
-                private $attribute = 'something';
-            }
-        );
+        $payload = $serializer->createPayload(new MixedEvent('something'));
         $this->assertArrayHasKey('attribute', $payload);
         $this->assertSame('something', $payload['attribute']);
     }
@@ -81,12 +76,12 @@ final class PayloadFromReflectionTest extends TestCase
         $serializer = new PayloadFromReflection();
 
         $this->expectException(NotSupportedTypeInPayload::class);
-        $this->expectExceptionMessage('Payload do not support having a value of type "array" as attribute "array"');
-        $serializer->createPayload(
-            new class implements DomainEvent {
-                private $array = [];
-            }
+        $this->expectExceptionMessage(
+            'Payload do not support having a value of type "array" as attribute "attribute", ' .
+            'only "int|string|float|bool|SerializableAttribute" are supported.' .
+            sprintf(' You may register a "%s" to support your value.', PropertyValueTransformer::class)
         );
+        $serializer->createPayload(new MixedEvent([]));
     }
 
     public function test_should_not_allow_to_serialize_object(): void
@@ -96,30 +91,15 @@ final class PayloadFromReflectionTest extends TestCase
         $this->expectException(NotSupportedTypeInPayload::class);
         $this->expectExceptionMessage(
             'Payload do not support having a value of type "object(stdClass)" as attribute "attribute"'
-            . ', only "int, string, float, bool" are supported.'
         );
-        $serializer->createPayload(
-            new class implements DomainEvent {
-                private $attribute;
-                public function __construct()
-                {
-                    $this->attribute = (object) [];
-                }
-            }
-        );
+        $serializer->createPayload(new MixedEvent((object) []));
     }
 
     public function test_it_should_allow_serialization_of_object_implementing_serializable_interface(): void
     {
         $serializer = new PayloadFromReflection();
         $payload = $serializer->createPayload(
-            new class implements DomainEvent {
-                private $attribute;
-                public function __construct()
-                {
-                    $this->attribute = PostId::fromString('id');
-                }
-            }
+            new MixedEvent(PostId::fromString('id'))
         );
 
         self::assertArrayHasKey('attribute', $payload);
@@ -155,5 +135,44 @@ final class PayloadFromReflectionTest extends TestCase
             get_class($class),
             $serializer->createEvent(get_class($class), [])
         );
+    }
+
+    public function test_it_should_allow_serialization_of_date_time_to_iso_8601(): void
+    {
+        $serializer = new PayloadFromReflection();
+        $serializer->registerTransformer(new DateTimeTransformer());
+
+        $payload = $serializer->createPayload(
+            new MixedEvent(new DateTimeImmutable('2000-01-01 12:34:56.0987'))
+        );
+
+        self::assertSame('2000-01-01T12:34:56+0000', $payload['attribute']);
+    }
+
+    public function test_it_should_allow_serialization_of_date_time_to_custom_format(): void
+    {
+        $serializer = new PayloadFromReflection();
+        $serializer->registerTransformer(new DateTimeTransformer('Y-m-d H:i:s.u'));
+
+        $payload = $serializer->createPayload(
+            new MixedEvent(new DateTimeImmutable('2000-01-01 12:34:56.0987'))
+        );
+
+        self::assertSame('2000-01-01 12:34:56.098700', $payload['attribute']);
+    }
+}
+
+final class MixedEvent implements DomainEvent {
+    /**
+     * @var mixed
+     */
+    private $attribute;
+
+    /**
+     * @param mixed $value
+     */
+    public function __construct($value)
+    {
+        $this->attribute = $value;
     }
 }
