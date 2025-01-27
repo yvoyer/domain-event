@@ -58,13 +58,9 @@ final class PostAggregate extends AggregateRoot
         return self::fromStream([new PostWasDrafted($id, $title, $blogId)]);
     }
 
-    public static function draftPostFixture(PostId $id = null): PostAggregate
+    public static function draftPostFixture(): PostAggregate
     {
-        if (!$id) {
-            $id = PostId::asUUID();
-        }
-
-        return self::draftPost($id, PostTitle::randomTitle(), BlogId::asUuid());
+        return self::draftPost(PostId::asUUID(), PostTitle::randomTitle(), BlogId::asUuid());
     }
 
     protected function onPostWasDrafted(PostWasDrafted $event): void
