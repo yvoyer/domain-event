@@ -24,6 +24,11 @@ final class CommandBusPass implements CompilerPassInterface
         $definition = new Definition(MessageMapBus::class);
         foreach ($container->findTaggedServiceIds('star.command_handler') as $serviceId => $tags) {
             foreach ($tags as $tag) {
+                /**
+                 * @var array{
+                 *     message?: class-string<Command>
+                 * } $tag
+                 */
                 $handlerDefinition = $container->getDefinition($serviceId);
                 $handlerClass = (string) $handlerDefinition->getClass();
                 $command = (string) \substr($handlerClass, 0, (int) \strrpos($handlerClass, 'Handler'));
