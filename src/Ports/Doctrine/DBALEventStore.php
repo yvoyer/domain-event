@@ -2,6 +2,7 @@
 
 namespace Star\Component\DomainEvent\Ports\Doctrine;
 
+use Assert\Assertion;
 use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
@@ -111,16 +112,28 @@ abstract class DBALEventStore
         if (! $result instanceof Result) {
             throw new RuntimeException('An error occurred while executing statement.');
         }
+        /**
+         * @var array<int, array{
+         *    event_name: string,
+         *    payload: string,
+         * }> $stream
+         */
         $stream = $result->fetchAllAssociative();
 
         if (count($stream) === 0) {
             $this->handleNoEventFound($id);
         }
 
-        /**
-         * @param array{"event_name":string, "payload":string} $eventRow
-         */
         $callback = function (array $eventRow): DomainEvent {
+            /**
+             * @var array{
+             *     event_name: string|class-string<DomainEvent>,
+             *     payload: string,
+             * } $eventRow
+             */
+            Assertion::keyExists($eventRow, 'event_name');
+            Assertion::keyExists($eventRow, 'payload');
+
             return $this->serializer->createEvent(
                 $eventRow['event_name'],
                 unserialize($eventRow['payload']) // @phpstan-ignore-line
