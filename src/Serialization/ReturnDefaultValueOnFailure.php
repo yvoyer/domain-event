@@ -3,17 +3,16 @@
 namespace Star\Component\DomainEvent\Serialization;
 
 use Assert\Assertion;
-use function is_numeric;
 
 final class ReturnDefaultValueOnFailure implements PayloadFailureStrategy
 {
     /**
-     * @var string|int|float|bool
+     * @var SerializableAttribute|bool|float|int|string
      */
     private $value;
 
     /**
-     * @param string|int|float|bool $value
+     * @param SerializableAttribute|bool|float|int|string $value
      */
     public function __construct($value)
     {
