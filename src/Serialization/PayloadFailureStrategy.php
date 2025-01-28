@@ -2,12 +2,15 @@
 
 namespace Star\Component\DomainEvent\Serialization;
 
+use DateTimeInterface;
+
 interface PayloadFailureStrategy
 {
     /**
      * @param string $key
      * @param SerializableAttribute[]|string[]|int[]|bool[]|float[] $payload
      * @return SerializableAttribute|bool|float|int|string
+     * @throws PayloadKeyNotFound
      */
     public function handleKeyNotFound(string $key, array $payload);
 
@@ -15,6 +18,7 @@ interface PayloadFailureStrategy
      * @param string $key
      * @param mixed $value
      * @return string
+     * @throws UnexpectedTypeForPayloadKey
      */
     public function handleInvalidStringValue(string $key, $value): string;
 
@@ -22,6 +26,7 @@ interface PayloadFailureStrategy
      * @param string $key
      * @param mixed $value
      * @return int
+     * @throws UnexpectedTypeForPayloadKey
      */
     public function handleInvalidIntegerValue(string $key, $value): int;
 
@@ -29,6 +34,7 @@ interface PayloadFailureStrategy
      * @param string $key
      * @param mixed $value
      * @return float
+     * @throws UnexpectedTypeForPayloadKey
      */
     public function handleInvalidFloatValue(string $key, $value): float;
 
@@ -36,8 +42,17 @@ interface PayloadFailureStrategy
      * @param string $key
      * @param mixed $value
      * @return bool
+     * @throws UnexpectedTypeForPayloadKey
      */
     public function handleInvalidBooleanValue(string $key, $value): bool;
+
+    /**
+     * @param string $key
+     * @param mixed $value
+     * @return DateTimeInterface
+     * @throws UnexpectedTypeForPayloadKey
+     */
+    public function handleInvalidDateTimeValue(string $key, $value): DateTimeInterface;
 
     /**
      * @param mixed $value
@@ -62,4 +77,10 @@ interface PayloadFailureStrategy
      * @return bool
      */
     public function transformRawValueToBoolean($value): bool;
+
+    /**
+     * @param mixed $value
+     * @return DateTimeInterface
+     */
+    public function transformRawValueToDateTime($value): DateTimeInterface;
 }

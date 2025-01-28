@@ -2,10 +2,12 @@
 
 namespace Star\Component\DomainEvent\Serialization;
 
+use DateTimeInterface;
 use function array_key_exists;
 use function in_array;
 use function is_numeric;
 use function is_string;
+use function json_decode;
 
 final class Payload
 {
@@ -66,6 +68,17 @@ final class Payload
         return $strategy->transformRawValueToBoolean($value);
     }
 
+    public function getDateTime(string $key, PayloadFailureStrategy $strategy = null): DateTimeInterface
+    {
+        $strategy = $this->assertStrategy($strategy);
+        $value = $this->getValue($key, $strategy);
+        if (!is_string($value)) {
+            return $strategy->handleInvalidDateTimeValue($key, $value);
+        }
+
+        return $strategy->transformRawValueToDateTime($value);
+    }
+
     private function assertStrategy(PayloadFailureStrategy $strategy = null): PayloadFailureStrategy
     {
         if (!$strategy) {
@@ -96,5 +109,15 @@ final class Payload
     public static function fromArray(array $payload): self
     {
         return new self($payload);
+    }
+
+    public static function fromJson(string $json): self
+    {
+        /**
+         * @var string[]|int[]|bool[]|float[] $payload
+         */
+        $payload = json_decode($json, true);
+
+        return self::fromArray($payload);
     }
 }
