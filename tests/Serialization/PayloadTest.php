@@ -115,4 +115,22 @@ final class PayloadTest extends TestCase
         $this->expectExceptionMessage('Value "string" for key "key" is not of expected type "boolean", got "string".');
         Payload::fromArray(['key' => 'string'])->getBoolean('key');
     }
+
+    public function test_it_should_create_payload_from_json(): void
+    {
+        $payload = Payload::fromJson('{"string":"value","int":123,"float":12.34,"bool":true}');
+        self::assertSame('value', $payload->getString('string'));
+        self::assertSame(123, $payload->getInteger('int'));
+        self::assertSame(12.34, $payload->getFloat('float'));
+        self::assertTrue($payload->getBoolean('bool'));
+    }
+
+    public function test_it_should_allow_date_time(): void
+    {
+        $payload = Payload::fromArray(['date' => '2000-01-01 12:34:56']);
+        self::assertSame(
+            '2000-01-01 12:34:56',
+            $payload->getDateTime('date')->format('Y-m-d H:i:s')
+        );
+    }
 }

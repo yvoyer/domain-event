@@ -3,6 +3,9 @@
 namespace Star\Component\DomainEvent\Serialization;
 
 use Assert\Assertion;
+use DateTimeImmutable;
+use DateTimeInterface;
+use RuntimeException;
 
 final class ReturnDefaultValueOnFailure implements PayloadFailureStrategy
 {
@@ -19,19 +22,38 @@ final class ReturnDefaultValueOnFailure implements PayloadFailureStrategy
         $this->value = $value;
     }
 
-    /**
-     * @param string $key
-     * @param SerializableAttribute[]|string[]|int[]|bool[]|float[] $payload
-     * @return SerializableAttribute|bool|float|int|string
-     */
     public function handleKeyNotFound(string $key, array $payload)
     {
         return $this->value;
     }
 
+    public function handleInvalidStringValue(string $key, $value): string
+    {
+        throw new RuntimeException(__METHOD__ . ' not implemented yet.');
+    }
+
+    public function handleInvalidIntegerValue(string $key, $value): int
+    {
+        throw new RuntimeException(__METHOD__ . ' not implemented yet.');
+    }
+
+    public function handleInvalidFloatValue(string $key, $value): float
+    {
+        throw new RuntimeException(__METHOD__ . ' not implemented yet.');
+    }
+
+    public function handleInvalidBooleanValue(string $key, $value): bool
+    {
+        throw new RuntimeException(__METHOD__ . ' not implemented yet.');
+    }
+
+    public function handleInvalidDateTimeValue(string $key, $value): DateTimeInterface
+    {
+        throw new RuntimeException(__METHOD__ . ' not implemented yet.');
+    }
+
     /**
      * @param string $value
-     * @return string
      */
     public function transformRawValueToString($value): string
     {
@@ -41,8 +63,7 @@ final class ReturnDefaultValueOnFailure implements PayloadFailureStrategy
     }
 
     /**
-     * @param int $value
-     * @return int
+     * @param int|float|string $value
      */
     public function transformRawValueToInt($value): int
     {
@@ -52,8 +73,7 @@ final class ReturnDefaultValueOnFailure implements PayloadFailureStrategy
     }
 
     /**
-     * @param float $value
-     * @return float
+     * @param int|float|string $value
      */
     public function transformRawValueToFloat($value): float
     {
@@ -63,8 +83,7 @@ final class ReturnDefaultValueOnFailure implements PayloadFailureStrategy
     }
 
     /**
-     * @param mixed $value
-     * @return bool
+     * @param int|float|string|bool $value
      */
     public function transformRawValueToBoolean($value): bool
     {
@@ -74,42 +93,12 @@ final class ReturnDefaultValueOnFailure implements PayloadFailureStrategy
     }
 
     /**
-     * @param string $key
      * @param string $value
-     * @return string
      */
-    public function handleInvalidStringValue(string $key, $value): string
+    public function transformRawValueToDateTime($value): DateTimeInterface
     {
-        throw new \RuntimeException(__METHOD__ . ' not implemented yet.');
-    }
+        Assertion::string($value);
 
-    /**
-     * @param string $key
-     * @param int $value
-     * @return int
-     */
-    public function handleInvalidIntegerValue(string $key, $value): int
-    {
-        throw new \RuntimeException(__METHOD__ . ' not implemented yet.');
-    }
-
-    /**
-     * @param string $key
-     * @param float $value
-     * @return float
-     */
-    public function handleInvalidFloatValue(string $key, $value): float
-    {
-        throw new \RuntimeException(__METHOD__ . ' not implemented yet.');
-    }
-
-    /**
-     * @param string $key
-     * @param bool $value
-     * @return bool
-     */
-    public function handleInvalidBooleanValue(string $key, $value): bool
-    {
-        throw new \RuntimeException(__METHOD__ . ' not implemented yet.');
+        return new DateTimeImmutable($value);
     }
 }
