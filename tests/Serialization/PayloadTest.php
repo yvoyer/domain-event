@@ -133,4 +133,19 @@ final class PayloadTest extends TestCase
             $payload->getDateTime('date')->format('Y-m-d H:i:s')
         );
     }
+
+    public function test_it_should_check_whether_a_key_contains_string(): void
+    {
+        self::assertFalse(
+            Payload::fromArray(['atHour' => 'Not matched'])->keyContainsString('At')
+        );
+        self::assertFalse(
+            Payload::fromArray(['Hourat' => 'Not matched'])->keyContainsString('At')
+        );
+        self::assertTrue(
+            Payload::fromArray(['AtKey' => 'matched'])->keyContainsString('At'));
+        self::assertTrue(
+            Payload::fromArray(['KeyAt' => 'matched'])->keyContainsString('At')
+        );
+    }
 }

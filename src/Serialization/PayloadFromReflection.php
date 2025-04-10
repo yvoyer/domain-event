@@ -33,7 +33,7 @@ final class PayloadFromReflection implements PayloadSerializer
         $this->transformers[] = $transformer;
     }
 
-    public function createPayload(DomainEvent $event): array
+    public function createPayload(DomainEvent $event): Payload
     {
         $reflection = new ReflectionClass($event);
         $properties = $reflection->getProperties();
@@ -56,7 +56,7 @@ final class PayloadFromReflection implements PayloadSerializer
             $payload[$attribute] = $value;
         }
 
-        return $payload;
+        return Payload::fromArray($payload);
     }
 
     public function createEvent(

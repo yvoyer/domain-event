@@ -3,11 +3,13 @@
 namespace Star\Component\DomainEvent\Serialization;
 
 use DateTimeInterface;
+use function array_filter;
 use function array_key_exists;
 use function in_array;
 use function is_numeric;
 use function is_string;
 use function json_decode;
+use function strpos;
 
 final class Payload
 {
@@ -22,6 +24,24 @@ final class Payload
     private function __construct(array $data)
     {
         $this->data = $data;
+    }
+
+    public function keyExists(string $key): bool
+    {
+        return array_key_exists($key, $this->data);
+    }
+
+    public function keyContainsString(string $string): bool
+    {
+        return count(
+            array_filter(
+                $this->data,
+                function (string $key) use ($string): bool {
+                    return strpos($key, $string) !== false;
+                },
+                ARRAY_FILTER_USE_KEY
+            )
+        ) > 0;
     }
 
     public function getString(string $key, PayloadFailureStrategy $strategy = null): string
@@ -77,6 +97,15 @@ final class Payload
         }
 
         return $strategy->transformRawValueToDateTime($value);
+    }
+
+    /**
+     * @return bool[]|float[]|int[]|SerializableAttribute[]|string[]
+     * @internal Do not use, prone to removal
+     */
+    public function toArray(): array
+    {
+        return $this->data;
     }
 
     private function assertStrategy(PayloadFailureStrategy $strategy = null): PayloadFailureStrategy

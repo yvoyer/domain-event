@@ -5,16 +5,17 @@ namespace Star\Component\DomainEvent\Ports\Doctrine;
 use Assert\Assertion;
 use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Result;
 use Doctrine\DBAL\Types\Types;
 use RuntimeException;
 use Star\Component\DomainEvent\AggregateRoot;
 use Star\Component\DomainEvent\DomainEvent;
 use Star\Component\DomainEvent\EventPublisher;
+use Star\Component\DomainEvent\Serialization\Payload;
 use Star\Component\DomainEvent\Serialization\PayloadSerializer;
 use function array_map;
 use function count;
+use function is_array;
 use function unserialize;
 
 abstract class DBALEventStore
@@ -146,16 +147,31 @@ abstract class DBALEventStore
         return $aggregate;
     }
 
+    /**
+     * Override to push more data in the row of events, based on your own logic.
+     */
+    protected function buildDatasetRow(
+        Payload $payload,
+        RowDatasetBuilder $builder
+    ): RowDatasetBuilder {
+        return $builder;
+    }
+
     protected function persistAggregate(string $id, AggregateRoot $aggregate): void
     {
         $this->ensureTableExists();
 
         $events = $aggregate->uncommitedEvents();
         foreach ($events as $event) {
+            $payload = $this->serializer->createPayload($event);
+            if (is_array($payload)) {
+                $payload = Payload::fromArray($payload);
+            }
+
             $this->persistEvent(
                 $id,
                 $this->serializer->createEventName($event),
-                $this->serializer->createPayload($event)
+                $payload
             );
 
             $this->publisher->publish($event);
@@ -173,17 +189,10 @@ abstract class DBALEventStore
         return new DateTimeImmutable();
     }
 
-    /**
-     * @param string $id
-     * @param string $eventName
-     * @param array<string, string|int|bool|float> $payload
-     *
-     * @throws Exception
-     */
     private function persistEvent(
         string $id,
         string $eventName,
-        array $payload
+        Payload $payload
     ): void {
         $expr = $this->connection->getExpressionBuilder();
 
@@ -196,23 +205,21 @@ abstract class DBALEventStore
             ->from($this->tableName(), 'sub')
             ->where($expr->eq('sub.' . self::COLUMN_AGGREGATE_ID, ':aggregate_id'))
             ->getSQL();
-        $this->connection->createQueryBuilder()
-            ->insert($this->tableName())
-            ->values(
+        $builder = $this->buildDatasetRow(
+            $payload,
+            RowDatasetBuilder::fromPayload(
                 [
                     self::COLUMN_AGGREGATE_ID => ':aggregate_id',
                     self::COLUMN_PAYLOAD => ':payload',
                     self::COLUMN_EVENT_NAME => ':event',
                     self::COLUMN_PUSHED_ON => ':pushed_on',
                     self::COLUMN_VERSION => '(' . $subQuery . ')'
-                ]
-            )
-            ->setParameters(
+                ],
                 [
                     'aggregate_id' => $id,
-                    'payload' => $payload, // todo allow serialization in other format than array (JSON)
+                    'payload' => $payload->toArray(), // todo allow serialization in other format than array (JSON)
                     'event' => $eventName, // todo allow custom event_name (ie. "some_event_name")
-                    'pushed_on' => $this->createPushedOnDateFromPayload($payload),
+                    'pushed_on' => $this->createPushedOnDateFromPayload($payload->toArray()),
                 ],
                 [
                     self::COLUMN_AGGREGATE_ID => Types::STRING,
@@ -221,6 +228,15 @@ abstract class DBALEventStore
                     self::COLUMN_PUSHED_ON => Types::DATETIME_IMMUTABLE,
                     self::COLUMN_VERSION => Types::INTEGER,
                 ]
+            )
+        );
+
+        $this->connection->createQueryBuilder()
+            ->insert($this->tableName())
+            ->values($builder->buildValues())
+            ->setParameters(
+                $builder->buildParameters(),
+                $builder->buildTypes()
             )
             ->setParameter('aggregate_id', $id, Types::STRING)
             ->execute();
