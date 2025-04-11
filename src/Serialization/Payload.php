@@ -3,6 +3,8 @@
 namespace Star\Component\DomainEvent\Serialization;
 
 use ArrayAccess;
+use Assert\Assertion;
+use DateTimeImmutable;
 use DateTimeInterface;
 use RuntimeException;
 use function array_filter;
@@ -11,6 +13,7 @@ use function in_array;
 use function is_numeric;
 use function is_string;
 use function json_decode;
+use function sprintf;
 use function strpos;
 
 /**
@@ -37,7 +40,7 @@ final class Payload implements ArrayAccess
         return array_key_exists($key, $this->data);
     }
 
-    public function keyContainsString(string $string): bool
+    public function keyContains(string $string): bool
     {
         return count(
             array_filter(
@@ -61,6 +64,22 @@ final class Payload implements ArrayAccess
         return $strategy->transformRawValueToString($value);
     }
 
+    /**
+     * Returns the first value where the $needle is found in key (case sensitive).
+     *
+     * @throws PayloadKeyNotFound When no key with $needle could be found
+     */
+    public function getStringWhereKeyContains(string $needle): string
+    {
+        /**
+         * @var string $value
+         */
+        $value = $this->getValueWhereKeyContains($needle);
+        Assertion::string($value);
+
+        return $value;
+    }
+
     public function getInteger(string $key, PayloadFailureStrategy $strategy = null): int
     {
         $strategy = $this->assertStrategy($strategy);
@@ -70,6 +89,22 @@ final class Payload implements ArrayAccess
         }
 
         return $strategy->transformRawValueToInt($value);
+    }
+
+    /**
+     * Returns the first value where the $needle is found in key (case sensitive).
+     *
+     * @throws PayloadKeyNotFound When no key with $needle could be found
+     */
+    public function getIntegerWhereKeyContains(string $needle): int
+    {
+        /**
+         * @var int|string $value
+         */
+        $value = $this->getValueWhereKeyContains($needle);
+        Assertion::integerish($value);
+
+        return (int) $value;
     }
 
     public function getFloat(string $key, PayloadFailureStrategy $strategy = null): float
@@ -83,6 +118,22 @@ final class Payload implements ArrayAccess
         return $strategy->transformRawValueToFloat($value);
     }
 
+    /**
+     * Returns the first value where the $needle is found in key (case sensitive).
+     *
+     * @throws PayloadKeyNotFound When no key with $needle could be found
+     */
+    public function getFloatWhereKeyContains(string $needle): float
+    {
+        /**
+         * @var float|string $value
+         */
+        $value = $this->getValueWhereKeyContains($needle);
+        Assertion::numeric($value);
+
+        return (float) $value;
+    }
+
     public function getBoolean(string $key, PayloadFailureStrategy $strategy = null): bool
     {
         $strategy = $this->assertStrategy($strategy);
@@ -92,6 +143,22 @@ final class Payload implements ArrayAccess
         }
 
         return $strategy->transformRawValueToBoolean($value);
+    }
+
+    /**
+     * Returns the first value where the $needle is found in key (case sensitive).
+     *
+     * @throws PayloadKeyNotFound When no key with $needle could be found
+     */
+    public function getBooleanWhereKeyContains(string $needle): bool
+    {
+        /**
+         * @var bool|int|string $value
+         */
+        $value = $this->getValueWhereKeyContains($needle);
+        Assertion::inArray($value, ['1', '0', 1, 0, true, false]);
+
+        return (bool) $value;
     }
 
     public function getDateTime(string $key, PayloadFailureStrategy $strategy = null): DateTimeInterface
@@ -106,12 +173,45 @@ final class Payload implements ArrayAccess
     }
 
     /**
+     * Returns the first value where the $needle is found in key (case sensitive).
+     *
+     * @throws PayloadKeyNotFound When no key with $needle could be found
+     */
+    public function getDateTimeWhereKeyContains(string $needle): DateTimeInterface
+    {
+        return new DateTimeImmutable($this->getStringWhereKeyContains($needle));
+    }
+
+    /**
      * @return array<string, SerializableAttribute|string|int|bool|float>
      * @internal Do not use, prone to removal
      */
     public function toArray(): array
     {
         return $this->data;
+    }
+
+    /**
+     * Returns the first value where the $needle is found in key (case sensitive).
+     *
+     * @throws PayloadKeyNotFound When no key with $needle could be found
+     * @return SerializableAttribute|string|int|bool|float
+     */
+    private function getValueWhereKeyContains(string $needle)
+    {
+        foreach ($this->data as $key => $value) {
+            if (strpos($key, $needle) !== false) {
+                return $value;
+            }
+        }
+
+        throw new PayloadKeyNotFound(
+            sprintf(
+                'No key with needle "%s" could be found. Available keys: "%s".',
+                $needle,
+                implode(', ', array_keys($this->data))
+            )
+        );
     }
 
     private function assertStrategy(PayloadFailureStrategy $strategy = null): PayloadFailureStrategy

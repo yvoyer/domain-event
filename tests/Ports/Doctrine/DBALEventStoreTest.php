@@ -339,7 +339,7 @@ final class DBALEventStoreTest extends TestCase
                 Payload $payload,
                 RowDatasetBuilder $builder
             ): RowDatasetBuilder {
-                if ($payload->keyContainsString('At')) {
+                if ($payload->keyContains('At')) {
                     $builder->setBooleanColumn(
                         'matching_pattern',
                         true
