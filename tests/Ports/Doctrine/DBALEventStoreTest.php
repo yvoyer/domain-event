@@ -374,7 +374,7 @@ final class DBALEventStoreTest extends TestCase
 
         self::assertCount(2, $result);
         self::assertNull($result[0]['matching_pattern']);
-        self::assertSame(1, $result[1]['matching_pattern']);
+        self::assertSame(1, (int) $result[1]['matching_pattern']);
     }
 }
 

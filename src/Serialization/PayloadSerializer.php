@@ -10,6 +10,7 @@ interface PayloadSerializer
 
     /**
      * @return array<string, string|int|float|bool>|Payload
+     * @deprecated Returning array will be removed in 3.0
      */
     public function createPayload(DomainEvent $event);
 

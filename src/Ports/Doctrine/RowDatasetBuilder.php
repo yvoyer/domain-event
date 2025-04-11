@@ -9,7 +9,7 @@ use function sprintf;
 final class RowDatasetBuilder
 {
     /**
-     * @var array<string, mixed>
+     * @var array<string, string>
      */
     private $values;
 
@@ -19,10 +19,15 @@ final class RowDatasetBuilder
     private $parameters;
 
     /**
-     * @var array<string, mixed>
+     * @var array<string, string>
      */
     private $types;
 
+    /**
+     * @param array<string, string> $values
+     * @param array<string, mixed> $parameters
+     * @param array<string, string> $types
+     */
     private function __construct(
         array $values,
         array $parameters,
@@ -83,21 +88,35 @@ final class RowDatasetBuilder
         $this->types[$column] = $type;
     }
 
+    /**
+     * @return array<string, string>
+     */
     final public function buildValues(): array
     {
         return $this->values;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     final public function buildParameters(): array
     {
         return $this->parameters;
     }
 
+    /**
+     * @return array<string, string>
+     */
     final public function buildTypes(): array
     {
         return $this->types;
     }
 
+    /**
+     * @param array<string, string> $values
+     * @param array<string, mixed> $parameters
+     * @param array<string, string> $types
+     */
     public static function fromPayload(
         array $values,
         array $parameters,

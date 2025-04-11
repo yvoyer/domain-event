@@ -2,7 +2,9 @@
 
 namespace Star\Component\DomainEvent\Serialization;
 
+use ArrayAccess;
 use DateTimeInterface;
+use RuntimeException;
 use function array_filter;
 use function array_key_exists;
 use function in_array;
@@ -11,15 +13,19 @@ use function is_string;
 use function json_decode;
 use function strpos;
 
-final class Payload
+/**
+ * @deprecated ArrayAccess will be removed in 3.0
+ * @implements ArrayAccess<string, SerializableAttribute|string|int|bool|float>
+ */
+final class Payload implements ArrayAccess
 {
     /**
-     * @var SerializableAttribute[]|string[]|int[]|bool[]|float[] $data
+     * @var array<string, SerializableAttribute|string|int|bool|float> $data
      */
     private $data;
 
     /**
-     * @param SerializableAttribute[]|string[]|int[]|bool[]|float[] $data
+     * @param array<string, SerializableAttribute|string|int|bool|float> $data
      */
     private function __construct(array $data)
     {
@@ -100,7 +106,7 @@ final class Payload
     }
 
     /**
-     * @return bool[]|float[]|int[]|SerializableAttribute[]|string[]
+     * @return array<string, SerializableAttribute|string|int|bool|float>
      * @internal Do not use, prone to removal
      */
     public function toArray(): array
@@ -132,7 +138,7 @@ final class Payload
     }
 
     /**
-     * @param SerializableAttribute[]|string[]|int[]|bool[]|float[] $payload
+     * @param array<string, SerializableAttribute|string|int|bool|float> $payload
      * @return static
      */
     public static function fromArray(array $payload): self
@@ -143,10 +149,47 @@ final class Payload
     public static function fromJson(string $json): self
     {
         /**
-         * @var string[]|int[]|bool[]|float[] $payload
+         * @var array<string, string|int|bool|float> $payload
          */
         $payload = json_decode($json, true);
 
         return self::fromArray($payload);
+    }
+
+    /**
+     * @param string $offset
+     */
+    public function offsetExists($offset): bool
+    {
+        return array_key_exists($offset, $this->data);
+    }
+
+    /**
+     * @param string $offset
+     * @return SerializableAttribute|string|int|bool|float
+     */
+    #[\ReturnTypeWillChange]
+    public function offsetGet($offset)
+    {
+        return $this->data[$offset];
+    }
+
+    /**
+     * @param string $offset
+     * @param SerializableAttribute|string|int|bool|float $value
+     * @return void
+     */
+    public function offsetSet($offset, $value): void
+    {
+        throw new RuntimeException(__METHOD__ . ' should never be invoked.');
+    }
+
+    /**
+     * @param string $offset
+     * @return void
+     */
+    public function offsetUnset($offset): void
+    {
+        throw new RuntimeException(__METHOD__ . ' should never be invoked.');
     }
 }
