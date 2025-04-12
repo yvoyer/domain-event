@@ -4,6 +4,7 @@ namespace Star\Component\DomainEvent\Ports\Doctrine;
 
 use Assert\Assertion;
 use DateTimeImmutable;
+use DateTimeInterface;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Result;
 use Doctrine\DBAL\Types\Types;
@@ -11,6 +12,8 @@ use RuntimeException;
 use Star\Component\DomainEvent\AggregateRoot;
 use Star\Component\DomainEvent\DomainEvent;
 use Star\Component\DomainEvent\EventPublisher;
+use Star\Component\DomainEvent\Ports\Event\AfterEventPersist;
+use Star\Component\DomainEvent\Ports\Event\BeforeEventPersist;
 use Star\Component\DomainEvent\Serialization\Payload;
 use Star\Component\DomainEvent\Serialization\PayloadSerializer;
 use function array_map;
@@ -147,16 +150,6 @@ abstract class DBALEventStore
         return $aggregate;
     }
 
-    /**
-     * Override to push more data in the row of events, based on your own logic.
-     */
-    protected function buildDatasetRow(
-        Payload $payload,
-        RowDatasetBuilder $builder
-    ): RowDatasetBuilder {
-        return $builder;
-    }
-
     protected function persistAggregate(string $id, AggregateRoot $aggregate): void
     {
         $this->ensureTableExists();
@@ -205,9 +198,13 @@ abstract class DBALEventStore
             ->from($this->tableName(), 'sub')
             ->where($expr->eq('sub.' . self::COLUMN_AGGREGATE_ID, ':aggregate_id'))
             ->getSQL();
-        $builder = $this->buildDatasetRow(
+
+        $pushedOn = $this->createPushedOnDateFromPayload($payload->toArray());
+        $this->beforeEventPersist(
+            $id,
+            $eventName,
             $payload,
-            RowDatasetBuilder::fromPayload(
+            $builder = RowDatasetBuilder::fromPayload(
                 [
                     self::COLUMN_AGGREGATE_ID => ':aggregate_id',
                     self::COLUMN_PAYLOAD => ':payload',
@@ -219,7 +216,7 @@ abstract class DBALEventStore
                     'aggregate_id' => $id,
                     'payload' => $payload->toArray(), // todo allow serialization in other format than array (JSON)
                     'event' => $eventName, // todo allow custom event_name (ie. "some_event_name")
-                    'pushed_on' => $this->createPushedOnDateFromPayload($payload->toArray()),
+                    'pushed_on' => $pushedOn,
                 ],
                 [
                     self::COLUMN_AGGREGATE_ID => Types::STRING,
@@ -228,6 +225,15 @@ abstract class DBALEventStore
                     self::COLUMN_PUSHED_ON => Types::DATETIME_IMMUTABLE,
                     self::COLUMN_VERSION => Types::INTEGER,
                 ]
+            ),
+            $pushedOn
+        );
+        $this->publisher->publish(
+            new BeforeEventPersist(
+                $id,
+                $eventName,
+                $payload,
+                $pushedOn
             )
         );
 
@@ -240,6 +246,48 @@ abstract class DBALEventStore
             )
             ->setParameter('aggregate_id', $id, Types::STRING)
             ->execute();
+
+        $this->afterEventPersist(
+            $id,
+            $eventName,
+            $payload,
+            $pushedOn
+        );
+        $this->publisher->publish(
+            new AfterEventPersist(
+                $id,
+                $eventName,
+                $payload,
+                $pushedOn
+            )
+        );
+    }
+
+    /**
+     * Dispatched before persist of the event in the DB.
+     * Override to push more data using the $builder.
+     * @see BeforeEventPersist if you need the information form outside the store.
+     */
+    protected function beforeEventPersist(
+        string $id,
+        string $eventName,
+        Payload $payload,
+        RowDatasetBuilder $builder,
+        DateTimeInterface $pushedOn
+    ): RowDatasetBuilder {
+        return $builder;
+    }
+
+    /**
+     * Dispatched after the event row is in the DB.
+     * @see AfterEventPersist if you need the information form outside the store.
+     */
+    protected function afterEventPersist(
+        string $id,
+        string $eventName,
+        Payload $payload,
+        DateTimeInterface $pushedOn
+    ): void {
     }
 
     private function ensureTableExists(): void
