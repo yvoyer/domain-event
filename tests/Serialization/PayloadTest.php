@@ -133,4 +133,128 @@ final class PayloadTest extends TestCase
             $payload->getDateTime('date')->format('Y-m-d H:i:s')
         );
     }
+
+    public function test_it_should_check_whether_a_key_contains_string(): void
+    {
+        self::assertFalse(
+            Payload::fromArray(['atHour' => 'Not matched'])->keyContains('At')
+        );
+        self::assertFalse(
+            Payload::fromArray(['Hourat' => 'Not matched'])->keyContains('At')
+        );
+        self::assertTrue(
+            Payload::fromArray(['AtKey' => 'matched'])->keyContains('At'));
+        self::assertTrue(
+            Payload::fromArray(['KeyAt' => 'matched'])->keyContains('At')
+        );
+    }
+
+    public function test_it_should_return_string_of_first_key_that_contains_string_in_key(): void
+    {
+        $payload = Payload::fromArray(
+            [
+                'addedBy' => 'Joe',
+                'updatedBy' => 'Jane',
+                'deletedBy' => 'Will',
+            ]
+        );
+        self::assertSame('Joe', $payload->getStringWhereKeyContains('By'));
+        self::assertSame('Jane', $payload->getStringWhereKeyContains('up'));
+        self::assertSame('Will', $payload->getStringWhereKeyContains('le'));
+
+        $this->expectException(PayloadKeyNotFound::class);
+        $this->expectExceptionMessage(
+            'No key with needle "invalid" could be found. Available keys: "addedBy, updatedBy, deletedBy".'
+        );
+        $payload->getStringWhereKeyContains('invalid');
+    }
+
+    public function test_it_should_return_integer_of_first_key_that_contains_string_in_key(): void
+    {
+        $payload = Payload::fromArray(
+            [
+                'addedAt' => 2,
+                'updatedAt' => '56',
+                'deletedAt' => 8,
+            ]
+        );
+        self::assertSame(2, $payload->getIntegerWhereKeyContains('At'));
+        self::assertSame(56, $payload->getIntegerWhereKeyContains('up'));
+        self::assertSame(8, $payload->getIntegerWhereKeyContains('le'));
+
+        $this->expectException(PayloadKeyNotFound::class);
+        $this->expectExceptionMessage(
+            'No key with needle "invalid" could be found. Available keys: "addedAt, updatedAt, deletedAt".'
+        );
+        $payload->getStringWhereKeyContains('invalid');
+    }
+
+    public function test_it_should_return_float_of_first_key_that_contains_string_in_key(): void
+    {
+        $payload = Payload::fromArray(
+            [
+                'addedWith' => 2.5,
+                'updatedWith' => '-2',
+                'deletedWith' => 0.01,
+            ]
+        );
+        self::assertSame(2.5, $payload->getFloatWhereKeyContains('With'));
+        self::assertSame(-2.0, $payload->getFloatWhereKeyContains('up'));
+        self::assertSame(0.01, $payload->getFloatWhereKeyContains('le'));
+
+        $this->expectException(PayloadKeyNotFound::class);
+        $this->expectExceptionMessage(
+            'No key with needle "invalid" could be found. Available keys: "addedWith, updatedWith, deletedWith".'
+        );
+        $payload->getStringWhereKeyContains('invalid');
+    }
+
+    public function test_it_should_return_boolean_of_first_key_that_contains_string_in_key(): void
+    {
+        $payload = Payload::fromArray(
+            [
+                'isAdded' => '0',
+                'hasSomething' => 1,
+                'wasDeleted' => false,
+            ]
+        );
+        self::assertFalse($payload->getBooleanWhereKeyContains('is'));
+        self::assertTrue($payload->getBooleanWhereKeyContains('th'));
+        self::assertFalse($payload->getBooleanWhereKeyContains('D'));
+
+        $this->expectException(PayloadKeyNotFound::class);
+        $this->expectExceptionMessage(
+            'No key with needle "invalid" could be found. Available keys: "isAdded, hasSomething, wasDeleted".'
+        );
+        $payload->getStringWhereKeyContains('invalid');
+    }
+
+    public function test_it_should_return_date_of_first_key_that_contains_string_in_key(): void
+    {
+        $payload = Payload::fromArray(
+            [
+                'addedAt' => '2000-01-01',
+                'updatedAt' => '2000-01-02',
+                'deletedAt' => '2000-02-04 19:21:11.012345',
+            ]
+        );
+        self::assertSame(
+            '2000-01-01 00:00:00.000000',
+            $payload->getDateTimeWhereKeyContains('At')->format('Y-m-d H:i:s.u')
+        );
+        self::assertSame(
+            '2000-01-02 00:00:00.000000',
+            $payload->getDateTimeWhereKeyContains('up')->format('Y-m-d H:i:s.u')
+        );
+        self::assertSame(
+            '2000-02-04 19:21:11.012345',
+            $payload->getDateTimeWhereKeyContains('le')->format('Y-m-d H:i:s.u')
+        );
+
+        $this->expectException(PayloadKeyNotFound::class);
+        $this->expectExceptionMessage(
+            'No key with needle "invalid" could be found. Available keys: "addedAt, updatedAt, deletedAt".'
+        );
+        $payload->getStringWhereKeyContains('invalid');
+    }
 }

@@ -53,14 +53,27 @@ final class PostAggregate extends AggregateRoot
         );
     }
 
-    public static function draftPost(PostId $id, PostTitle $title, BlogId $blogId): self
-    {
+    /**
+     * @return static
+     */
+    public static function draftPost(
+        PostId $id,
+        PostTitle $title,
+        BlogId $blogId
+    ): self {
         return self::fromStream([new PostWasDrafted($id, $title, $blogId)]);
     }
 
-    public static function draftPostFixture(): PostAggregate
+    /**
+     * @return static
+     */
+    public static function draftPostFixture(): AggregateRoot
     {
-        return self::draftPost(PostId::asUUID(), PostTitle::randomTitle(), BlogId::asUuid());
+        return self::draftPost(
+            PostId::asUUID(),
+            PostTitle::randomTitle(),
+            BlogId::asUuid()
+        );
     }
 
     protected function onPostWasDrafted(PostWasDrafted $event): void

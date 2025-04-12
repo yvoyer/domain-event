@@ -10,6 +10,9 @@ use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Star\Component\DomainEvent\AggregateRoot;
 use Star\Component\DomainEvent\EventPublisher;
+use Star\Component\DomainEvent\Ports\Event\AfterEventPersist;
+use Star\Component\DomainEvent\Ports\Event\BeforeEventPersist;
+use Star\Component\DomainEvent\Serialization\Payload;
 use Star\Component\DomainEvent\Serialization\PayloadFromReflection;
 use Star\Example\Blog\Domain\Event\Post\PostTitleWasChanged;
 use Star\Example\Blog\Domain\Event\Post\PostWasDrafted;
@@ -20,6 +23,7 @@ use Star\Example\Blog\Domain\Model\Post\PostId;
 use Star\Example\Blog\Domain\Model\Post\PostTitle;
 use function extension_loaded;
 use function key_exists;
+use function sprintf;
 
 final class DBALEventStoreTest extends TestCase
 {
@@ -235,6 +239,250 @@ final class DBALEventStoreTest extends TestCase
         self::assertSame(3, (int) $result[2]['version']);
         self::assertSame(PostTitleWasChanged::class, $result[3]['event_name']);
         self::assertSame(4, (int) $result[3]['version']);
+    }
+
+    public function test_it_should_allow_to_add_more_data_to_event_table(): void
+    {
+        $store = new class(
+            $this->connection,
+            $this->createMock(EventPublisher::class),
+            new PayloadFromReflection()
+        ) extends DBALEventStore {
+            protected function tableName(): string
+            {
+                return DBALEventStoreTest::TABLE_NAME;
+            }
+
+            protected function createAggregateFromStream(array $events): AggregateRoot
+            {
+                throw new \RuntimeException(__METHOD__ . ' not implemented yet.');
+            }
+
+            protected function handleNoEventFound(string $id): void
+            {
+                throw new RuntimeException(\sprintf('Aggregate "%s" not found.', $id));
+            }
+
+            public function saveAggregate(PostAggregate $post): void
+            {
+                $this->persistAggregate($post->getId()->toString(), $post);
+            }
+
+            protected function beforeEventPersist(
+                string $id,
+                string $eventName,
+                Payload $payload,
+                RowDatasetBuilder $builder,
+                DateTimeInterface $pushedOn
+            ): RowDatasetBuilder {
+                if ($payload->keyExists('changedAt')) {
+                    $builder->setStringColumn(
+                        'same_as_name',
+                        $payload->getString('changedAt')
+                    );
+                }
+
+                return parent::beforeEventPersist(
+                    $id,
+                    $eventName,
+                    $payload,
+                    $builder,
+                    $pushedOn
+                );
+            }
+        };
+        $post = PostAggregate::draftPostFixture();
+        $store->saveAggregate($post);
+
+        $this->connection
+            ->executeQuery(
+                sprintf(
+                    'ALTER TABLE %s ADD COLUMN same_as_name DEFAULT NULL',
+                    self::TABLE_NAME
+                )
+            );
+
+        $post->changeTitle('New title', new DateTimeImmutable('2000-01-01'));
+        $store->saveAggregate($post);
+
+        /**
+         * @var array<int, array{ new_column: null|string }> $result
+         */
+        $result = $this->connection->createQueryBuilder()
+            ->select('*')
+            ->from(self::TABLE_NAME)
+            ->execute()
+            ->fetchAllAssociative();
+
+        self::assertCount(2, $result);
+        self::assertNull($result[0]['same_as_name']);
+        self::assertSame('2000-01-01 00:00:00.000000', $result[1]['same_as_name']);
+    }
+
+    public function test_it_should_allow_to_add_more_data_based_on_pattern_in_payload(): void
+    {
+        $store = new class(
+            $this->connection,
+            $this->createMock(EventPublisher::class),
+            new PayloadFromReflection()
+        ) extends DBALEventStore {
+            protected function tableName(): string
+            {
+                return DBALEventStoreTest::TABLE_NAME;
+            }
+
+            protected function createAggregateFromStream(array $events): AggregateRoot
+            {
+                throw new \RuntimeException(__METHOD__ . ' not implemented yet.');
+            }
+
+            protected function handleNoEventFound(string $id): void
+            {
+                throw new RuntimeException(\sprintf('Aggregate "%s" not found.', $id));
+            }
+
+            public function saveAggregate(PostAggregate $post): void
+            {
+                $this->persistAggregate($post->getId()->toString(), $post);
+            }
+
+            protected function beforeEventPersist(
+                string $id,
+                string $eventName,
+                Payload $payload,
+                RowDatasetBuilder $builder,
+                DateTimeInterface $pushedOn
+            ): RowDatasetBuilder {
+                if ($payload->keyContains('At')) {
+                    $builder->setBooleanColumn(
+                        'matching_pattern',
+                        true
+                    );
+                }
+
+                return parent::beforeEventPersist(
+                    $id,
+                    $eventName,
+                    $payload,
+                    $builder,
+                    $pushedOn
+                );
+            }
+        };
+        $post = PostAggregate::draftPostFixture();
+        $store->saveAggregate($post);
+
+        $this->connection
+            ->executeQuery(
+                sprintf(
+                    'ALTER TABLE %s ADD COLUMN matching_pattern DEFAULT NULL',
+                    self::TABLE_NAME
+                )
+            );
+
+        $post->changeTitle('New title', new DateTimeImmutable('2000-01-01'));
+        $store->saveAggregate($post);
+
+        /**
+         * @var array<int, array{ new_column: null|string }> $result
+         */
+        $result = $this->connection->createQueryBuilder()
+            ->select('*')
+            ->from(self::TABLE_NAME)
+            ->execute()
+            ->fetchAllAssociative();
+
+        self::assertCount(2, $result);
+        self::assertNull($result[0]['matching_pattern']);
+        self::assertSame(1, (int) $result[1]['matching_pattern']);
+    }
+
+    public function test_it_should_allow_after_insert_hook(): void
+    {
+        $store = new class(
+            $this->connection,
+            $this->createMock(EventPublisher::class),
+            new PayloadFromReflection()
+        ) extends DBALEventStore {
+            protected function tableName(): string
+            {
+                return DBALEventStoreTest::TABLE_NAME;
+            }
+
+            protected function createAggregateFromStream(array $events): AggregateRoot
+            {
+                throw new \RuntimeException(__METHOD__ . ' not implemented yet.');
+            }
+
+            protected function handleNoEventFound(string $id): void
+            {
+                throw new RuntimeException(\sprintf('Aggregate "%s" not found.', $id));
+            }
+
+            public function saveAggregate(PostAggregate $post): void
+            {
+                $this->persistAggregate($post->getId()->toString(), $post);
+            }
+
+            protected function afterEventPersist(
+                string $id,
+                string $eventName,
+                Payload $payload,
+                DateTimeInterface $pushedOn
+            ): void {
+                $this->connection->update(
+                    $this->tableName(),
+                    [
+                        'version' => 999,
+                    ],
+                    [
+                        'aggregate_id' => $id,
+                        'event_name' => $eventName,
+                    ]
+                );
+
+                parent::afterEventPersist(
+                    $id,
+                    $eventName,
+                    $payload,
+                    $pushedOn
+                );
+            }
+        };
+        $post = PostAggregate::draftPostFixture();
+        $store->saveAggregate($post);
+
+        /**
+         * @var array<int, array{ new_column: null|string }> $result
+         */
+        $result = $this->connection->createQueryBuilder()
+            ->select('*')
+            ->from(self::TABLE_NAME)
+            ->execute()
+            ->fetchAllAssociative();
+
+        self::assertCount(1, $result);
+        self::assertSame(999, (int) $result[0]['version']);
+    }
+
+    public function test_it_should_dispatch_events_on_persist(): void
+    {
+        $store = new PostEventStore(
+            $this->connection,
+            $publisher = $this->createMock(EventPublisher::class),
+            new PayloadFromReflection()
+        );
+
+        $publisher
+            ->expects(self::at(0))
+            ->method('publish')
+            ->with(self::isInstanceOf(BeforeEventPersist::class));
+        $publisher
+            ->expects(self::at(1))
+            ->method('publish')
+            ->with(self::isInstanceOf(AfterEventPersist::class));
+
+        $store->saveAggregate(PostAggregate::draftPostFixture());
     }
 }
 
