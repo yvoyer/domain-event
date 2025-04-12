@@ -462,7 +462,7 @@ final class DBALEventStoreTest extends TestCase
             ->fetchAllAssociative();
 
         self::assertCount(1, $result);
-        self::assertSame(999, $result[0]['version']);
+        self::assertSame('999', $result[0]['version']);
     }
 
     public function test_it_should_dispatch_events_on_persist(): void
