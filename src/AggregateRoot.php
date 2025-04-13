@@ -65,14 +65,8 @@ abstract class AggregateRoot
                 ' Pass them directly.',
                 E_USER_DEPRECATED
             );
-            /**
-             * @var DomainEvent[] $events
-             */
             $events = $args[0];
         } else {
-            /**
-             * @var DomainEvent[] $events
-             */
             $events = $args;
         }
         Assert::allIsInstanceOf($events, DomainEvent::class);
