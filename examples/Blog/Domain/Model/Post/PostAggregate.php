@@ -61,7 +61,7 @@ final class PostAggregate extends AggregateRoot
         PostTitle $title,
         BlogId $blogId
     ): self {
-        return self::fromStream([new PostWasDrafted($id, $title, $blogId)]);
+        return self::fromStream(new PostWasDrafted($id, $title, $blogId));
     }
 
     /**
