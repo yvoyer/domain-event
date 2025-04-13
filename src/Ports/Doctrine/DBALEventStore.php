@@ -291,6 +291,10 @@ abstract class DBALEventStore
     ): void {
     }
 
+    /**
+     * @deprecated Will be remove in 3.0
+     * @see https://github.com/yvoyer/domain-event/issues/54
+     */
     private function ensureTableExists(): void
     {
         /** @deprecated remove this automatic stuff */

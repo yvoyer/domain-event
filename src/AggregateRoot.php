@@ -52,15 +52,14 @@ abstract class AggregateRoot
      * @param DomainEvent[]|DomainEvent $events
      *
      * @return static
+     * @deprecated Passing an array of event will be removed, consider passing events directly.
+     * @see https://github.com/yvoyer/domain-event/issues/55
      */
     public static function fromStream($events): AggregateRoot
     {
         $args = func_get_args();
         if (count($args) === 1 && is_array($args[0])) {
-            /**
-             * @see https://github.com/yvoyer/domain-event/issues/55
-             */
-            @trigger_error(
+            trigger_error(
                 'Passing an array of DomainEvent to AggregateRoot::fromStream() will be removed in 3.0.' .
                 ' Pass them directly.',
                 E_USER_DEPRECATED
