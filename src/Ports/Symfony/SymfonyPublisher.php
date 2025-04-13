@@ -18,9 +18,11 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as ContractDispat
 use Symfony\Contracts\EventDispatcher\Event as ContractEvent;
 use Symfony\Component\EventDispatcher\Event as LegacyEvent;
 use function array_key_exists;
+use function array_merge;
 use function count;
 use function get_class;
 use function sprintf;
+use function trigger_error;
 
 final class SymfonyPublisher implements EventPublisher
 {
@@ -42,54 +44,66 @@ final class SymfonyPublisher implements EventPublisher
         $this->dispatcher = $dispatcher;
     }
 
-    public function publish(DomainEvent $event): void
-    {
-        if ($this->dispatcher instanceof ContractDispatcher) {
-            // support for symfony >= 5 while keeping BC
-            // todo remove conditional when upgrading dependency to current version
-            $args = [
-                new class($event) extends ContractEvent implements EventAdapter {
-                    /**
-                     * @var DomainEvent
-                     */
-                    private $event;
+    public function publish(
+        DomainEvent $event,
+        DomainEvent ...$others
+    ): void {
+        $events = array_merge([$event], $others);
+        foreach ($events as $event) {
+            if ($this->dispatcher instanceof ContractDispatcher) {
+                // support for symfony >= 5 while keeping BC
+                // todo remove conditional when upgrading dependency to current version
+                $this->dispatcher->dispatch(
+                    new class($event) extends ContractEvent implements EventAdapter {
+                        /**
+                         * @var DomainEvent
+                         */
+                        private $event;
 
-                    public function __construct(DomainEvent $event)
-                    {
-                        $this->event = $event;
-                    }
+                        public function __construct(DomainEvent $event)
+                        {
+                            $this->event = $event;
+                        }
 
-                    public function getWrappedEvent(): DomainEvent
+                        public function getWrappedEvent(): DomainEvent
+                        {
+                            return $this->event;
+                        }
+                    },
+                    \get_class($event)
+                );
+            } else {
+                trigger_error(
+                    sprintf(
+                        'Using an instance of "%s" will be removed in 3.0. Consider using an instance of "%s".' .
+                        ' See: https://github.com/yvoyer/domain-event/issues/18',
+                        'Symfony\Component\EventDispatcher\EventDispatcherInterface',
+                        'Symfony\Contracts\EventDispatcher\EventDispatcherInterface'
+                    ),
+                    E_USER_DEPRECATED
+                );
+                $this->dispatcher->dispatch(
+                    \get_class($event),
+                    new class($event) extends LegacyEvent implements EventAdapter
                     {
-                        return $this->event;
-                    }
-                },
-                \get_class($event),
-            ];
-        } else {
-            $args = [
-                \get_class($event),
-                new class($event) extends LegacyEvent implements EventAdapter
-                {
-                    /**
-                     * @var DomainEvent
-                     */
-                    private $event;
+                        /**
+                         * @var DomainEvent
+                         */
+                        private $event;
 
-                    public function __construct(DomainEvent $event)
-                    {
-                        $this->event = $event;
-                    }
+                        public function __construct(DomainEvent $event)
+                        {
+                            $this->event = $event;
+                        }
 
-                    public function getWrappedEvent(): DomainEvent
-                    {
-                        return $this->event;
+                        public function getWrappedEvent(): DomainEvent
+                        {
+                            return $this->event;
+                        }
                     }
-                },
-            ];
+                );
+            }
         }
-
-        $this->dispatcher->dispatch(...$args);
     }
 
     /**

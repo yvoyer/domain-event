@@ -22,6 +22,9 @@ interface EventPublisher
 
     /**
      * @param DomainEvent[] $events
+     * @deprecated This method will be removed in 3.0. Pass the events to publish.
+     * @see self::publish()
+     * @see https://github.com/yvoyer/domain-event/issues/52
      */
     public function publishChanges(array $events): void;
 }
