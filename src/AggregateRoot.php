@@ -8,12 +8,12 @@
 
 namespace Star\Component\DomainEvent;
 
+use Webmozart\Assert\Assert;
 use function array_merge;
 use function count;
 use function func_get_args;
 use function is_array;
 use function trigger_error;
-use function var_dump;
 
 abstract class AggregateRoot
 {
@@ -60,16 +60,22 @@ abstract class AggregateRoot
             /**
              * @see https://github.com/yvoyer/domain-event/issues/55
              */
-            trigger_error(
+            @trigger_error(
                 'Passing an array of DomainEvent to AggregateRoot::fromStream() will be removed in 3.0.' .
                 ' Pass them directly.',
                 E_USER_DEPRECATED
             );
-
-            // deprecated
+            /**
+             * @var DomainEvent[] $events
+             */
+            $events = $args[0];
         } else {
+            /**
+             * @var DomainEvent[] $events
+             */
             $events = $args;
         }
+        Assert::allIsInstanceOf($events, DomainEvent::class);
 
         /**
          * @var static $aggregate
