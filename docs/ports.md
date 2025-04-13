@@ -9,7 +9,12 @@ Note: Any new implementation is welcome. Go submit a PR.
 ## Doctrine DBAL
 
 ```php
-use Doctrine\DBAL\Types\Types;use Star\Component\DomainEvent\Ports\Doctrine\DBALEventStore;use Star\Component\DomainEvent\Ports\Doctrine\RowDatasetBuilder;use Star\Component\DomainEvent\Ports\Event\AfterEventPersist;use Star\Component\DomainEvent\Ports\Event\BeforeEventPersist;use Star\Component\DomainEvent\Serialization\Payload;
+use Doctrine\DBAL\Types\Types;
+use Star\Component\DomainEvent\Ports\Doctrine\DBALEventStore;
+use Star\Component\DomainEvent\Ports\Doctrine\RowDatasetBuilder;
+use Star\Component\DomainEvent\Ports\Event\AfterEventPersist;
+use Star\Component\DomainEvent\Ports\Event\BeforeEventPersist;
+use Star\Component\DomainEvent\Serialization\Payload;
 
 final MyEventStore extends DBALEventStore 
 {
