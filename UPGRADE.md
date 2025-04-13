@@ -38,3 +38,13 @@ return self::fromStream(
 You must ensure your table exists on your side when the events tables do not exist. Use migrations or manual script.
 
 :warning: No replacement is provided.
+
+### Remove support for old dispatcher interface in [SymfonyPublisher](src/Ports/Symfony/SymfonyPublisher.php)
+
+[See #18](https://github.com/yvoyer/domain-event/issues/18)
+
+*What to do:*
+
+You must stop injecting instance of type `Symfony\Component\EventDispatcher\EventDispatcherInterface` to
+ the `SymfonyPublisher`. Starting in 3.0, we'll only be allowing instance of type
+ `Symfony\Contracts\EventDispatcher\EventDispatcherInterface`.

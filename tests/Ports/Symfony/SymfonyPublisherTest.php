@@ -2,6 +2,7 @@
 
 namespace Star\Component\DomainEvent\Ports\Symfony;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Star\Component\DomainEvent\BadMethodCallException;
 use Star\Component\DomainEvent\DomainEvent;
@@ -11,6 +12,7 @@ use Star\Example\Blog\Domain\Event\Post\PostWasDrafted;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface as ComponentDispatcher;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as ContractDispatcher;
+use function sprintf;
 
 final class SymfonyPublisherTest extends TestCase implements EventListener
 {
@@ -161,6 +163,41 @@ final class SymfonyPublisherTest extends TestCase implements EventListener
             ' already listening at that priority.'
         );
         $publisher->subscribe(new ListenerWithNewPriority());
+    }
+
+    public function test_it_should_allow_passing_more_than_one_event(): void
+    {
+        $dispatcher = $this->createMockDispatcher();
+        $dispatcher
+            ->expects(self::exactly(3))
+            ->method('dispatch')
+        ;
+        $publisher = new SymfonyPublisher($dispatcher);
+        $publisher->publish(
+            $this->createMock(DomainEvent::class),
+            $this->createMock(DomainEvent::class),
+            $this->createMock(DomainEvent::class)
+        );
+    }
+
+    /**
+     * @return MockObject|ContractDispatcher|ComponentDispatcher
+     */
+    private function createMockDispatcher(): MockObject
+    {
+        if (\interface_exists(ContractDispatcher::class)) {
+            return $this->createMock(ContractDispatcher::class);
+        } elseif (\interface_exists(ComponentDispatcher::class)) {
+            return $this->createMock(ComponentDispatcher::class);
+        }
+
+        $this->markTestSkipped(
+            sprintf(
+                'Interface "%s|%s" are not defined.',
+                ComponentDispatcher::class,
+                ContractDispatcher::class
+            )
+        );
     }
 }
 
