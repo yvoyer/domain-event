@@ -19,6 +19,7 @@ use Star\Component\DomainEvent\Serialization\PayloadSerializer;
 use function array_map;
 use function count;
 use function is_array;
+use function trigger_error;
 use function unserialize;
 
 abstract class DBALEventStore
@@ -290,11 +291,21 @@ abstract class DBALEventStore
     ): void {
     }
 
+    /**
+     * @deprecated Will be remove in 3.0
+     * @see https://github.com/yvoyer/domain-event/issues/54
+     */
     private function ensureTableExists(): void
     {
         /** @deprecated remove this automatic stuff */
         $manager = $this->connection->getSchemaManager();
         if (!$manager->tablesExist([$this->tableName()])) {
+            trigger_error(
+                'Automatic table creation will be removed in 3.0.' .
+                ' You need to create your schema before persisting events.' .
+                ' See: https://github.com/yvoyer/domain-event/issues/54',
+                E_USER_DEPRECATED
+            );
             $originalSchema = $manager->createSchema();
             $newSchema = $manager->createSchema();
 
