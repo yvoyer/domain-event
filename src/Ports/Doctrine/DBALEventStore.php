@@ -292,7 +292,7 @@ abstract class DBALEventStore
 
     private function ensureTableExists(): void
     {
-        // todo remove this automatic stuff
+        /** @deprecated remove this automatic stuff */
         $manager = $this->connection->getSchemaManager();
         if (!$manager->tablesExist([$this->tableName()])) {
             $originalSchema = $manager->createSchema();
