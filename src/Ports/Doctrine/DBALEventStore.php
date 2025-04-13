@@ -215,12 +215,12 @@ abstract class DBALEventStore
                 [
                     'aggregate_id' => $id,
                     'payload' => $payload->toArray(), // todo allow serialization in other format than array (JSON)
-                    'event' => $eventName, // todo allow custom event_name (ie. "some_event_name")
+                    'event' => $eventName,
                     'pushed_on' => $pushedOn,
                 ],
                 [
                     self::COLUMN_AGGREGATE_ID => Types::STRING,
-                    self::COLUMN_PAYLOAD => Types::ARRAY,
+                    self::COLUMN_PAYLOAD => Types::ARRAY,// todo #31 switch to JSON by default
                     self::COLUMN_EVENT_NAME => Types::STRING,
                     self::COLUMN_PUSHED_ON => Types::DATETIME_IMMUTABLE,
                     self::COLUMN_VERSION => Types::INTEGER,
@@ -292,7 +292,7 @@ abstract class DBALEventStore
 
     private function ensureTableExists(): void
     {
-        // todo remove this automatic stuff
+        /** @deprecated remove this automatic stuff */
         $manager = $this->connection->getSchemaManager();
         if (!$manager->tablesExist([$this->tableName()])) {
             $originalSchema = $manager->createSchema();
