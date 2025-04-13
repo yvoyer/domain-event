@@ -42,6 +42,8 @@ You must ensure your table exists on your side when the events tables do not exi
 ### Remove support for old dispatcher interface in [SymfonyPublisher](src/Ports/Symfony/SymfonyPublisher.php)
 
 [See #18](https://github.com/yvoyer/domain-event/issues/18)
+[See #47](https://github.com/yvoyer/domain-event/issues/47)
+[See #52](https://github.com/yvoyer/domain-event/issues/52)
 
 *What to do:*
 
