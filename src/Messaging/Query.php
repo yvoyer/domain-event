@@ -17,6 +17,9 @@ interface Query extends Message
 
     /**
      * @return mixed
+     * @deprecated Will be removed from the interface in 3.0.
+     * No need to change anything unless you type hinted to Query and used getResult().
+     * @see https://github.com/yvoyer/domain-event/issues/50
      */
     public function getResult();
 }

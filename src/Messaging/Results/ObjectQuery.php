@@ -11,6 +11,10 @@ namespace Star\Component\DomainEvent\Messaging\Results;
 use Assert\Assertion;
 use Star\Component\DomainEvent\Messaging\Query;
 
+/**
+ * @deprecated This class will be removed in 3.0, stop usage and only implement interface.
+ * @see https://github.com/yvoyer/domain-event/issues/50
+ */
 abstract class ObjectQuery implements Query
 {
     /**
@@ -18,6 +22,9 @@ abstract class ObjectQuery implements Query
      */
     private $result;
 
+    /**
+     * @deprecated This method along with the class will be removed in 3.0.
+     */
     abstract protected function getObjectType(): string;
 
     /**
