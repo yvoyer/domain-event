@@ -41,10 +41,32 @@ final class AggregateRootTest extends TestCase
         $this->assertCount(0, $root->uncommitedEvents());
         $this->assertSame(12, $root->id);
     }
+
+    public function test_it_should_allow_to_pass_multiple_events_on_mutate(): void
+    {
+        $root = StubAggregate::fromStream([]);
+        $root->addEvents(
+            $one = new NamedEvent('one'),
+            $two = new NamedEvent('two'),
+            $three = new NamedEvent('three')
+        );
+
+        self::assertCount(3, $events = $root->uncommitedEvents());
+        self::assertSame($one, $events[0]);
+        self::assertSame($two, $events[1]);
+        self::assertSame($three, $events[2]);
+    }
 }
 
 final class StubAggregate extends AggregateRoot
 {
+    public function addEvents(
+        DomainEvent $event,
+        DomainEvent ...$others
+    ): void {
+        $this->mutate($event, ...$others);
+    }
+
     public function onValidEvent(ValidEvent $event): void
     {
     }
@@ -52,6 +74,10 @@ final class StubAggregate extends AggregateRoot
     protected function onMultipleEventWereTriggered($event): void
     {
         $this->mutate(new EventOneWasTriggered());
+    }
+
+    protected function onNamedEvent(NamedEvent $event): void
+    {
     }
 
     public function onEventOneWasTriggered($event): void
@@ -82,6 +108,19 @@ final class EventOneWasTriggered implements DomainEvent
 
 final class EventTwoWasTriggered implements DomainEvent
 {
+}
+
+final class NamedEvent implements DomainEvent
+{
+    /**
+     * @var string
+     */
+    private $name;
+
+    public function __construct(string $name)
+    {
+        $this->name = $name;
+    }
 }
 
 final class RootWithConstruct extends AggregateRoot
