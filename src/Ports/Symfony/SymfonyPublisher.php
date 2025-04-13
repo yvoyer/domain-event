@@ -38,8 +38,10 @@ final class SymfonyPublisher implements EventPublisher
 
     /**
      * @param ComponentDispatcher|ContractDispatcher $dispatcher
+     * @deprecated Signature will be changed to use "Symfony\Component\EventDispatcher\EventDispatcherInterface" in 3.0. Consider changing your implementations.
+     * @see https://github.com/yvoyer/domain-event/issues/47
      */
-    public function __construct(/* todo uncomment in major version EventDispatcherInterface */$dispatcher)
+    public function __construct(/* todo Uncomment in 3.0 EventDispatcherInterface */$dispatcher)
     {
         $this->dispatcher = $dispatcher;
     }
