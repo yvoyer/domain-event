@@ -56,6 +56,17 @@ final class AggregateRootTest extends TestCase
         self::assertSame($two, $events[1]);
         self::assertSame($three, $events[2]);
     }
+
+    public function test_it_should_allow_to_pass_stream_of_event_as_splat_operator(): void
+    {
+        $class = StubAggregate::fromStream(
+            new NamedEvent(),
+            new NamedEvent(),
+            new NamedEvent()
+        );
+
+        self::assertCount(3, $class->uncommitedEvents());
+    }
 }
 
 final class StubAggregate extends AggregateRoot
@@ -117,7 +128,7 @@ final class NamedEvent implements DomainEvent
      */
     private $name;
 
-    public function __construct(string $name)
+    public function __construct(string $name = 'test')
     {
         $this->name = $name;
     }
