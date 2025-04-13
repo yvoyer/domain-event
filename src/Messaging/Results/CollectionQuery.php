@@ -10,7 +10,13 @@ namespace Star\Component\DomainEvent\Messaging\Results;
 
 use Star\Component\DomainEvent\Messaging\Query;
 use Webmozart\Assert\Assert;
+use function sprintf;
+use function trigger_error;
 
+/**
+ * @deprecated This class will be removed in 3.0, stop usage and only implement interface.
+ * @see https://github.com/yvoyer/domain-event/issues/50
+ */
 abstract class CollectionQuery implements Query
 {
     /**
@@ -33,9 +39,19 @@ abstract class CollectionQuery implements Query
 
     /**
      * @param mixed $result
+     * @deprecated This method along with the class will be removed in 3.0.
      */
     protected function validateResult($result): void
     {
+        trigger_error(
+            sprintf(
+                'The method "%s::%s()" will be remove, along with its class in 3.0. ' .
+                'Consider duplicating "__invoke" or implementing your own validation.',
+                __CLASS__,
+                __FUNCTION__
+            ),
+            E_USER_DEPRECATED
+        );
     }
 
     /**

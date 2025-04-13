@@ -50,3 +50,25 @@ You must ensure your table exists on your side when the events tables do not exi
 You must stop injecting instance of type `Symfony\Component\EventDispatcher\EventDispatcherInterface` to
  the `SymfonyPublisher`. Starting in 3.0, we'll only be allowing instance of type
  `Symfony\Contracts\EventDispatcher\EventDispatcherInterface`.
+
+### Remove support of Query classes
+
+[See #50](https://github.com/yvoyer/domain-event/issues/50)
+
+*What to do:*
+
+You only need to change from `extends` to `implements Query`.
+ You may also need to remove your definition of `validateResult()`, since it won't be called anymore,
+ unless you want to validate it your way. 
+
+```php
+// before
+class YourCollection extends CollectionQuery { ... }
+class YourScalar extends ScalarQuery { ... }
+class YourObject extends ObjectQuery { ... }
+
+// after
+class YourCollection implements Query { ... }
+class YourScalar implements Query { ... }
+class YourObject implements Query { ... }
+```
