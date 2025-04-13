@@ -8,6 +8,8 @@
 
 namespace Star\Component\DomainEvent;
 
+use function array_merge;
+
 abstract class AggregateRoot
 {
     /**
@@ -60,18 +62,22 @@ abstract class AggregateRoot
     }
 
     /**
-     * @param DomainEvent $event
      * @throws AggregateRootException
      */
-    protected function mutate(DomainEvent $event): void
-    {
-        $method = $this->getEventMethod($event);
-        if (! \method_exists($this, $method)) {
-            throw AggregateRootException::missingMutationOnAggregate($this, $method);
-        }
+    protected function mutate(
+        DomainEvent $event,
+        DomainEvent ...$others
+    ): void {
+        $events = array_merge([$event], $others);
+        foreach ($events as $event) {
+            $method = $this->getEventMethod($event);
+            if (! \method_exists($this, $method)) {
+                throw AggregateRootException::missingMutationOnAggregate($this, $method);
+            }
 
-        $this->mutations[] = $event;
-        $this->$method($event);
+            $this->mutations[] = $event;
+            $this->$method($event);
+        }
     }
 
     /**
