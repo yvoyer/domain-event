@@ -31,7 +31,7 @@
         "doctrine/dbal": "^3.0",
         "phpstan/phpstan": "*",
         "phpstan/phpstan-phpunit": "*",
-        "phpunit/phpunit": "*",
+        "phpunit/phpunit": "^9.0",
         "squizlabs/php_codesniffer": "*",
         "symfony/contracts": ">=2.0",
         "symfony/dependency-injection": ">=5.0",

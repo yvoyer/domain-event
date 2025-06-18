@@ -7,8 +7,6 @@
          processIsolation="false"
          stopOnFailure="false"
          bootstrap="vendor/autoload.php"
-         cacheDirectory=".phpunit.cache"
-         backupStaticProperties="false"
 >
   <testsuites>
     <testsuite name="main">
@@ -20,9 +18,9 @@
     </testsuite>
   </testsuites>
 
-  <source>
-    <include>
+  <filter>
+    <whitelist>
       <directory>src</directory>
-    </include>
-  </source>
+    </whitelist>
+  </filter>
 </phpunit>
