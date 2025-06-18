@@ -23,7 +23,9 @@
     "require": {
         "php": "^8.0",
         "ext-json": "*",
+        "ext-mbstring": "*",
         "beberlei/assert": "^3.3",
+        "psr/event-dispatcher": "^1.0",
         "webmozart/assert": "^1.1"
     },
     "require-dev": {
@@ -33,9 +35,9 @@
         "phpunit/php-file-iterator": "^2.0",
         "phpunit/phpunit": "^7.0||^8.0||^9.0",
         "squizlabs/php_codesniffer": "^3.4",
-        "symfony/contracts": "^1.0",
+        "symfony/contracts": ">=2.0",
         "symfony/dependency-injection": ">=4.3",
-        "symfony/event-dispatcher": ">=2.5"
+        "symfony/event-dispatcher": ">=5.0"
     },
     "suggest": {
         "symfony/event-dispatcher": "Allows the usage of the SymfonyPublisher adapter provided by the star/domain-event."

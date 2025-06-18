@@ -4,6 +4,7 @@ namespace Star\Component\DomainEvent\Ports\Symfony;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use Star\Component\DomainEvent\BadMethodCallException;
 use Star\Component\DomainEvent\DomainEvent;
 use Star\Component\DomainEvent\DuplicatedListenerPriority;
@@ -12,19 +13,14 @@ use Star\Example\Blog\Domain\Event\Post\PostWasDrafted;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface as ComponentDispatcher;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as ContractDispatcher;
+use function interface_exists;
 use function sprintf;
 
 final class SymfonyPublisherTest extends TestCase implements EventListener
 {
-    /**
-     * @var SymfonyPublisher
-     */
-    private $publisher;
+    private SymfonyPublisher $publisher;
 
-    /**
-     * @var bool
-     */
-    private $triggered = false;
+    private bool $triggered = false;
 
     public function setUp(): void
     {
@@ -65,7 +61,7 @@ final class SymfonyPublisherTest extends TestCase implements EventListener
 
     public function test_it_should_publish_event_with_contract_dispatcher(): void
     {
-        if (! \interface_exists(ContractDispatcher::class)) {
+        if (! interface_exists(ContractDispatcher::class)) {
             $this->markTestSkipped('Interface "' . ContractDispatcher::class . '" is not defined.');
         }
         $dispatcher = $this->createMock(ContractDispatcher::class);
@@ -79,7 +75,7 @@ final class SymfonyPublisherTest extends TestCase implements EventListener
 
     public function test_it_should_publish_event_with_component_dispatcher(): void
     {
-        if (! \interface_exists(ComponentDispatcher::class)) {
+        if (! interface_exists(ComponentDispatcher::class)) {
             $this->markTestSkipped('Interface "' . ComponentDispatcher::class . '" is not defined.');
         }
         $dispatcher = $this->createMock(ComponentDispatcher::class);
@@ -96,7 +92,10 @@ final class SymfonyPublisherTest extends TestCase implements EventListener
         $publisher = new SymfonyPublisher($dispatcher);
         $publisher->subscribe(
             $listener = new class() implements EventListener {
-                public $methodCalls = [];
+                /**
+                 * @var array<int, string>
+                 */
+                public array $methodCalls = [];
 
                 public function onZero(): void
                 {
@@ -185,9 +184,9 @@ final class SymfonyPublisherTest extends TestCase implements EventListener
      */
     private function createMockDispatcher(): MockObject
     {
-        if (\interface_exists(ContractDispatcher::class)) {
+        if (interface_exists(ContractDispatcher::class)) {
             return $this->createMock(ContractDispatcher::class);
-        } elseif (\interface_exists(ComponentDispatcher::class)) {
+        } elseif (interface_exists(ComponentDispatcher::class)) {
             return $this->createMock(ComponentDispatcher::class);
         }
 
@@ -230,14 +229,9 @@ final class MissingMethodListener implements EventListener
 
 final class SomethingOccurred implements DomainEvent
 {
-    /**
-     * @var string
-     */
-    private $action;
-
-    public function __construct(string $action)
-    {
-        $this->action = $action;
+    public function __construct(
+        private string $action,
+    ) {
     }
 
     public function action(): string
@@ -288,7 +282,7 @@ final class ListenerWithMethod implements EventListener
     /**
      * @var array<int, DomainEvent>
      */
-    public $dispatchedEvents = [];
+    public array $dispatchedEvents = [];
 
     public function methodOne(Version3EventOne $event): void
     {
@@ -323,6 +317,6 @@ final class ListenerWithMethod implements EventListener
 
     public function listensTo(): array
     {
-        throw new \RuntimeException(__METHOD__ . ' not implemented yet.');
+        throw new RuntimeException(__METHOD__ . ' not implemented yet.');
     }
 }

@@ -8,17 +8,13 @@
 
 namespace Star\Component\DomainEvent;
 
-final class BadMethodCallException extends \InvalidArgumentException
+use InvalidArgumentException;
+
+final class BadMethodCallException extends InvalidArgumentException
 {
-    /**
-     * @param string $method
-     * @param class-string<EventListener> $listener
-     *
-     * @return BadMethodCallException
-     */
     public static function methodNotDefinedOnListener(
         string $method,
-        string $listener
+        string $listener,
     ): self {
         return new self("The method '{$method}' do not exists on listener '{$listener}'.");
     }

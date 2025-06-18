@@ -10,8 +10,10 @@ use function sprintf;
 
 final class AlwaysThrowExceptionOnFailure implements PayloadFailureStrategy
 {
-    public function handleKeyNotFound(string $key, array $payload)
-    {
+    public function handleKeyNotFound(
+        string $key,
+        array $payload,
+    ): mixed {
         throw new PayloadKeyNotFound(
             sprintf(
                 'Payload key "%s" could not be found in payload: "%s".',

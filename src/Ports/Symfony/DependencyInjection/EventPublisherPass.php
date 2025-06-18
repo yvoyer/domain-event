@@ -17,14 +17,9 @@ use Symfony\Component\DependencyInjection\Reference;
 
 final class EventPublisherPass implements CompilerPassInterface
 {
-    /**
-     * @var string
-     */
-    private $event_dispatcher;
-
-    public function __construct(string $event_dispatcher = 'event_dispatcher')
-    {
-        $this->event_dispatcher = $event_dispatcher;
+    public function __construct(
+        private string $event_dispatcher = 'event_dispatcher',
+    ) {
     }
 
     public function process(ContainerBuilder $container): void

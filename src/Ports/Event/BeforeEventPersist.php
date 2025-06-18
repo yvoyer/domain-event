@@ -7,36 +7,12 @@ use Star\Component\DomainEvent\Serialization\Payload;
 
 final class BeforeEventPersist implements EventStoreEvent
 {
-    /**
-     * @var string
-     */
-    private $aggregateId;
-
-    /**
-     * @var string
-     */
-    private $eventName;
-
-    /**
-     * @var Payload
-     */
-    private $payload;
-
-    /**
-     * @var DateTimeInterface
-     */
-    private $pushedOn;
-
     public function __construct(
-        string $aggregateId,
-        string $eventName,
-        Payload $payload,
-        DateTimeInterface $pushedOn
+        private string $aggregateId,
+        private string $eventName,
+        private Payload $payload,
+        private DateTimeInterface $pushedOn
     ) {
-        $this->aggregateId = $aggregateId;
-        $this->eventName = $eventName;
-        $this->payload = $payload;
-        $this->pushedOn = $pushedOn;
     }
 
     final public function getAggregateId(): string

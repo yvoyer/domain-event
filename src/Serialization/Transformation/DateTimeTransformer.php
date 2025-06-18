@@ -6,21 +6,15 @@ use DateTimeInterface;
 
 final class DateTimeTransformer implements PropertyValueTransformer
 {
-    /**
-     * @var string
-     */
-    private $format;
-
     public function __construct(
-        string $format = 'Y-m-d\TH:i:sO'
+        private string $format = 'Y-m-d\TH:i:sO'
     ) {
-        $this->format = $format;
     }
 
     public function eventPropertyToPayloadValue(
         string $property,
-        $value
-    ) {
+         mixed $value
+    ): mixed {
         if ($value instanceof DateTimeInterface) {
             $value = $value->format($this->format);
         }

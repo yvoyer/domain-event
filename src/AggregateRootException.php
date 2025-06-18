@@ -8,17 +8,16 @@
 
 namespace Star\Component\DomainEvent;
 
-final class AggregateRootException extends \Exception
+use Exception;
+use function get_class;
+
+final class AggregateRootException extends Exception
 {
-    /**
-     * @param AggregateRoot $aggregate
-     * @param string $method
-     *
-     * @return AggregateRootException
-     */
-    public static function missingMutationOnAggregate(AggregateRoot $aggregate, string $method): self
-    {
-        $class = \get_class($aggregate);
+    public static function missingMutationOnAggregate(
+        AggregateRoot $aggregate,
+        string $method,
+    ): self {
+        $class = get_class($aggregate);
 
         return new self("The mutation '{$method}' do not exists on aggregate '{$class}'.");
     }

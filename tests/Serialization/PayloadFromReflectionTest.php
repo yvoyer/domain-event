@@ -46,8 +46,8 @@ final class PayloadFromReflectionTest extends TestCase
         $serializer = new PayloadFromReflection();
         $payload = $serializer->createPayload(
             new class implements DomainEvent {
-                private $as_int = 123.456;
-                private $as_string = '123.456';
+                private float $as_int = 123.456;
+                private string $as_string = '123.456';
             }
         );
         $this->assertArrayHasKey('as_int', $payload);
@@ -61,8 +61,8 @@ final class PayloadFromReflectionTest extends TestCase
         $serializer = new PayloadFromReflection();
         $payload = $serializer->createPayload(
             new class implements DomainEvent {
-                private $true = true;
-                private $false = false;
+                private bool $true = true;
+                private bool $false = false;
             }
         );
         $this->assertArrayHasKey('true', $payload);
@@ -175,27 +175,17 @@ final class PayloadFromReflectionTest extends TestCase
 }
 
 final class MixedEvent implements DomainEvent {
-    /**
-     * @var mixed
-     */
-    private $attribute;
-
-    /**
-     * @param mixed $value
-     */
-    public function __construct($value)
-    {
-        $this->attribute = $value;
+    public function __construct(
+        private mixed $attribute,
+    ) {
     }
 }
 
 final class V2EventArray implements CreatedFromPayload
 {
-    public $key;
-
-    public function __construct(string $key)
-    {
-        $this->key = $key;
+    public function __construct(
+        public string $key,
+    ) {
     }
 
     public static function fromPayload(array $payload): CreatedFromPayload
@@ -206,11 +196,9 @@ final class V2EventArray implements CreatedFromPayload
 
 final class V2EventPayload implements CreatedFromTypedPayload
 {
-    public $key;
-
-    public function __construct(string $key)
-    {
-        $this->key = $key;
+    public function __construct(
+        public string $key,
+    ) {
     }
 
     public static function fromPayload(Payload $payload): DomainEvent

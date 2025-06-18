@@ -16,6 +16,11 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
+use function is_subclass_of;
+use function sprintf;
+use function strlen;
+use function strrpos;
+use function substr;
 
 final class CommandBusPass implements CompilerPassInterface
 {
@@ -31,10 +36,10 @@ final class CommandBusPass implements CompilerPassInterface
                  */
                 $handlerDefinition = $container->getDefinition($serviceId);
                 $handlerClass = (string) $handlerDefinition->getClass();
-                $command = (string) \substr($handlerClass, 0, (int) \strrpos($handlerClass, 'Handler'));
-                if (\strlen($command) === 0) {
+                $command = (string) substr($handlerClass, 0, (int) strrpos($handlerClass, 'Handler'));
+                if (strlen($command) === 0) {
                     throw new InvalidArgumentException(
-                        \sprintf('The handler "%s" must have a "Handler" suffix.', $handlerClass)
+                        sprintf('The handler "%s" must have a "Handler" suffix.', $handlerClass)
                     );
                 }
 
@@ -42,9 +47,9 @@ final class CommandBusPass implements CompilerPassInterface
                     $command = (string) $tag['message'];
                 }
 
-                if (! \is_subclass_of($command, Command::class)) {
+                if (! is_subclass_of($command, Command::class)) {
                     throw new \InvalidArgumentException(
-                        \sprintf(
+                        sprintf(
                             'The command "%s" must be a class implementing interface "%s".',
                             $command,
                             Command::class

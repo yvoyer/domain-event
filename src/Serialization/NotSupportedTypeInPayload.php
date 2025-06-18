@@ -12,11 +12,7 @@ use function sprintf;
 
 final class NotSupportedTypeInPayload extends InvalidArgumentException
 {
-    /**
-     * @param string $attribute
-     * @param mixed $value
-     */
-    public function __construct(string $attribute, $value)
+    public function __construct(string $attribute, mixed $value)
     {
         $type = sprintf('%s', gettype($value));
         if (is_object($value)) {

@@ -29,10 +29,7 @@ final class DBALEventStoreTest extends TestCase
 {
     const TABLE_NAME = 'post_events';
 
-    /**
-     * @var Connection
-     */
-    private $connection;
+    private Connection $connection;
 
     protected function setUp(): void
     {
@@ -174,12 +171,12 @@ final class DBALEventStoreTest extends TestCase
 
             protected function createAggregateFromStream(array $events): AggregateRoot
             {
-                throw new \RuntimeException(__METHOD__ . ' not implemented yet.');
+                throw new RuntimeException(__METHOD__ . ' not implemented yet.');
             }
 
             protected function handleNoEventFound(string $id): void
             {
-                throw new \RuntimeException(__METHOD__ . ' not implemented yet.');
+                throw new RuntimeException(__METHOD__ . ' not implemented yet.');
             }
         };
 
@@ -255,7 +252,7 @@ final class DBALEventStoreTest extends TestCase
 
             protected function createAggregateFromStream(array $events): AggregateRoot
             {
-                throw new \RuntimeException(__METHOD__ . ' not implemented yet.');
+                throw new RuntimeException(__METHOD__ . ' not implemented yet.');
             }
 
             protected function handleNoEventFound(string $id): void
@@ -333,7 +330,7 @@ final class DBALEventStoreTest extends TestCase
 
             protected function createAggregateFromStream(array $events): AggregateRoot
             {
-                throw new \RuntimeException(__METHOD__ . ' not implemented yet.');
+                throw new RuntimeException(__METHOD__ . ' not implemented yet.');
             }
 
             protected function handleNoEventFound(string $id): void
@@ -411,7 +408,7 @@ final class DBALEventStoreTest extends TestCase
 
             protected function createAggregateFromStream(array $events): AggregateRoot
             {
-                throw new \RuntimeException(__METHOD__ . ' not implemented yet.');
+                throw new RuntimeException(__METHOD__ . ' not implemented yet.');
             }
 
             protected function handleNoEventFound(string $id): void

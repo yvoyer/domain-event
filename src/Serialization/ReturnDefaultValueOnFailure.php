@@ -10,52 +10,43 @@ use RuntimeException;
 final class ReturnDefaultValueOnFailure implements PayloadFailureStrategy
 {
     /**
-     * @var SerializableAttribute|bool|float|int|string
-     */
-    private $value;
-
-    /**
      * @param SerializableAttribute|bool|float|int|string $value
      */
-    public function __construct($value)
+    public function __construct(private mixed $value)
     {
-        $this->value = $value;
     }
 
-    public function handleKeyNotFound(string $key, array $payload)
+    public function handleKeyNotFound(string $key, array $payload): mixed
     {
         return $this->value;
     }
 
-    public function handleInvalidStringValue(string $key, $value): string
+    public function handleInvalidStringValue(string $key, mixed $value): string
     {
         throw new RuntimeException(__METHOD__ . ' not implemented yet.');
     }
 
-    public function handleInvalidIntegerValue(string $key, $value): int
+    public function handleInvalidIntegerValue(string $key, mixed $value): int
     {
         throw new RuntimeException(__METHOD__ . ' not implemented yet.');
     }
 
-    public function handleInvalidFloatValue(string $key, $value): float
+    public function handleInvalidFloatValue(string $key, mixed $value): float
     {
         throw new RuntimeException(__METHOD__ . ' not implemented yet.');
     }
 
-    public function handleInvalidBooleanValue(string $key, $value): bool
+    public function handleInvalidBooleanValue(string $key, mixed $value): bool
     {
         throw new RuntimeException(__METHOD__ . ' not implemented yet.');
     }
 
-    public function handleInvalidDateTimeValue(string $key, $value): DateTimeInterface
+    public function handleInvalidDateTimeValue(string $key, mixed $value): DateTimeInterface
     {
         throw new RuntimeException(__METHOD__ . ' not implemented yet.');
     }
 
-    /**
-     * @param string $value
-     */
-    public function transformRawValueToString($value): string
+    public function transformRawValueToString(mixed $value): string
     {
         Assertion::string($value);
 
@@ -65,7 +56,7 @@ final class ReturnDefaultValueOnFailure implements PayloadFailureStrategy
     /**
      * @param int|float|string $value
      */
-    public function transformRawValueToInt($value): int
+    public function transformRawValueToInt(mixed $value): int
     {
         Assertion::numeric($value);
 
@@ -75,7 +66,7 @@ final class ReturnDefaultValueOnFailure implements PayloadFailureStrategy
     /**
      * @param int|float|string $value
      */
-    public function transformRawValueToFloat($value): float
+    public function transformRawValueToFloat(mixed $value): float
     {
         Assertion::numeric($value);
 
@@ -85,7 +76,7 @@ final class ReturnDefaultValueOnFailure implements PayloadFailureStrategy
     /**
      * @param int|float|string|bool $value
      */
-    public function transformRawValueToBoolean($value): bool
+    public function transformRawValueToBoolean(mixed $value): bool
     {
         Assertion::inArray($value, ['0', '1', 0, 1, true, false]);
 
@@ -95,7 +86,7 @@ final class ReturnDefaultValueOnFailure implements PayloadFailureStrategy
     /**
      * @param string $value
      */
-    public function transformRawValueToDateTime($value): DateTimeInterface
+    public function transformRawValueToDateTime(mixed $value): DateTimeInterface
     {
         Assertion::string($value);
 

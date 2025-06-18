@@ -33,12 +33,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-php-
 
-      - name: Event dispatcher 2.5.0
-        run: composer require --dev symfony/event-dispatcher:~2.5.0 -W
-      - name: Event dispatcher 3.0.0
-        run: composer require --dev symfony/event-dispatcher:~3.0.0 -W
-      - name: Event dispatcher 4.0.0
-        run: composer require --dev symfony/event-dispatcher:~4.0.0 -W
       - name: Event dispatcher 5.0.0
         run: composer require --dev symfony/event-dispatcher:~5.0.0 -W
       - name: Event dispatcher 6.0.0

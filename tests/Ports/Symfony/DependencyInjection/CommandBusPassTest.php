@@ -9,6 +9,7 @@ use Star\Component\DomainEvent\Messaging\Command;
 use Star\Component\DomainEvent\Messaging\CommandBus;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
+use function get_class;
 
 final class CommandBusPassTest extends TestCase
 {
@@ -30,7 +31,7 @@ final class CommandBusPassTest extends TestCase
          */
         $controller = $builder->get(CommandController::class);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Command: ' . DoStuff::class);
 
         $controller->doStuff();
@@ -48,7 +49,7 @@ final class CommandBusPassTest extends TestCase
         ;
         $builder->addCompilerPass(new CommandBusPass());
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage(
             'The handler "' . MalformedThatThrowsException::class . '" must have a "Handler" suffix.'
         );
@@ -84,7 +85,7 @@ final class CommandBusPassTest extends TestCase
             ->setPublic(true);
         $builder
             ->register('my_handler', DoStuffHandler::class)
-            ->addTag('star.command_handler', ['message' => \get_class($command)])
+            ->addTag('star.command_handler', ['message' => get_class($command)])
         ;
         $builder->addCompilerPass(new CommandBusPass());
         $builder->compile();
@@ -95,21 +96,16 @@ final class CommandBusPassTest extends TestCase
         $controller = $builder->get(CommandController::class);
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Command: ' . \get_class($command));
+        $this->expectExceptionMessage('Command: ' . get_class($command));
         $controller->dispatch($command);
     }
 }
 
 final class CommandController
 {
-    /**
-     * @var CommandBus
-     */
-    private $bus;
-
-    public function __construct(CommandBus $bus)
-    {
-        $this->bus = $bus;
+    public function __construct(
+        private CommandBus $bus,
+    ) {
     }
 
     public function doStuff(): void
@@ -134,7 +130,7 @@ final class DoStuffHandler
 {
     public function __invoke($command): void
     {
-        throw new \RuntimeException('Command: ' . \get_class($command));
+        throw new RuntimeException('Command: ' . get_class($command));
     }
 }
 final class MalformedThatThrowsException implements Command

@@ -6,10 +6,7 @@ use PHPUnit\Framework\TestCase;
 
 final class MessageMapBusTest extends TestCase
 {
-    /**
-     * @var MessageMapBus
-     */
-    private $bus;
+    private MessageMapBus $bus;
 
     public function setUp(): void
     {

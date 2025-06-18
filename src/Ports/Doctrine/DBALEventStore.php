@@ -33,44 +33,23 @@ abstract class DBALEventStore
     protected const COLUMN_VERSION = 'version';
 
     /**
-     * @var Connection
-     */
-    protected $connection;
-
-    /**
-     * @var EventPublisher
-     */
-    private $publisher;
-
-    /**
-     * @var PayloadSerializer
-     */
-    private $serializer;
-
-    /**
      * The columns to use int the fetch of the events. (Default = "version")
      *
-     * @var string[]
+     * @var array<int, string>
      */
-    private $orderColumns;
+    private array $orderColumns;
 
     /**
-     * @param Connection $connection
-     * @param EventPublisher $publisher
-     * @param PayloadSerializer $serializer
-     * @param string[] $orderColumns
+     * @param array<int, string> $orderColumns
      */
     public function __construct(
-        Connection $connection,
-        EventPublisher $publisher,
-        PayloadSerializer $serializer,
+        protected Connection $connection,
+        private EventPublisher $publisher,
+        private PayloadSerializer $serializer,
         array $orderColumns = [
             self::COLUMN_VERSION,
         ]
     ) {
-        $this->connection = $connection;
-        $this->publisher = $publisher;
-        $this->serializer = $serializer;
         $this->orderColumns = $orderColumns;
     }
 
@@ -78,7 +57,6 @@ abstract class DBALEventStore
 
     /**
      * @param DomainEvent[] $events
-     * @return AggregateRoot
      */
     abstract protected function createAggregateFromStream(array $events): AggregateRoot;
 
@@ -87,7 +65,7 @@ abstract class DBALEventStore
     /**
      * The columns to use int the fetch of the events.
      *
-     * @return string[]
+     * @return array<int, string>
      */
     protected function getOrderColumns(): array
     {
@@ -153,8 +131,10 @@ abstract class DBALEventStore
         return $aggregate;
     }
 
-    protected function persistAggregate(string $id, AggregateRoot $aggregate): void
-    {
+    protected function persistAggregate(
+        string $id,
+        AggregateRoot $aggregate,
+    ): void {
         $this->ensureTableExists();
 
         $events = $aggregate->uncommitedEvents();
@@ -180,8 +160,9 @@ abstract class DBALEventStore
      * @param array<string, mixed> $payload
      * @return DateTimeImmutable
      */
-    protected function createPushedOnDateFromPayload(array $payload): DateTimeImmutable
-    {
+    protected function createPushedOnDateFromPayload(
+        array $payload,
+    ): DateTimeImmutable {
         return new DateTimeImmutable();
     }
 

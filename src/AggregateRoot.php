@@ -18,9 +18,9 @@ use function trigger_error;
 abstract class AggregateRoot
 {
     /**
-     * @var DomainEvent[]
+     * @var array<int, DomainEvent>
      */
-    private $mutations = [];
+    private array $mutations = [];
 
     /**
      * Protected, define a static constructor (Factory method)
@@ -38,7 +38,7 @@ abstract class AggregateRoot
     }
 
     /**
-     * @return DomainEvent[]
+     * @return array<int, DomainEvent>
      */
     public function uncommitedEvents(): array
     {
@@ -107,8 +107,9 @@ abstract class AggregateRoot
      *
      * @return string
      */
-    protected function getEventMethod(DomainEvent $event): string
-    {
+    protected function getEventMethod(
+        DomainEvent $event,
+    ): string {
         $class = \get_class($event);
         $parts = \explode('\\', $class);
         $name = \array_pop($parts);
