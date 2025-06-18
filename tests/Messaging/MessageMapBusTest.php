@@ -29,7 +29,7 @@ final class MessageMapBusTest extends TestCase
     public function test_it_should_throw_exception_when_command_not_supported(): void
     {
         $this->expectException(NoHandlerFound::class);
-        $this->expectExceptionMessage('No handler could be found for message "Mock_Command_');
+        $this->expectExceptionMessage('No handler could be found for message "MockObject_Command_');
 
         $this->bus->dispatchCommand($this->createMock(Command::class));
     }
@@ -50,7 +50,7 @@ final class MessageMapBusTest extends TestCase
     public function test_it_should_throw_exception_when_query_not_supported(): void
     {
         $this->expectException(NoHandlerFound::class);
-        $this->expectExceptionMessage('No handler could be found for message "Mock_Query_');
+        $this->expectExceptionMessage('No handler could be found for message "MockObject_Query_');
 
         $this->bus->dispatchQuery($this->createMock(Query::class));
     }

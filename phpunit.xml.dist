@@ -1,32 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!-- http://www.phpunit.de/manual/current/en/appendixes.configuration.html -->
-<phpunit
-        backupGlobals               = "false"
-        backupStaticAttributes      = "false"
-        colors                      = "true"
-        convertErrorsToExceptions   = "true"
-        convertNoticesToExceptions  = "true"
-        convertWarningsToExceptions = "true"
-        convertDeprecationsToExceptions = "false"
-        forceCoversAnnotation       = "true"
-        processIsolation            = "false"
-        stopOnFailure               = "false"
-        bootstrap                   = "vendor/autoload.php" >
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
+         backupGlobals="false"
+         colors="true"
+         processIsolation="false"
+         stopOnFailure="false"
+         bootstrap="vendor/autoload.php"
+         cacheDirectory=".phpunit.cache"
+         backupStaticProperties="false"
+>
+  <testsuites>
+    <testsuite name="main">
+      <directory suffix="Test.php">tests</directory>
+    </testsuite>
 
-    <testsuites>
-        <testsuite name="main">
-            <directory suffix="Test.php">tests</directory>
-        </testsuite>
+    <testsuite name="example">
+      <directory suffix=".phpt">examples</directory>
+    </testsuite>
+  </testsuites>
 
-        <testsuite name="example">
-            <directory suffix=".phpt">examples</directory>
-        </testsuite>
-    </testsuites>
-
-    <filter>
-        <whitelist>
-            <directory>src</directory>
-        </whitelist>
-    </filter>
+  <source>
+    <include>
+      <directory>src</directory>
+    </include>
+  </source>
 </phpunit>

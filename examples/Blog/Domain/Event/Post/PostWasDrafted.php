@@ -10,29 +10,11 @@ use Star\Example\Blog\Domain\Model\Post\PostTitle;
 
 final class PostWasDrafted implements CreatedFromPayload
 {
-    /**
-     * @var PostId
-     */
-    private $id;
-
-    /**
-     * @var PostTitle
-     */
-    private $title;
-
-    /**
-     * @var BlogId
-     */
-    private $blogId;
-
     public function __construct(
-        PostId $id,
-        PostTitle $title,
-        BlogId $blogId
+        private PostId $id,
+        private PostTitle $title,
+        private BlogId $blogId,
     ) {
-        $this->id = $id;
-        $this->title = $title;
-        $this->blogId = $blogId;
     }
 
     public function postId(): PostId

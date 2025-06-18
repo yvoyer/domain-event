@@ -11,7 +11,7 @@ final class PostCollection implements PostRepository
     /**
      * @var PostAggregate[]
      */
-    private $posts = [];
+    private array $posts = [];
 
     public function savePost(PostAggregate $post): void
     {

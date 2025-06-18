@@ -7,14 +7,9 @@ use Star\Example\Blog\Domain\Model\BlogId;
 
 final class CreateBlog implements Command
 {
-    /**
-     * @var BlogId
-     */
-    private $blogId;
-
-    public function __construct(BlogId $blogId)
-    {
-        $this->blogId = $blogId;
+    public function __construct(
+        private BlogId $blogId,
+    ) {
     }
 
     public function blogId(): BlogId

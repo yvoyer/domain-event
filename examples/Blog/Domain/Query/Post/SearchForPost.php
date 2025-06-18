@@ -2,16 +2,16 @@
 
 namespace Star\Example\Blog\Domain\Query\Post;
 
+use Assert\Assertion;
 use Star\Component\DomainEvent\Messaging\Results\CollectionQuery;
 use Star\Example\Blog\Domain\Query\Post\DataTransfer\PostListItem;
-use Webmozart\Assert\Assert;
 
 final class SearchForPost extends CollectionQuery
 {
     /**
      * @var string[]
      */
-    private $strings;
+    private array $strings;
 
     public function __construct(string ...$strings)
     {
@@ -25,7 +25,7 @@ final class SearchForPost extends CollectionQuery
 
     protected function validateResult($result): void
     {
-        Assert::allIsInstanceOf($result, PostListItem::class);
+        Assertion::allIsInstanceOf($result, PostListItem::class);
     }
 
     /**

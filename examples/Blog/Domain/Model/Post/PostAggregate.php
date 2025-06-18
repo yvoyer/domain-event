@@ -11,20 +11,9 @@ use Star\Example\Blog\Domain\Model\BlogId;
 
 final class PostAggregate extends AggregateRoot
 {
-    /**
-     * @var PostId
-     */
-    private $id;
-
-    /**
-     * @var PostTitle
-     */
-    private $title;
-
-    /**
-     * @var BlogId
-     */
-    private $blog;
+    private PostId $id;
+    private PostTitle $title;
+    private BlogId $blog;
 
     public function getId(): PostId
     {
@@ -36,7 +25,7 @@ final class PostAggregate extends AggregateRoot
         return $this->title;
     }
 
-    public function publish(\DateTimeInterface $publishedAt, string $publishedBy): void
+    public function publish(DateTimeInterface $publishedAt, string $publishedBy): void
     {
         $this->mutate(new PostWasPublished($this->id, $publishedAt, $publishedBy));
     }

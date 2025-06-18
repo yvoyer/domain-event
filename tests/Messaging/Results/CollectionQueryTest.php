@@ -11,7 +11,7 @@ final class CollectionQueryTest extends TestCase
         $query = new class extends CollectionQuery {};
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage(' expected an array, got: "string".');
+        $this->expectExceptionMessage(' expected an array, got: "invalid".');
         $query('invalid');
     }
 

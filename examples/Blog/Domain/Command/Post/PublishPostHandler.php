@@ -7,20 +7,10 @@ use Star\Example\Blog\Domain\Model\Post\PostRepository;
 
 final class PublishPostHandler
 {
-    /**
-     * @var PostRepository
-     */
-    private $posts;
-
-    /**
-     * @var EventPublisher
-     */
-    private $publisher;
-
-    public function __construct(PostRepository $posts, EventPublisher $publisher)
-    {
-        $this->posts = $posts;
-        $this->publisher = $publisher;
+    public function __construct(
+        private PostRepository $posts,
+        private EventPublisher $publisher,
+    ) {
     }
 
     public function __invoke(PublishPost $command): void

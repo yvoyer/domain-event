@@ -9,29 +9,14 @@ use Star\Example\Blog\Domain\Model\Post\PostId;
 
 final class PostWasPublished implements DomainEvent
 {
-    /**
-     * @var PostId
-     */
-    private $postId;
-
-    /**
-     * @var SerializableDateTime
-     */
-    private $publishedAt;
-
-    /**
-     * @var string
-     */
-    private $publishedBy;
+    private SerializableDateTime $publishedAt;
 
     public function __construct(
-        PostId $postId,
+        private PostId $postId,
         DateTimeInterface $publishedAt,
-        string $publishedBy
+        private string $publishedBy,
     ) {
-        $this->postId = $postId;
         $this->publishedAt = new SerializableDateTime($publishedAt);
-        $this->publishedBy = $publishedBy;
     }
 
     public function postId(): PostId

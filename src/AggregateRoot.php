@@ -8,11 +8,15 @@
 
 namespace Star\Component\DomainEvent;
 
-use Webmozart\Assert\Assert;
+use Assert\Assertion;
 use function array_merge;
+use function array_pop;
 use function count;
+use function explode;
 use function func_get_args;
+use function get_class;
 use function is_array;
+use function method_exists;
 use function trigger_error;
 
 abstract class AggregateRoot
@@ -68,13 +72,16 @@ abstract class AggregateRoot
         } else {
             $events = $args;
         }
-        Assert::allIsInstanceOf($events, DomainEvent::class);
+        Assertion::allIsInstanceOf($events, DomainEvent::class);
 
         /**
          * @var static $aggregate
          */
         $aggregate = new static();
         foreach ($events as $event) {
+            /**
+             * @var DomainEvent $event
+             */
             $aggregate->mutate($event);
         }
 
@@ -91,7 +98,7 @@ abstract class AggregateRoot
         $events = array_merge([$event], $others);
         foreach ($events as $event) {
             $method = $this->getEventMethod($event);
-            if (! \method_exists($this, $method)) {
+            if (! method_exists($this, $method)) {
                 throw AggregateRootException::missingMutationOnAggregate($this, $method);
             }
 
@@ -110,9 +117,9 @@ abstract class AggregateRoot
     protected function getEventMethod(
         DomainEvent $event,
     ): string {
-        $class = \get_class($event);
-        $parts = \explode('\\', $class);
-        $name = \array_pop($parts);
+        $class = get_class($event);
+        $parts = explode('\\', $class);
+        $name = array_pop($parts);
         $method = 'on' . $name;
 
         return $method;

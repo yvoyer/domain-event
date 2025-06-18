@@ -9,29 +9,11 @@ use Star\Example\Blog\Domain\Model\Post\PostTitle;
 
 final class CreateNewPost implements Command
 {
-    /**
-     * @var PostId
-     */
-    private $postId;
-
-    /**
-     * @var PostTitle
-     */
-    private $title;
-
-    /**
-     * @var BlogId
-     */
-    private $blogId;
-
     public function __construct(
-        PostId $postId,
-        PostTitle $title,
-        BlogId $blogId
+        private PostId $postId,
+        private PostTitle $title,
+        private BlogId $blogId
     ) {
-        $this->postId = $postId;
-        $this->title = $title;
-        $this->blogId = $blogId;
     }
 
     public function postId(): PostId

@@ -12,6 +12,7 @@ use Star\Component\DomainEvent\AggregateRoot;
 use Star\Component\DomainEvent\EventPublisher;
 use Star\Component\DomainEvent\Ports\Event\AfterEventPersist;
 use Star\Component\DomainEvent\Ports\Event\BeforeEventPersist;
+use Star\Component\DomainEvent\Ports\InMemory\SpyPublisher;
 use Star\Component\DomainEvent\Serialization\Payload;
 use Star\Component\DomainEvent\Serialization\PayloadFromReflection;
 use Star\Example\Blog\Domain\Event\Post\PostTitleWasChanged;
@@ -466,20 +467,19 @@ final class DBALEventStoreTest extends TestCase
     {
         $store = new PostEventStore(
             $this->connection,
-            $publisher = $this->createMock(EventPublisher::class),
+            $publisher = new SpyPublisher(),
             new PayloadFromReflection()
         );
 
-        $publisher
-            ->expects(self::at(0))
-            ->method('publish')
-            ->with(self::isInstanceOf(BeforeEventPersist::class));
-        $publisher
-            ->expects(self::at(1))
-            ->method('publish')
-            ->with(self::isInstanceOf(AfterEventPersist::class));
+        self::assertCount(0, $publisher->getPublishedEvents());
 
         $store->saveAggregate(PostAggregate::draftPostFixture());
+
+        $afterEvents = $publisher->getPublishedEvents();
+        self::assertCount(3, $afterEvents);
+        self::assertInstanceOf(BeforeEventPersist::class, $afterEvents[0]);
+        self::assertInstanceOf(AfterEventPersist::class, $afterEvents[1]);
+        self::assertInstanceOf(PostWasDrafted::class, $afterEvents[2]);
     }
 }
 

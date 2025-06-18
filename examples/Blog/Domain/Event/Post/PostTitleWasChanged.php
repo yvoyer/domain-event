@@ -13,35 +13,14 @@ use Star\Example\Blog\Domain\Model\Post\PostTitle;
 
 final class PostTitleWasChanged implements CreatedFromTypedPayload
 {
-    /**
-     * @var PostId
-     */
-    private $postId;
-
-    /**
-     * @var PostTitle
-     */
-    private $oldTitle;
-
-    /**
-     * @var PostTitle
-     */
-    private $newTitle;
-
-    /**
-     * @var SerializableDateTime
-     */
-    private $changedAt;
+    private SerializableDateTime $changedAt;
 
     public function __construct(
-        PostId $postId,
-        PostTitle $oldTitle,
-        PostTitle $newTitle,
-        DateTimeInterface $changedAt
+        private PostId $postId,
+        private PostTitle $oldTitle,
+        private PostTitle $newTitle,
+        DateTimeInterface $changedAt,
     ) {
-        $this->postId = $postId;
-        $this->oldTitle = $oldTitle;
-        $this->newTitle = $newTitle;
         $this->changedAt = new SerializableDateTime($changedAt);
     }
 

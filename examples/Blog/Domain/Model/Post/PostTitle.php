@@ -7,14 +7,9 @@ use function uniqid;
 
 final class PostTitle implements SerializableAttribute
 {
-    /**
-     * @var string
-     */
-    private $value;
-
-    public function __construct(string $value)
-    {
-        $this->value = $value;
+    public function __construct(
+        private string $value,
+    ) {
     }
 
     public function toString(): string
