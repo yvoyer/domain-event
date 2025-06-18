@@ -114,3 +114,24 @@ final class YourImplementation implements EventListener
     }
 }
 ```
+
+### Default payload type will be changed to json in DBALEventStore
+
+The default type for `<table.payload>` will be changed to `Types::json` instead of `Types:array`.
+
+[See #31](https://github.com/yvoyer/domain-event/issues/31)
+
+*What to do:*
+
+We now provide a way to override the types for `payload` (Using `getPayloadType()`) and `pushed_on`
+ (Using `getPushedOnType()`). If you need to keep `array`, you may override the method.
+
+```php
+class YourStore extends DBALEventStore
+{
+    protected function getPayloadType(): string
+    {
+        return Types::array; // Types::json will be used by default as of 3.0
+    }
+}
+```
