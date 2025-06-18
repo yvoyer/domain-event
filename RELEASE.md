@@ -1,5 +1,9 @@
 # Release notes
 
+# 2.6.1
+
+* [#68](https://github.com/yvoyer/domain-event/pull/68) Unserialization error when using other type than default
+
 # 2.6.0
 
 * [#65](https://github.com/yvoyer/domain-event/pull/65) Deprecate #48 - Replace usage of payload array in favor of Payload class

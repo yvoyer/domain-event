@@ -121,7 +121,7 @@ abstract class DBALEventStore
 
             return $this->serializer->createEvent(
                 $eventRow['event_name'],
-                unserialize($eventRow['payload']) // @phpstan-ignore-line
+                $this->unserializePayloadColumn($eventRow['payload'])
             );
         };
 
@@ -166,12 +166,36 @@ abstract class DBALEventStore
         return new DateTimeImmutable();
     }
 
+    /**
+     * @param string $data
+     * @return array<string, string|int|bool|float>
+     * @see self::getPayloadType()
+     */
+    protected function unserializePayloadColumn(string $data): array
+    {
+        @trigger_error(
+            sprintf(
+                'Default type for payload will be changed to Types::JSON. Override "%s::getPayloadType()" '
+                . 'and "%s::unserializePayloadColumn()" if you need another type.',
+                get_class($this),
+                get_class($this)
+            ),
+            E_USER_DEPRECATED
+        );
+        return unserialize($data); // @phpstan-ignore-line
+    }
+
+    /**
+     * @return string
+     * @see self::unserializeRowPayload() The unserialize strategy depends on the return type
+     */
     protected function getPayloadType(): string
     {
         @trigger_error(
             sprintf(
-                'Default type for payload will be changed to Types::JSON. Override %s::getPayloadType() '
-                . 'if you need another type.',
+                'Default type for payload will be changed to Types::JSON. Override "%s::getPayloadType()" '
+                . 'and "%s::unserializePayloadColumn()" if you need another type.',
+                get_class($this),
                 get_class($this)
             ),
             E_USER_DEPRECATED
