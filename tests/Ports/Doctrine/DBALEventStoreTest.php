@@ -6,6 +6,7 @@ use DateTimeImmutable;
 use DateTimeInterface;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Types\Types;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Star\Component\DomainEvent\AggregateRoot;
@@ -22,6 +23,7 @@ use Star\Example\Blog\Domain\Model\Post\PostAggregate;
 use Star\Example\Blog\Domain\Model\Post\PostId;
 use Star\Example\Blog\Domain\Model\Post\PostTitle;
 use function extension_loaded;
+use function json_decode;
 use function key_exists;
 use function sprintf;
 
@@ -483,6 +485,55 @@ final class DBALEventStoreTest extends TestCase
             ->with(self::isInstanceOf(AfterEventPersist::class));
 
         $store->saveAggregate(PostAggregate::draftPostFixture());
+    }
+
+    public function test_it_should_allow_to_use_json_payload(): void
+    {
+        $store = new class(
+            $this->connection,
+            $publisher = $this->createMock(EventPublisher::class),
+            new PayloadFromReflection()
+        ) extends DBALEventStore {
+            protected function tableName(): string
+            {
+                return 'table_name';
+            }
+
+            protected function createAggregateFromStream(array $events): AggregateRoot
+            {
+                return PostAggregate::fromStream(...$events);
+            }
+
+            protected function handleNoEventFound(string $id): void
+            {
+                throw new \RuntimeException(__METHOD__ . ' not implemented yet.');
+            }
+
+            protected function unserializePayloadColumn(string $data): array
+            {
+                return json_decode($data, true);
+            }
+
+            protected function getPayloadType(): string
+            {
+                return Types::JSON;
+            }
+
+            public function saveAggregate(PostAggregate $post): void
+            {
+                $this->persistAggregate($post->getId()->toString(), $post);
+            }
+
+            public function getAggregate(PostId $postId): PostAggregate
+            {
+                return $this->getAggregateWithId($postId->toString());
+            }
+        };
+
+        $store->saveAggregate($post = PostAggregate::draftPostFixture());
+        $object = $store->getAggregate($post->getId());
+
+        self::assertSame($post->getTitle()->toString(), $object->getTitle()->toString());
     }
 }
 
