@@ -59,7 +59,7 @@ abstract class AggregateRoot
     {
         $args = func_get_args();
         if (count($args) === 1 && is_array($args[0])) {
-            trigger_error(
+            @trigger_error(
                 'Passing an array of DomainEvent to AggregateRoot::fromStream() will be removed in 3.0.' .
                 ' Pass them directly.',
                 E_USER_DEPRECATED

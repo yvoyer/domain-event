@@ -21,8 +21,11 @@ use function array_key_exists;
 use function array_merge;
 use function count;
 use function get_class;
+use function method_exists;
+use function property_exists;
 use function sprintf;
 use function trigger_error;
+use function uniqid;
 
 final class SymfonyPublisher implements EventPublisher
 {
@@ -32,7 +35,7 @@ final class SymfonyPublisher implements EventPublisher
     private $dispatcher;
 
     /**
-     * @var array<string, array<int, class-string>
+     * @var array<class-string<DomainEvent>, array<int, class-string>
      */
     private $priorityMap = [];
 
@@ -77,7 +80,7 @@ final class SymfonyPublisher implements EventPublisher
                     \get_class($event)
                 );
             } else {
-                trigger_error(
+                @trigger_error(
                     sprintf(
                         'Using an instance of "%s" will be removed in 3.0. Consider using an instance of "%s".' .
                         ' See: https://github.com/yvoyer/domain-event/issues/18',
@@ -110,48 +113,60 @@ final class SymfonyPublisher implements EventPublisher
         }
     }
 
-    /**
-     * @param string $eventClassName The class full name of the event
-     * @param EventListener $listener An object that listens to events
-     * @param string $method
-     * @param int $priority
-     * @throws BadMethodCallException
-     */
-    private function addListener(
-        string $eventClassName,
-        EventListener $listener,
-        string $method,
-        int $priority
-    ): void {
-        if (! \method_exists($listener, $method)) {
-            throw BadMethodCallException::methodNotDefinedOnListener($method, $listener);
-        }
-
-        $transformer = function (EventAdapter $adapter) use ($listener, $method) {
-            $listener->{$method}($adapter->getWrappedEvent());
-        };
-
-        $namespacedMethod = get_class($listener) . '::' . $method . '()';
-        if (isset($this->priorityMap[$eventClassName][$priority])) {
-            throw new DuplicatedListenerPriority(
-                sprintf(
-                    'Cannot subscribe a listener for event "%s" at priority "%s", ' .
-                    'another listener is already listening at that priority. Attempting to push "%s", '  .
-                    'but listener "%s" is already registered.',
-                    $eventClassName,
-                    $priority,
-                    $namespacedMethod,
-                    $this->priorityMap[$eventClassName][$priority]
-                )
-            );
-        }
-        $this->priorityMap[$eventClassName][$priority] = $namespacedMethod;
-        $this->dispatcher->addListener($eventClassName, $transformer, $priority);
-    }
-
     public function subscribe(EventListener $listener): void
     {
-        foreach ($listener->listensTo() as $eventClass => $method) {
+        if (!method_exists($listener, 'getListenedEvents')) {
+            @trigger_error(
+                sprintf(
+                    '%s::listensTo() method is deprecated and will be removed in 3.0. '
+                    . 'Define the new static method "%s::getListenedEvents(): array" '
+                    . 'and move the content of "listensTo()" into it. '
+                    . 'See: https://github.com/yvoyer/domain-event/issues/62',
+                    EventListener::class,
+                    get_class($listener)
+                ),
+                E_USER_DEPRECATED
+            );
+            // todo remove eval in 3.0
+            $name = uniqid('listener');
+            $class = <<<CLASS
+use Star\Component\DomainEvent\EventListener;
+
+final class {$name} implements EventListener
+{
+    /**
+     * @var EventListener
+     */
+    public static \$listener;
+
+    public function __construct(EventListener \$listener)
+    {
+        self::\$listener = \$listener;
+    }
+
+    public function listensTo(): array
+    {
+        throw new \RuntimeException(__METHOD__ . " not implemented yet.");
+    }
+
+    public function __call(\$name, \$args): void
+    {
+        self::\$listener->{\$name}(...\$args);
+    }
+
+    public static function getListenedEvents(): array
+    {
+        return self::\$listener->listensTo();
+    }
+}
+
+CLASS;
+
+            eval($class);
+            $listener = new $name($listener);
+        }
+
+        foreach ($listener::getListenedEvents() as $eventClass => $method) {
             if (is_array($method)) {
                 foreach ($method as $priority => $_method) {
                     $this->addListener($eventClass, $listener, $_method, $priority);
@@ -181,5 +196,47 @@ final class SymfonyPublisher implements EventPublisher
         foreach ($events as $event) {
             $this->publish($event);
         }
+    }
+
+    /**
+     * @param class-string<DomainEvent> $eventClassName The class full name of the event
+     * @throws BadMethodCallException
+     */
+    private function addListener(
+        string $eventClassName,
+        EventListener $listener,
+        string $method,
+        int $priority
+    ): void {
+        $listenerClass = get_class($listener);
+        if (property_exists($listener, 'listener')) {
+            // todo remove condition in 3.0 We fetch the listener from the bridge
+            $listenerClass = get_class($listener::$listener);
+        }
+
+        if (! \method_exists($listenerClass, $method)) {
+            throw BadMethodCallException::methodNotDefinedOnListener($method, $listenerClass);
+        }
+
+        $transformer = function (EventAdapter $adapter) use ($listener, $method) {
+            $listener->{$method}($adapter->getWrappedEvent());
+        };
+
+        $namespacedMethod = get_class($listener) . '::' . $method . '()';
+        if (isset($this->priorityMap[$eventClassName][$priority])) {
+            throw new DuplicatedListenerPriority(
+                sprintf(
+                    'Cannot subscribe a listener for event "%s" at priority "%s", ' .
+                    'another listener is already listening at that priority. Attempting to push "%s", '  .
+                    'but listener "%s" is already registered.',
+                    $eventClassName,
+                    $priority,
+                    $namespacedMethod,
+                    $this->priorityMap[$eventClassName][$priority]
+                )
+            );
+        }
+        $this->priorityMap[$eventClassName][$priority] = $namespacedMethod;
+        $this->dispatcher->addListener($eventClassName, $transformer, $priority);
     }
 }

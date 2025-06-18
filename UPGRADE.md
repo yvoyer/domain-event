@@ -72,3 +72,45 @@ class YourCollection implements Query { ... }
 class YourScalar implements Query { ... }
 class YourObject implements Query { ... }
 ```
+
+### Move EventListener::listenTo() to static getListenedEvents().
+
+The method `EventListener::listenTo()` will be replaced with `EventListener::getListenedEvents(): array`.
+
+[See #62](https://github.com/yvoyer/domain-event/issues/62)
+
+*What to do:*
+
+Implement the method "public static function getListenedEvents(): array", and put the content of your
+ `listensTo()` in it.
+
+```php
+use Star\Component\DomainEvent\EventListener;
+
+final class YourImplementation implements EventListener
+{
+    public function method(): void
+    {
+        // Invoked when event occurs
+    }
+
+    public function listensTo(): array
+    {
+        // Will be removed in 3.0
+        return [
+            'YourEvent' => 'method',
+        ];
+    }
+
+    /**
+     * @return array<class-string<DomainEvent>, string|array<int, string>>
+     */
+    public static function getListenedEvents(): array
+    {
+        // Will be added in 3.0, Add it in your code to silence the Deprecation warning.
+        return [
+            'YourEvent' => 'method',
+        ];
+    }
+}
+```

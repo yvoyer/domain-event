@@ -300,7 +300,7 @@ abstract class DBALEventStore
         /** @deprecated remove this automatic stuff */
         $manager = $this->connection->getSchemaManager();
         if (!$manager->tablesExist([$this->tableName()])) {
-            trigger_error(
+            @trigger_error(
                 'Automatic table creation will be removed in 3.0.' .
                 ' You need to create your schema before persisting events.' .
                 ' See: https://github.com/yvoyer/domain-event/issues/54',
