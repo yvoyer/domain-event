@@ -43,7 +43,7 @@ abstract class CollectionQuery implements Query
      */
     protected function validateResult($result): void
     {
-        trigger_error(
+        @trigger_error(
             sprintf(
                 'The method "%s::%s()" will be remove, along with its class in 3.0. ' .
                 'Consider duplicating "__invoke" or implementing your own validation.',

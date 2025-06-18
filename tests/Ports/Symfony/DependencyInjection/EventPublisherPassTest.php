@@ -3,12 +3,14 @@
 namespace Star\Component\DomainEvent\Ports\Symfony\DependencyInjection;
 
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use Star\Component\DomainEvent\DomainEvent;
 use Star\Component\DomainEvent\EventListener;
 use Star\Component\DomainEvent\EventPublisher;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use function get_class;
 
 final class EventPublisherPassTest extends TestCase
 {
@@ -51,6 +53,34 @@ final class EventPublisherPassTest extends TestCase
         $this->expectExceptionMessage('My blog works!!');
         $service->doAction('My blog');
     }
+
+    public function test_it_should_allow_to_register_listeners_using_new_api(): void
+    {
+        $builder = new ContainerBuilder();
+        $builder->register('event_dispatcher', EventDispatcher::class);
+        $builder->addCompilerPass(new EventPublisherPass());
+        $builder->register(ListenerV3::class, ListenerV3::class)
+            ->setPublic(true)
+            ->addTag('star.event_listener');
+        $builder->register(MyController::class, MyController::class)
+            ->addArgument(new Reference('star.event_publisher'))
+            ->setPublic(true);
+        $builder->compile();
+
+        /**
+         * @var ListenerV3 $listener
+         */
+        $listener = $builder->get(ListenerV3::class);
+        self::assertNull($listener->event);
+
+        /**
+         * @var MyController $service
+         */
+        $service = $builder->get(MyController::class);
+        $service->doAction('My blog');
+
+        self::assertInstanceOf(SomethingWasDone::class, $listener->event);
+    }
 }
 
 final class MyController
@@ -68,6 +98,28 @@ final class MyController
     public function doAction(string $action): void
     {
         $this->publisher->publish(new SomethingWasDone($action));
+    }
+}
+
+final class ListenerV3 implements EventListener
+{
+    public $event;
+
+    public function onEvent(SomethingWasDone $event): void
+    {
+        $this->event = $event;
+    }
+
+    public function listensTo(): array
+    {
+        throw new RuntimeException(__METHOD__ . ' should not be invoked');
+    }
+
+    public static function getListenedEvents(): array
+    {
+        return [
+            SomethingWasDone::class => 'onEvent',
+        ];
     }
 }
 

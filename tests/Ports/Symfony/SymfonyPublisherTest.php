@@ -199,6 +199,23 @@ final class SymfonyPublisherTest extends TestCase implements EventListener
             )
         );
     }
+
+    public function test_it_should_register_listener_with_new_api(): void
+    {
+        $dispatcher = new EventDispatcher();
+        $publisher = new SymfonyPublisher($dispatcher);
+        $publisher->subscribe($listener = new ListenerWithMethod());
+        self::assertCount(0, $listener->dispatchedEvents);
+
+        $publisher->publish(
+            new Version3EventOne(),
+            new Version3EventTwo()
+        );
+
+        self::assertCount(1, $dispatcher->getListeners(Version3EventOne::class));
+        self::assertCount(3, $dispatcher->getListeners(Version3EventTwo::class));
+        self::assertCount(3, $listener->dispatchedEvents);
+    }
 }
 
 final class MissingMethodListener implements EventListener
@@ -256,5 +273,56 @@ final class ListenerWithNewPriority implements EventListener
                 100 => 'method',
             ],
         ];
+    }
+}
+
+final class Version3EventOne implements DomainEvent
+{
+}
+final class Version3EventTwo implements DomainEvent
+{
+}
+
+final class ListenerWithMethod implements EventListener
+{
+    /**
+     * @var array<int, DomainEvent>
+     */
+    public $dispatchedEvents = [];
+
+    public function methodOne(Version3EventOne $event): void
+    {
+        $this->dispatchedEvents[] = $event;
+    }
+
+    public function methodTen(Version3EventTwo $event): void
+    {
+        $this->dispatchedEvents[] = $event;
+    }
+
+    public function methodZero(Version3EventTwo $event): void
+    {
+        $this->dispatchedEvents[] = $event;
+    }
+
+    public function methodMinusTen(Version3EventTwo $event): void
+    {
+    }
+
+    public static function getListenedEvents(): array
+    {
+        return [
+            Version3EventOne::class => 'methodOne',
+            Version3EventTwo::class => [
+                10 => 'methodTen',
+                0 => 'methodZero',
+                -10 => 'methodMinusTen',
+            ],
+        ];
+    }
+
+    public function listensTo(): array
+    {
+        throw new \RuntimeException(__METHOD__ . ' not implemented yet.');
     }
 }
