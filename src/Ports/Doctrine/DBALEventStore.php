@@ -187,7 +187,7 @@ abstract class DBALEventStore
 
     /**
      * @param string $data
-     * @return array
+     * @return array<string, string|int|bool|float>
      * @see self::getPayloadType()
      */
     protected function unserializePayloadColumn(string $data): array
@@ -201,7 +201,7 @@ abstract class DBALEventStore
             ),
             E_USER_DEPRECATED
         );
-        return unserialize($data);
+        return unserialize($data); // @phpstan-ignore-line
     }
 
     /**
