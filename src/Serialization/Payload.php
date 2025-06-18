@@ -15,12 +15,12 @@ use function is_string;
 use function json_decode;
 use function sprintf;
 use function strpos;
+use function trigger_error;
 
 /**
- * @deprecated ArrayAccess will be removed in 3.0
  * @implements ArrayAccess<string, SerializableAttribute|string|int|bool|float>
  */
-final class Payload implements ArrayAccess
+final class Payload implements ArrayAccess // todo ArrayAccess implement will be removed in 3.0 **/
 {
     /**
      * @var array<string, SerializableAttribute|string|int|bool|float> $data
@@ -258,19 +258,38 @@ final class Payload implements ArrayAccess
 
     /**
      * @param string $offset
+     * @deprecated Will be remove in 3.0, stop usage.
      */
     public function offsetExists($offset): bool
     {
+        @trigger_error(
+            sprintf(
+                'Array access on "%s" will be removed in 3.0. Avoid using method "%s".',
+                self::class,
+                __METHOD__
+            ),
+            E_USER_DEPRECATED
+        );
+
         return array_key_exists($offset, $this->data);
     }
 
     /**
      * @param string $offset
      * @return SerializableAttribute|string|int|bool|float
+     * @deprecated Will be remove in 3.0, stop usage.
      */
     #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
+        @trigger_error(
+            sprintf(
+                'Array access on "%s" will be removed in 3.0. Avoid using method "%s".',
+                self::class,
+                __METHOD__
+            ),
+            E_USER_DEPRECATED
+        );
         return $this->data[$offset];
     }
 
@@ -278,18 +297,36 @@ final class Payload implements ArrayAccess
      * @param string $offset
      * @param SerializableAttribute|string|int|bool|float $value
      * @return void
+     * @deprecated Will be remove in 3.0, stop usage.
      */
     public function offsetSet($offset, $value): void
     {
+        @trigger_error(
+            sprintf(
+                'Array access on "%s" will be removed in 3.0. Avoid using method "%s".',
+                self::class,
+                __METHOD__
+            ),
+            E_USER_DEPRECATED
+        );
         throw new RuntimeException(__METHOD__ . ' should never be invoked.');
     }
 
     /**
      * @param string $offset
      * @return void
+     * @deprecated Will be remove in 3.0, stop usage.
      */
     public function offsetUnset($offset): void
     {
+        @trigger_error(
+            sprintf(
+                'Array access on "%s" will be removed in 3.0. Avoid using method "%s".',
+                self::class,
+                __METHOD__
+            ),
+            E_USER_DEPRECATED
+        );
         throw new RuntimeException(__METHOD__ . ' should never be invoked.');
     }
 }

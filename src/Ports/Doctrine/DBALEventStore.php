@@ -18,7 +18,9 @@ use Star\Component\DomainEvent\Serialization\Payload;
 use Star\Component\DomainEvent\Serialization\PayloadSerializer;
 use function array_map;
 use function count;
+use function get_class;
 use function is_array;
+use function sprintf;
 use function trigger_error;
 use function unserialize;
 
@@ -183,6 +185,24 @@ abstract class DBALEventStore
         return new DateTimeImmutable();
     }
 
+    protected function getPayloadType(): string
+    {
+        @trigger_error(
+            sprintf(
+                'Default type for payload will be changed to Types::JSON. Override %s::getPayloadType() '
+                . 'if you need another type.',
+                get_class($this)
+            ),
+            E_USER_DEPRECATED
+        );
+        return Types::ARRAY; // todo uncomment in 3.0 Types::JSON
+    }
+
+    protected function getPushedOnType(): string
+    {
+        return Types::DATETIME_IMMUTABLE;
+    }
+
     private function persistEvent(
         string $id,
         string $eventName,
@@ -221,10 +241,10 @@ abstract class DBALEventStore
                 ],
                 [
                     self::COLUMN_AGGREGATE_ID => Types::STRING,
-                    self::COLUMN_PAYLOAD => Types::ARRAY,// todo #31 switch to JSON by default
+                    self::COLUMN_PAYLOAD => $this->getPayloadType(),
                     self::COLUMN_EVENT_NAME => Types::STRING,
-                    self::COLUMN_PUSHED_ON => Types::DATETIME_IMMUTABLE,
-                    self::COLUMN_VERSION => Types::INTEGER,
+                    self::COLUMN_PUSHED_ON => $this->getPushedOnType(),
+                    self::COLUMN_VERSION => Types::BIGINT,
                 ]
             ),
             $pushedOn
@@ -323,11 +343,11 @@ abstract class DBALEventStore
             );
             $table->addColumn(
                 self::COLUMN_PAYLOAD,
-                Types::ARRAY
+                $this->getPayloadType()
             );
             $table->addColumn(
                 self::COLUMN_PUSHED_ON,
-                Types::DATETIME_IMMUTABLE
+                $this->getPushedOnType()
             );
             $table->addColumn(
                 self::COLUMN_VERSION,
