@@ -21,7 +21,7 @@
         }
     },
     "require": {
-        "php": "^7.1||>=8.0 <8.4",
+        "php": "^7.1||^8.0",
         "ext-json": "*",
         "beberlei/assert": "^3.3",
         "webmozart/assert": "^1.1"

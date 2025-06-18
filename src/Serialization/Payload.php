@@ -53,7 +53,7 @@ final class Payload implements ArrayAccess // todo ArrayAccess implement will be
         ) > 0;
     }
 
-    public function getString(string $key, PayloadFailureStrategy $strategy = null): string
+    public function getString(string $key, ?PayloadFailureStrategy $strategy = null): string
     {
         $strategy = $this->assertStrategy($strategy);
         $value = $this->getValue($key, $strategy);
@@ -80,7 +80,7 @@ final class Payload implements ArrayAccess // todo ArrayAccess implement will be
         return $value;
     }
 
-    public function getInteger(string $key, PayloadFailureStrategy $strategy = null): int
+    public function getInteger(string $key, ?PayloadFailureStrategy $strategy = null): int
     {
         $strategy = $this->assertStrategy($strategy);
         $value = $this->getValue($key, $strategy);
@@ -107,7 +107,7 @@ final class Payload implements ArrayAccess // todo ArrayAccess implement will be
         return (int) $value;
     }
 
-    public function getFloat(string $key, PayloadFailureStrategy $strategy = null): float
+    public function getFloat(string $key, ?PayloadFailureStrategy $strategy = null): float
     {
         $strategy = $this->assertStrategy($strategy);
         $value = $this->getValue($key, $strategy);
@@ -134,7 +134,7 @@ final class Payload implements ArrayAccess // todo ArrayAccess implement will be
         return (float) $value;
     }
 
-    public function getBoolean(string $key, PayloadFailureStrategy $strategy = null): bool
+    public function getBoolean(string $key, ?PayloadFailureStrategy $strategy = null): bool
     {
         $strategy = $this->assertStrategy($strategy);
         $value = $this->getValue($key, $strategy);
@@ -161,7 +161,7 @@ final class Payload implements ArrayAccess // todo ArrayAccess implement will be
         return (bool) $value;
     }
 
-    public function getDateTime(string $key, PayloadFailureStrategy $strategy = null): DateTimeInterface
+    public function getDateTime(string $key, ?PayloadFailureStrategy $strategy = null): DateTimeInterface
     {
         $strategy = $this->assertStrategy($strategy);
         $value = $this->getValue($key, $strategy);
@@ -214,7 +214,7 @@ final class Payload implements ArrayAccess // todo ArrayAccess implement will be
         );
     }
 
-    private function assertStrategy(PayloadFailureStrategy $strategy = null): PayloadFailureStrategy
+    private function assertStrategy(?PayloadFailureStrategy $strategy = null): PayloadFailureStrategy
     {
         if (!$strategy) {
             $strategy = new AlwaysThrowExceptionOnFailure();
