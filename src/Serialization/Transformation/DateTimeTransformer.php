@@ -13,7 +13,7 @@ final class DateTimeTransformer implements PropertyValueTransformer
 
     public function eventPropertyToPayloadValue(
         string $property,
-         mixed $value
+        mixed $value
     ): mixed {
         if ($value instanceof DateTimeInterface) {
             $value = $value->format($this->format);
