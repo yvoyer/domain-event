@@ -10,6 +10,8 @@ namespace Star\Component\DomainEvent\Messaging\Results;
 
 use Assert\Assertion;
 use Star\Component\DomainEvent\Messaging\Query;
+use function sprintf;
+use function trigger_error;
 
 /**
  * @deprecated This class will be removed in 3.0, stop usage and only implement interface.
@@ -31,9 +33,17 @@ abstract class ObjectQuery implements Query
      * @param object $result
      * @return void
      * @throws \Assert\AssertionFailedException
+     * @deprecated This method along with the class will be removed in 3.0.
      */
     final public function __invoke($result): void
     {
+        @trigger_error(
+            sprintf(
+                'Abstract query "%s" will be removed in 3.0. No replacements provided.',
+                __METHOD__
+            ),
+            E_USER_DEPRECATED
+        );
         /**
          * @var class-string<object> $class
          */
@@ -46,8 +56,18 @@ abstract class ObjectQuery implements Query
         $this->result = $result;
     }
 
+    /**
+     * @deprecated This method along with the class will be removed in 3.0.
+     */
     public function getResult()
     {
+        @trigger_error(
+            sprintf(
+                'Abstract query "%s" will be removed in 3.0. No replacements provided.',
+                __METHOD__
+            ),
+            E_USER_DEPRECATED
+        );
         $type = $this->getObjectType();
         if (! $this->result instanceof $type) {
             throw new \RuntimeException('Query "' . static::class . '" was never invoked.');

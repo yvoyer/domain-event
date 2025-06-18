@@ -135,3 +135,67 @@ class YourStore extends DBALEventStore
     }
 }
 ```
+
+### CreatedFromPayload will now accept Payload instead of array.
+
+The interface `Star\Component\DomainEvent\DomainEvent\CreatedFromPayload` will accept only `Payload` instance
+instead of array as argument.
+The Interface `Star\Component\DomainEvent\DomainEvent\CreatedFromTypedPayload` will be removed,
+ in favor of `CreatedFromPayload`.
+
+*What to do:*
+
+Remove all usage of `CreatedFromTypedPayload`. All classes that used it should now implement `CreatedFromPayload`
+ instead. Pass the `Payload` class as argument instead of array. Change offset get to getter where necessary.
+
+#### Class that implemented CreatedFromPayload
+
+```php
+// Before
+final MyClass implement CreatedFromPayload
+{
+    public static function fromPayload(array $payload): DomainEvent
+    {
+        return new self(
+            $payload['key'],
+        );
+    }
+}
+
+// After
+final MyClass implement CreatedFromPayload
+{
+    public static function fromPayload(Payload $payload): DomainEvent
+    {
+        return new self(
+            $payload->getString('key'),
+        );
+    }
+}
+```
+
+#### Class that implemented CreatedFromTypedPayload
+
+```php
+// Before
+final MyClass implement CreatedFromTypedPayload
+{
+    public static function fromPayload(Payload $payload): DomainEvent
+    {
+        return new self(
+            $payload->getString('key'),
+        );
+    }
+}
+
+// After
+final MyClass implement CreatedFromPayload
+{
+    public static function fromPayload(Payload $payload): DomainEvent
+    {
+        return new self(
+            $payload->getString('key'),
+        );
+    }
+}
+```
