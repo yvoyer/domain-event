@@ -26,9 +26,17 @@ abstract class CollectionQuery implements Query
 
     /**
      * @param mixed[] $result
+     * @deprecated This method along with the class will be removed in 3.0.
      */
     final public function __invoke($result): void
     {
+        @trigger_error(
+            sprintf(
+                'Abstract query "%s" will be removed in 3.0. No replacements provided.',
+                __METHOD__
+            ),
+            E_USER_DEPRECATED
+        );
         $this->validateResult($result);
         Assert::isArray(
             $result,
@@ -56,9 +64,17 @@ abstract class CollectionQuery implements Query
 
     /**
      * @return mixed[]
+     * @deprecated This method along with the class will be removed in 3.0.
      */
     public function getResult(): array
     {
+        @trigger_error(
+            sprintf(
+                'Abstract query "%s" will be removed in 3.0. No replacements provided.',
+                __METHOD__
+            ),
+            E_USER_DEPRECATED
+        );
         return $this->result;
     }
 }

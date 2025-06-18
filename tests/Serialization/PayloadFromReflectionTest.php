@@ -160,6 +160,18 @@ final class PayloadFromReflectionTest extends TestCase
 
         self::assertSame('2000-01-01 12:34:56.098700', $payload['attribute']);
     }
+
+    public function test_it_should_allow_migration_to_new_api(): void
+    {
+        $serializer = new PayloadFromReflection();
+        $oldEvent = $serializer->createEvent(V2EventArray::class, ['key' => 'value']);
+        self::assertInstanceOf(V2EventArray::class, $oldEvent);
+        self::assertSame('value', $oldEvent->key);
+
+        $newEvent = $serializer->createEvent(V2EventPayload::class, ['key' => 'value']);
+        self::assertInstanceOf(V2EventPayload::class, $newEvent);
+        self::assertSame('value', $newEvent->key);
+    }
 }
 
 final class MixedEvent implements DomainEvent {
@@ -174,5 +186,35 @@ final class MixedEvent implements DomainEvent {
     public function __construct($value)
     {
         $this->attribute = $value;
+    }
+}
+
+final class V2EventArray implements CreatedFromPayload
+{
+    public $key;
+
+    public function __construct(string $key)
+    {
+        $this->key = $key;
+    }
+
+    public static function fromPayload(array $payload): CreatedFromPayload
+    {
+        return new self($payload['key']);
+    }
+}
+
+final class V2EventPayload implements CreatedFromTypedPayload
+{
+    public $key;
+
+    public function __construct(string $key)
+    {
+        $this->key = $key;
+    }
+
+    public static function fromPayload(Payload $payload): DomainEvent
+    {
+        return new self($payload->getString('key'));
     }
 }

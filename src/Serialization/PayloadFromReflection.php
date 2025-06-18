@@ -12,6 +12,7 @@ use function is_bool;
 use function is_scalar;
 use function is_subclass_of;
 use function sprintf;
+use function trigger_error;
 
 final class PayloadFromReflection implements PayloadSerializer
 {
@@ -71,6 +72,14 @@ final class PayloadFromReflection implements PayloadSerializer
         }
 
         if (is_subclass_of($eventName, CreatedFromTypedPayload::class)) {
+            @trigger_error(
+                sprintf(
+                    'The interface "%s" will be remove in 3.0. Use "%s" instead and use Payload as argument.',
+                    CreatedFromTypedPayload::class,
+                    CreatedFromPayload::class
+                ),
+                E_USER_DEPRECATED
+            );
             return $eventName::fromPayload(Payload::fromArray($payload));
         }
 
