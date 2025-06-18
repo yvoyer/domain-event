@@ -8,3 +8,6 @@ parameters:
     level: max
     excludePaths:
         - src/Ports/Symfony/SymfonyPublisher.php
+    ignoreErrors:
+        -
+            identifier: parameter.implicitlyNullable

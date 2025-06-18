@@ -1,5 +1,22 @@
 # Release notes
 
+# 2.6.0
+
+* [#65](https://github.com/yvoyer/domain-event/pull/65) Deprecate #48 - Replace usage of payload array in favor of Payload class
+* [#64](https://github.com/yvoyer/domain-event/pull/64) Deprecate #31 - Switch default payload definition of array to json
+* [#63](https://github.com/yvoyer/domain-event/pull/63) Fix #49 - Deprecate EventListener::listensTo()
+* [#61](https://github.com/yvoyer/domain-event/pull/61) Deprecate #50 - Query classes will be removed
+* [#60](https://github.com/yvoyer/domain-event/pull/60) Deprecate #47 - Deprecation of construct of SymfonyPublisher
+* [#59](https://github.com/yvoyer/domain-event/pull/59) Fix #52 - Allow passing events using splat operator in publish
+* [#58](https://github.com/yvoyer/domain-event/pull/58) Deprecate #54 automatic table creation
+* [#57](https://github.com/yvoyer/domain-event/pull/57) Fix #55 - Allow passing events using the splat operator.
+* [#56](https://github.com/yvoyer/domain-event/pull/56) Fix #51 - Allow mutate to receive more than one event
+* [#53](https://github.com/yvoyer/domain-event/pull/53) Add documentation for new features
+* [#44](https://github.com/yvoyer/domain-event/pull/44) Update actions versions
+* [#43](https://github.com/yvoyer/domain-event/pull/43) Add support to push additional columns in event table
+* [#42](https://github.com/yvoyer/domain-event/pull/42) Fix #41 - Add support for DateTime in payload
+* [#40](https://github.com/yvoyer/domain-event/pull/40) Add build tests for 8.3
+
 # 2.5.1
 
 * [#35](https://github.com/yvoyer/domain-event/pull/35) Allow override of pushed_on value based on payload
@@ -59,4 +76,3 @@
 # 1.0
 
 * Added AggregateRoot
-
