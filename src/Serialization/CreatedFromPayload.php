@@ -7,7 +7,7 @@ use Star\Component\DomainEvent\DomainEvent;
 interface CreatedFromPayload extends DomainEvent
 {
     /**
-     * @param Payload|SerializableAttribute[]|string[]|int[]|bool[]|float[] $payload
+     * @param SerializableAttribute[]|string[]|int[]|bool[]|float[] $payload
      * @return CreatedFromPayload
      * @deprecated Class receive Payload class as argument in 3.0.
      */
