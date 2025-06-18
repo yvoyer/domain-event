@@ -8,8 +8,8 @@
 
 namespace Star\Component\DomainEvent\Messaging\Results;
 
+use Assert\Assertion;
 use Star\Component\DomainEvent\Messaging\Query;
-use Webmozart\Assert\Assert;
 use function sprintf;
 use function trigger_error;
 
@@ -38,7 +38,7 @@ abstract class CollectionQuery implements Query
             E_USER_DEPRECATED
         );
         $this->validateResult($result);
-        Assert::isArray(
+        Assertion::isArray(
             $result,
             'Query "' . static::class . '" expected an array, got: "%s".'
         );

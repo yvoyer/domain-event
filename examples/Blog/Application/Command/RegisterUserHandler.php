@@ -7,18 +7,13 @@ use Star\Example\Blog\Application\Bridge\Event\UserWasRegistered;
 
 final class RegisterUserHandler
 {
-    /**
-     * @var EventPublisher
-     */
-    private $publisher;
-
-    public function __construct(EventPublisher $publisher)
-    {
-        $this->publisher = $publisher;
+    public function __construct(
+        private EventPublisher $publisher,
+    ) {
     }
 
     public function __invoke(RegisterUser $command): void
     {
-        $this->publisher->publish(new UserWasRegistered($command->selectedBlogName()));
+        $this->publisher->publish(new UserWasRegistered($command->blogName()));
     }
 }

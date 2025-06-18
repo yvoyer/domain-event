@@ -11,17 +11,17 @@ final class RowDatasetBuilder
     /**
      * @var array<string, string>
      */
-    private $values;
+    private array $values;
 
     /**
      * @var array<string, mixed>
      */
-    private $parameters;
+    private array $parameters;
 
     /**
      * @var array<string, string>
      */
-    private $types;
+    private array $types;
 
     /**
      * @param array<string, string> $values

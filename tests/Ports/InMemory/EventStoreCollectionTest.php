@@ -95,10 +95,7 @@ final class StubEvent implements DomainEvent
 
 final class StubAggregate extends AggregateRoot
 {
-    /**
-     * @var int
-     */
-    public $counter = 0;
+    public int $counter = 0;
 
     public function increment(): void
     {

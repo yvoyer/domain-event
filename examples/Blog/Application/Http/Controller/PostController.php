@@ -10,28 +10,18 @@ use Star\Example\Blog\Domain\Model\BlogId;
 use Star\Example\Blog\Domain\Model\Post\PostId;
 use Star\Example\Blog\Domain\Model\Post\PostTitle;
 use Star\Example\Blog\Domain\Query\Post\SearchForPost;
+use function implode;
+use function json_encode;
+use function sprintf;
 
 final class PostController
 {
-    /**
-     * @var CommandBus
-     */
-    private $commandBus;
+    private int $i = 0;
 
-    /**
-     * @var QueryBus
-     */
-    private $queryBus;
-
-    /**
-     * @var int
-     */
-    private $i = 0;
-
-    public function __construct(CommandBus $commandBus, QueryBus $queryBus)
-    {
-        $this->commandBus = $commandBus;
-        $this->queryBus = $queryBus;
+    public function __construct(
+        private CommandBus $commandBus,
+        private QueryBus $queryBus,
+    ) {
     }
 
     public function publish(int $postId): string
@@ -40,17 +30,17 @@ final class PostController
             new PublishPost(PostId::fromInt($postId), new \DateTime('2000-01-01'), 'username')
         );
 
-        return \json_encode(['success' => true]);
+        return json_encode(['success' => true]);
     }
 
     public function search(string ...$patterns): string
     {
-        echo \sprintf('Searching: %s.', \implode(', ', $patterns)) . "\n";
+        echo sprintf('Searching: %s.', implode(', ', $patterns)) . "\n";
         $query = new SearchForPost(...$patterns);
 
         $this->queryBus->dispatchQuery($query);
 
-        return \json_encode($query->getResult());
+        return json_encode($query->getResult());
     }
 
     public function createPost(string $blogId, array $request): string
@@ -64,7 +54,7 @@ final class PostController
             )
         );
 
-        return \json_encode(
+        return json_encode(
             [
                 'id' => $id->toString(),
             ]

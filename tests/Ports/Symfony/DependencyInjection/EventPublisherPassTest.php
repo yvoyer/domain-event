@@ -10,7 +10,6 @@ use Star\Component\DomainEvent\EventPublisher;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use function get_class;
 
 final class EventPublisherPassTest extends TestCase
 {
@@ -29,7 +28,7 @@ final class EventPublisherPassTest extends TestCase
          * @var MyController $service
          */
         $service = $builder->get(MyController::class);
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('My blog works!!');
         $service->doAction('My blog');
     }
@@ -49,7 +48,7 @@ final class EventPublisherPassTest extends TestCase
          * @var MyController $service
          */
         $service = $builder->get(MyController::class);
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('My blog works!!');
         $service->doAction('My blog');
     }
@@ -85,14 +84,9 @@ final class EventPublisherPassTest extends TestCase
 
 final class MyController
 {
-    /**
-     * @var EventPublisher
-     */
-    private $publisher;
-
-    public function __construct(EventPublisher $publisher)
-    {
-        $this->publisher = $publisher;
+    public function __construct(
+        private EventPublisher $publisher,
+    ) {
     }
 
     public function doAction(string $action): void
@@ -103,7 +97,7 @@ final class MyController
 
 final class ListenerV3 implements EventListener
 {
-    public $event;
+    public ?SomethingWasDone $event = null;
 
     public function onEvent(SomethingWasDone $event): void
     {
@@ -127,7 +121,7 @@ final class SomeListener implements EventListener
 {
     public function onSomethingWasDone(SomethingWasDone $event): void
     {
-        throw new \RuntimeException($event->action() . ' works!!');
+        throw new RuntimeException($event->action() . ' works!!');
     }
 
     public function listensTo(): array
@@ -140,14 +134,9 @@ final class SomeListener implements EventListener
 
 final class SomethingWasDone implements DomainEvent
 {
-    /**
-     * @var string
-     */
-    private $action;
-
-    public function __construct(string $action)
-    {
-        $this->action = $action;
+    public function __construct(
+        private string $action,
+    ) {
     }
 
     public function action(): string

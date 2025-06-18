@@ -7,14 +7,9 @@ use DateTimeInterface;
 
 final class SerializableDateTime implements SerializableAttribute
 {
-    /**
-     * @var DateTimeInterface
-     */
-    private $dateTime;
-
-    public function __construct(DateTimeInterface $dateTime)
-    {
-        $this->dateTime = $dateTime;
+    public function __construct(
+        private DateTimeInterface $dateTime,
+    ) {
     }
 
     public function toSerializableString(): string

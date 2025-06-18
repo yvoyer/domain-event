@@ -10,14 +10,9 @@ use Star\Example\Blog\Domain\Model\BlogId;
 
 final class CreateBlogOnUserRegister implements EventListener
 {
-    /**
-     * @var CommandBus
-     */
-    private $bus;
-
-    public function __construct(CommandBus $bus)
-    {
-        $this->bus = $bus;
+    public function __construct(
+        private CommandBus $bus,
+    ) {
     }
 
     public function onUserWasRegistered(UserWasRegistered $event): void

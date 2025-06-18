@@ -134,8 +134,10 @@ final class Payload implements ArrayAccess // todo ArrayAccess implement will be
         return (float) $value;
     }
 
-    public function getBoolean(string $key, ?PayloadFailureStrategy $strategy = null): bool
-    {
+    public function getBoolean(
+        string $key,
+        ?PayloadFailureStrategy $strategy = null,
+    ): bool {
         $strategy = $this->assertStrategy($strategy);
         $value = $this->getValue($key, $strategy);
         if (!in_array($value, ['1', '0', 1, 0, true, false], true)) {
@@ -150,8 +152,9 @@ final class Payload implements ArrayAccess // todo ArrayAccess implement will be
      *
      * @throws PayloadKeyNotFound When no key with $needle could be found
      */
-    public function getBooleanWhereKeyContains(string $needle): bool
-    {
+    public function getBooleanWhereKeyContains(
+        string $needle,
+    ): bool {
         /**
          * @var bool|int|string $value
          */
@@ -161,8 +164,10 @@ final class Payload implements ArrayAccess // todo ArrayAccess implement will be
         return (bool) $value;
     }
 
-    public function getDateTime(string $key, ?PayloadFailureStrategy $strategy = null): DateTimeInterface
-    {
+    public function getDateTime(
+        string $key,
+        ?PayloadFailureStrategy $strategy = null,
+    ): DateTimeInterface {
         $strategy = $this->assertStrategy($strategy);
         $value = $this->getValue($key, $strategy);
         if (!is_string($value)) {
@@ -177,8 +182,9 @@ final class Payload implements ArrayAccess // todo ArrayAccess implement will be
      *
      * @throws PayloadKeyNotFound When no key with $needle could be found
      */
-    public function getDateTimeWhereKeyContains(string $needle): DateTimeInterface
-    {
+    public function getDateTimeWhereKeyContains(
+        string $needle,
+    ): DateTimeInterface {
         return new DateTimeImmutable($this->getStringWhereKeyContains($needle));
     }
 
@@ -197,7 +203,7 @@ final class Payload implements ArrayAccess // todo ArrayAccess implement will be
      * @throws PayloadKeyNotFound When no key with $needle could be found
      * @return SerializableAttribute|string|int|bool|float
      */
-    private function getValueWhereKeyContains(string $needle)
+    private function getValueWhereKeyContains(string $needle): mixed
     {
         foreach ($this->data as $key => $value) {
             if (strpos($key, $needle) !== false) {
@@ -214,8 +220,9 @@ final class Payload implements ArrayAccess // todo ArrayAccess implement will be
         );
     }
 
-    private function assertStrategy(?PayloadFailureStrategy $strategy = null): PayloadFailureStrategy
-    {
+    private function assertStrategy(
+        ?PayloadFailureStrategy $strategy = null,
+    ): PayloadFailureStrategy {
         if (!$strategy) {
             $strategy = new AlwaysThrowExceptionOnFailure();
         }
@@ -228,8 +235,10 @@ final class Payload implements ArrayAccess // todo ArrayAccess implement will be
      * @param PayloadFailureStrategy $strategy
      * @return SerializableAttribute|bool|float|int|string
      */
-    private function getValue(string $key, PayloadFailureStrategy $strategy)
-    {
+    private function getValue(
+        string $key,
+        PayloadFailureStrategy $strategy,
+    ): mixed {
         if (!array_key_exists($key, $this->data)) {
             return $strategy->handleKeyNotFound($key, $this->data);
         }

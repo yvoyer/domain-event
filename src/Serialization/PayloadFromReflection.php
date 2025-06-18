@@ -19,7 +19,7 @@ final class PayloadFromReflection implements PayloadSerializer
     /**
      * @var array<int, PropertyValueTransformer>
      */
-    private $transformers;
+    private array $transformers;
 
     public function __construct()
     {
@@ -37,8 +37,9 @@ final class PayloadFromReflection implements PayloadSerializer
     /**
      * @return array<string, string|int|float|bool>
      */
-    public function createPayload(DomainEvent $event): array
-    {
+    public function createPayload(
+        DomainEvent $event,
+    ): array {
         $reflection = new ReflectionClass($event);
         $properties = $reflection->getProperties();
         $payload = [
@@ -93,8 +94,9 @@ final class PayloadFromReflection implements PayloadSerializer
         );
     }
 
-    public function createEventName(DomainEvent $event): string
-    {
+    public function createEventName(
+        DomainEvent $event,
+    ): string {
         return get_class($event);
     }
 }

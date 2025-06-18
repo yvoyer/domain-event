@@ -123,14 +123,9 @@ final class EventTwoWasTriggered implements DomainEvent
 
 final class NamedEvent implements DomainEvent
 {
-    /**
-     * @var string
-     */
-    private $name;
-
-    public function __construct(string $name = 'test')
-    {
-        $this->name = $name;
+    public function __construct(
+        private string $name = 'test',
+    ) {
     }
 }
 

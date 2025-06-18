@@ -8,15 +8,21 @@
 
 namespace Star\Component\DomainEvent\Messaging;
 
+use function array_key_exists;
+use function call_user_func_array;
+use function get_class;
+
 final class MessageMapBus implements CommandBus, QueryBus
 {
     /**
      * @var callable[]
      */
-    private $handlers = [];
+    private array $handlers = [];
 
-    public function registerHandler(string $message, callable $handler): void
-    {
+    public function registerHandler(
+        string $message,
+        callable $handler,
+    ): void {
         $this->handlers[$message] = $handler;
     }
 
@@ -32,12 +38,12 @@ final class MessageMapBus implements CommandBus, QueryBus
 
     private function dispatch(Message $message): void
     {
-        $class = \get_class($message);
-        if (! \array_key_exists($class, $this->handlers)) {
+        $class = get_class($message);
+        if (! array_key_exists($class, $this->handlers)) {
             throw new NoHandlerFound($class);
         }
 
         $handler = $this->handlers[$class];
-        \call_user_func_array($handler, [$message]);
+        call_user_func_array($handler, [$message]);
     }
 }

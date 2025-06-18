@@ -2,11 +2,15 @@
 
 namespace Star\Component\DomainEvent\Ports\Symfony\DependencyInjection;
 
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use Star\Component\DomainEvent\Messaging\Query;
 use Star\Component\DomainEvent\Messaging\QueryBus;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
+use function get_class;
+use function sprintf;
 
 final class QueryBusPassTest extends TestCase
 {
@@ -42,7 +46,7 @@ final class QueryBusPassTest extends TestCase
         ;
         $builder->addCompilerPass(new QueryBusPass());
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('The query handler "InvalidClass" must have a "Handler" suffix.');
         $builder->compile();
     }
@@ -59,9 +63,9 @@ final class QueryBusPassTest extends TestCase
         ;
         $builder->addCompilerPass(new QueryBusPass());
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage(
-            \sprintf('The query "DateTime" must implement the "%s" interface.', Query::class)
+            sprintf('The query "DateTime" must implement the "%s" interface.', Query::class)
         );
         $builder->compile();
     }
@@ -87,7 +91,7 @@ final class QueryBusPassTest extends TestCase
             ->setPublic(true);
         $builder
             ->register('my_handler', SearchStuffHandler::class)
-            ->addTag('star.query_handler', ['message' => \get_class($query)])
+            ->addTag('star.query_handler', ['message' => get_class($query)])
         ;
         $builder->addCompilerPass(new QueryBusPass());
         $builder->compile();
@@ -102,14 +106,9 @@ final class QueryBusPassTest extends TestCase
 }
 final class QueryController
 {
-    /**
-     * @var QueryBus
-     */
-    private $queryBus;
-
-    public function __construct(QueryBus $queryBus)
-    {
-        $this->queryBus = $queryBus;
+    public function __construct(
+        private QueryBus $queryBus,
+    ) {
     }
 
     public function searchStuff(): string
@@ -126,7 +125,7 @@ final class QueryController
 }
 final class SearchStuff implements Query
 {
-    private $result;
+    private mixed $result;
 
     public function __invoke($result): void
     {
@@ -148,11 +147,11 @@ final class SearchStuffHandler
 final class WillThrowExceptionForInvalidFormat implements Query {
     public function __invoke($result): void
     {
-        throw new \RuntimeException('Method ' . __METHOD__ . ' not implemented yet.');
+        throw new RuntimeException('Method ' . __METHOD__ . ' not implemented yet.');
     }
 
     public function getResult()
     {
-        throw new \RuntimeException('Method ' . __METHOD__ . ' not implemented yet.');
+        throw new RuntimeException('Method ' . __METHOD__ . ' not implemented yet.');
     }
 }

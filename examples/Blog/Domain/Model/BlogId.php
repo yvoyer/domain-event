@@ -3,17 +3,13 @@
 namespace Star\Example\Blog\Domain\Model;
 
 use Star\Component\DomainEvent\Serialization\SerializableAttribute;
+use function uniqid;
 
 final class BlogId implements SerializableAttribute
 {
-    /**
-     * @var string
-     */
-    private $name;
-
-    public function __construct(string $name)
-    {
-        $this->name = $name;
+    public function __construct(
+        private string $name,
+    ) {
     }
 
     public function toString(): string
@@ -28,6 +24,6 @@ final class BlogId implements SerializableAttribute
 
     public static function asUuid(): self
     {
-        return new self(\uniqid('blog-uuid-'));
+        return new self(uniqid('blog-uuid-'));
     }
 }

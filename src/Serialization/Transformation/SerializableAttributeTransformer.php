@@ -11,8 +11,8 @@ final class SerializableAttributeTransformer implements PropertyValueTransformer
 {
     public function eventPropertyToPayloadValue(
         string $property,
-        $value
-    ) {
+        mixed $value
+    ): mixed {
         if ($value instanceof SerializableAttribute) {
             $value = $value->toSerializableString();
         }

@@ -3,6 +3,7 @@
 namespace Star\Component\DomainEvent;
 
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 final class EventPublisherTest extends TestCase
 {
@@ -35,7 +36,7 @@ abstract class BaseTestPublisher implements EventPublisher
     /**
      * @var array<int, DomainEvent>
      */
-    protected $events = [];
+    protected array $events = [];
 
     /**
      * @return array<int, DomainEvent>
@@ -47,12 +48,12 @@ abstract class BaseTestPublisher implements EventPublisher
 
     public function subscribe(EventListener $listener): void
     {
-        throw new \RuntimeException(__METHOD__ . ' not implemented yet.');
+        throw new RuntimeException(__METHOD__ . ' not implemented yet.');
     }
 
     public function publishChanges(array $events): void
     {
-        throw new \RuntimeException(__METHOD__ . ' not implemented yet.');
+        throw new RuntimeException(__METHOD__ . ' not implemented yet.');
     }
 }
 

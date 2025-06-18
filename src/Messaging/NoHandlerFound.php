@@ -8,12 +8,15 @@
 
 namespace Star\Component\DomainEvent\Messaging;
 
-final class NoHandlerFound extends \InvalidArgumentException
+use InvalidArgumentException;
+use function sprintf;
+
+final class NoHandlerFound extends InvalidArgumentException
 {
     public function __construct(string $message)
     {
         parent::__construct(
-            \sprintf('No handler could be found for message "%s".', $message)
+            sprintf('No handler could be found for message "%s".', $message)
         );
     }
 }

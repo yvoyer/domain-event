@@ -10,13 +10,9 @@ interface PropertyValueTransformer
 {
     /**
      * Invoked during serialization of the event. It must return a serializable value.
-     *
-     * @param string $property
-     * @param mixed $value
-     * @return mixed
      */
     public function eventPropertyToPayloadValue(
         string $property,
-        $value
-    );
+        mixed $value
+    ): mixed;
 }

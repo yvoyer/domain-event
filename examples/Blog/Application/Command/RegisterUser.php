@@ -4,14 +4,9 @@ namespace Star\Example\Blog\Application\Command;
 
 final class RegisterUser
 {
-    /**
-     * @var string
-     */
-    private $blogName;
-
-    public function __construct(string $blogName)
-    {
-        $this->blogName = $blogName;
+    public function __construct(
+        private string $blogName,
+    ) {
     }
 
     public function blogName(): string
