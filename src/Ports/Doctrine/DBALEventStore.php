@@ -18,11 +18,9 @@ use Star\Component\DomainEvent\Serialization\Payload;
 use Star\Component\DomainEvent\Serialization\PayloadSerializer;
 use function array_map;
 use function count;
-use function get_class;
 use function is_array;
-use function sprintf;
+use function json_decode;
 use function trigger_error;
-use function unserialize;
 
 abstract class DBALEventStore
 {
@@ -116,12 +114,12 @@ abstract class DBALEventStore
              *     payload: string,
              * } $eventRow
              */
-            Assertion::keyExists($eventRow, 'event_name');
-            Assertion::keyExists($eventRow, 'payload');
+            Assertion::keyExists($eventRow, self::COLUMN_EVENT_NAME);
+            Assertion::keyExists($eventRow, self::COLUMN_PAYLOAD);
 
             return $this->serializer->createEvent(
-                $eventRow['event_name'],
-                $this->unserializePayloadColumn($eventRow['payload'])
+                $eventRow[self::COLUMN_EVENT_NAME],
+                $this->unserializePayloadColumn($eventRow[self::COLUMN_PAYLOAD])
             );
         };
 
@@ -173,16 +171,7 @@ abstract class DBALEventStore
      */
     protected function unserializePayloadColumn(string $data): array
     {
-        @trigger_error(
-            sprintf(
-                'Default type for payload will be changed to Types::JSON. Override "%s::getPayloadType()" '
-                . 'and "%s::unserializePayloadColumn()" if you need another type.',
-                get_class($this),
-                get_class($this)
-            ),
-            E_USER_DEPRECATED
-        );
-        return unserialize($data); // @phpstan-ignore-line
+        return json_decode($data, true); // @phpstan-ignore-line
     }
 
     /**
@@ -191,16 +180,7 @@ abstract class DBALEventStore
      */
     protected function getPayloadType(): string
     {
-        @trigger_error(
-            sprintf(
-                'Default type for payload will be changed to Types::JSON. Override "%s::getPayloadType()" '
-                . 'and "%s::unserializePayloadColumn()" if you need another type.',
-                get_class($this),
-                get_class($this)
-            ),
-            E_USER_DEPRECATED
-        );
-        return Types::ARRAY; // todo uncomment in 3.0 Types::JSON
+        return Types::JSON;
     }
 
     protected function getPushedOnType(): string
@@ -220,7 +200,7 @@ abstract class DBALEventStore
          * @see https://stackoverflow.com/questions/45494/mysql-error-1093-cant-specify-target-table-for-update-in-from-clause
          */
         $subQuery = $this->connection->createQueryBuilder()
-            ->select('COUNT(sub.version) + 1')
+            ->select('COUNT(sub.' . self::COLUMN_VERSION . ') + 1')
             ->from($this->tableName(), 'sub')
             ->where($expr->eq('sub.' . self::COLUMN_AGGREGATE_ID, ':aggregate_id'))
             ->getSQL();
