@@ -3,15 +3,20 @@
 namespace Star\Example\Blog\Domain\Query\Post;
 
 use Assert\Assertion;
-use Star\Component\DomainEvent\Messaging\Results\CollectionQuery;
+use Star\Component\DomainEvent\Messaging\Query;
 use Star\Example\Blog\Domain\Query\Post\DataTransfer\PostListItem;
 
-final class SearchForPost extends CollectionQuery
+final class SearchForPost implements Query
 {
     /**
      * @var string[]
      */
     private array $strings;
+
+    /**
+     * @var array<int, PostListItem>
+     */
+    private array $result;
 
     public function __construct(string ...$strings)
     {
@@ -23,9 +28,10 @@ final class SearchForPost extends CollectionQuery
         return $this->strings;
     }
 
-    protected function validateResult($result): void
+    public function __invoke($result): void
     {
         Assertion::allIsInstanceOf($result, PostListItem::class);
+        $this->result = $result;
     }
 
     /**
@@ -33,6 +39,6 @@ final class SearchForPost extends CollectionQuery
      */
     public function getResult(): array
     {
-        return parent::getResult();
+        return $this->result;
     }
 }
