@@ -20,7 +20,7 @@ final class CreateBlogOnUserRegister implements EventListener
         $this->bus->dispatchCommand(new CreateBlog(new BlogId($event->blogName())));
     }
 
-    public function listensTo(): array
+    public static function getListenedEvents(): array
     {
         return [
             UserWasRegistered::class => 'onUserWasRegistered',

@@ -104,11 +104,6 @@ final class ListenerV3 implements EventListener
         $this->event = $event;
     }
 
-    public function listensTo(): array
-    {
-        throw new RuntimeException(__METHOD__ . ' should not be invoked');
-    }
-
     public static function getListenedEvents(): array
     {
         return [
@@ -124,7 +119,7 @@ final class SomeListener implements EventListener
         throw new RuntimeException($event->action() . ' works!!');
     }
 
-    public function listensTo(): array
+    public static function getListenedEvents(): array
     {
         return [
             SomethingWasDone::class => 'onSomethingWasDone',
