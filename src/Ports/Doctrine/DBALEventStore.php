@@ -18,7 +18,6 @@ use Star\Component\DomainEvent\Serialization\Payload;
 use Star\Component\DomainEvent\Serialization\PayloadSerializer;
 use function array_map;
 use function count;
-use function is_array;
 use function json_decode;
 use function trigger_error;
 
@@ -119,7 +118,7 @@ abstract class DBALEventStore
 
             return $this->serializer->createEvent(
                 $eventRow[self::COLUMN_EVENT_NAME],
-                $this->unserializePayloadColumn($eventRow[self::COLUMN_PAYLOAD])
+                Payload::fromArray($this->unserializePayloadColumn($eventRow[self::COLUMN_PAYLOAD]))
             );
         };
 
@@ -137,15 +136,10 @@ abstract class DBALEventStore
 
         $events = $aggregate->uncommitedEvents();
         foreach ($events as $event) {
-            $payload = $this->serializer->createPayload($event);
-            if (is_array($payload)) {
-                $payload = Payload::fromArray($payload);
-            }
-
             $this->persistEvent(
                 $id,
                 $this->serializer->createEventName($event),
-                $payload
+                $this->serializer->createPayload($event),
             );
 
             $this->publisher->publish($event);

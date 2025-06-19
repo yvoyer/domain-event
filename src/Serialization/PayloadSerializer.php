@@ -8,18 +8,13 @@ interface PayloadSerializer
 {
     public function createEventName(DomainEvent $event): string;
 
-    /**
-     * @return array<string, string|int|float|bool>|Payload
-     * @deprecated Returning array will be removed in 3.0, We'll return Payload
-     */
-    public function createPayload(DomainEvent $event);
+    public function createPayload(DomainEvent $event): Payload;
 
     /**
      * @param string|class-string<DomainEvent> $eventName
-     * @param array<string, string|int|bool|float> $payload
      */
     public function createEvent(
         string $eventName,
-        array $payload
+        Payload $payload,
     ): DomainEvent;
 }

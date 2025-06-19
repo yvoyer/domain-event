@@ -113,18 +113,17 @@ final class PayloadFromReflectionTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage(
             sprintf(
-                'Event with name "stdClass" must implement interface "%s" or "%s" in order to be re-created.',
+                'Event with name "stdClass" must implement interface "%s" in order to be re-created.',
                 CreatedFromPayload::class,
-                CreatedFromTypedPayload::class
             )
         );
-        $serializer->createEvent(stdClass::class, []);
+        $serializer->createEvent(stdClass::class, Payload::fromArray([]));
     }
 
     public function test_it_should_allow_creating_event_using_new_payload_object(): void
     {
         $serializer = new PayloadFromReflection();
-        $class = new class() implements CreatedFromTypedPayload {
+        $class = new class() implements CreatedFromPayload {
             public static function fromPayload(Payload $payload): DomainEvent
             {
                 return new self();
@@ -133,7 +132,7 @@ final class PayloadFromReflectionTest extends TestCase
 
         self::assertInstanceOf(
             get_class($class),
-            $serializer->createEvent(get_class($class), [])
+            $serializer->createEvent(get_class($class), Payload::fromArray([]))
         );
     }
 
@@ -160,49 +159,11 @@ final class PayloadFromReflectionTest extends TestCase
 
         self::assertSame('2000-01-01 12:34:56.098700', $payload['attribute']);
     }
-
-    public function test_it_should_allow_migration_to_new_api(): void
-    {
-        $serializer = new PayloadFromReflection();
-        $oldEvent = $serializer->createEvent(V2EventArray::class, ['key' => 'value']);
-        self::assertInstanceOf(V2EventArray::class, $oldEvent);
-        self::assertSame('value', $oldEvent->key);
-
-        $newEvent = $serializer->createEvent(V2EventPayload::class, ['key' => 'value']);
-        self::assertInstanceOf(V2EventPayload::class, $newEvent);
-        self::assertSame('value', $newEvent->key);
-    }
 }
 
 final class MixedEvent implements DomainEvent {
     public function __construct(
-        private mixed $attribute,
+        public mixed $attribute,
     ) {
-    }
-}
-
-final class V2EventArray implements CreatedFromPayload
-{
-    public function __construct(
-        public string $key,
-    ) {
-    }
-
-    public static function fromPayload(array $payload): CreatedFromPayload
-    {
-        return new self($payload['key']);
-    }
-}
-
-final class V2EventPayload implements CreatedFromTypedPayload
-{
-    public function __construct(
-        public string $key,
-    ) {
-    }
-
-    public static function fromPayload(Payload $payload): DomainEvent
-    {
-        return new self($payload->getString('key'));
     }
 }

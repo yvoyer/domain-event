@@ -12,7 +12,6 @@ use function is_bool;
 use function is_scalar;
 use function is_subclass_of;
 use function sprintf;
-use function trigger_error;
 
 final class PayloadFromReflection implements PayloadSerializer
 {
@@ -34,12 +33,9 @@ final class PayloadFromReflection implements PayloadSerializer
         $this->transformers[] = $transformer;
     }
 
-    /**
-     * @return array<string, string|int|float|bool>
-     */
     public function createPayload(
         DomainEvent $event,
-    ): array {
+    ): Payload {
         $reflection = new ReflectionClass($event);
         $properties = $reflection->getProperties();
         $payload = [
@@ -61,35 +57,22 @@ final class PayloadFromReflection implements PayloadSerializer
             $payload[$attribute] = $value;
         }
 
-        return $payload;
+        return Payload::fromArray($payload);
     }
 
     public function createEvent(
         string $eventName,
-        array $payload
+        Payload $payload,
     ): DomainEvent {
         if (is_subclass_of($eventName, CreatedFromPayload::class)) {
             return $eventName::fromPayload($payload);
         }
 
-        if (is_subclass_of($eventName, CreatedFromTypedPayload::class)) {
-            @trigger_error(
-                sprintf(
-                    'The interface "%s" will be remove in 3.0. Use "%s" instead and use Payload as argument.',
-                    CreatedFromTypedPayload::class,
-                    CreatedFromPayload::class
-                ),
-                E_USER_DEPRECATED
-            );
-            return $eventName::fromPayload(Payload::fromArray($payload));
-        }
-
         throw new InvalidArgumentException(
             sprintf(
-                'Event with name "%s" must implement interface "%s" or "%s" in order to be re-created. ',
+                'Event with name "%s" must implement interface "%s" in order to be re-created.',
                 $eventName,
                 CreatedFromPayload::class,
-                CreatedFromTypedPayload::class
             )
         );
     }
