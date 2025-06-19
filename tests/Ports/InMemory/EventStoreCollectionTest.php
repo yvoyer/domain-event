@@ -37,7 +37,7 @@ final class EventStoreCollectionTest extends TestCase
         $publisher = $this->createMock(EventPublisher::class);
         $publisher
             ->expects(self::once())
-            ->method('publishChanges')
+            ->method('publish')
             ->with(self::containsOnlyInstancesOf(StubEvent::class));
 
         $store = new StubCollection($publisher);

@@ -15,8 +15,8 @@ final class EventPublisherTest extends TestCase
             $this->createMock(DomainEvent::class),
         ];
 
-        $withOne->publish(...$events); // @phpstan-ignore-line
-        self::assertCount(1, $withOne->getEvents());
+        $withOne->publish(...$events);
+        self::assertCount(2, $withOne->getEvents());
     }
 
     public function test_it_should_support_using_interface_with_many_events(): void
@@ -50,29 +50,24 @@ abstract class BaseTestPublisher implements EventPublisher
     {
         throw new RuntimeException(__METHOD__ . ' not implemented yet.');
     }
-
-    public function publishChanges(array $events): void
-    {
-        throw new RuntimeException(__METHOD__ . ' not implemented yet.');
-    }
 }
 
 final class PublisherVersion1 extends BaseTestPublisher
 {
-    public function publish(DomainEvent $event): void {
-        $this->events[] = $event;
+    public function publish(DomainEvent ...$events): void
+    {
+        foreach ($events as $event) {
+            $this->events[] = $event;
+        }
     }
 }
 
 final class PublisherVersion2 extends BaseTestPublisher
 {
-    public function publish(
-        DomainEvent $event,
-        DomainEvent ...$others
-    ): void {
-        $this->events[] = $event;
-        foreach ($others as $other) {
-            $this->events[] = $other;
+    public function publish(DomainEvent ...$events): void
+    {
+        foreach ($events as $event) {
+            $this->events[] = $event;
         }
     }
 }

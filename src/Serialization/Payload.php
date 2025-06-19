@@ -2,7 +2,6 @@
 
 namespace Star\Component\DomainEvent\Serialization;
 
-use ArrayAccess;
 use Assert\Assertion;
 use DateTimeImmutable;
 use DateTimeInterface;
@@ -15,9 +14,6 @@ use function json_decode;
 use function sprintf;
 use function str_contains;
 
-/**
- * @implements ArrayAccess<string, SerializableAttribute|string|int|bool|float>
- */
 final class Payload
 {
     /**

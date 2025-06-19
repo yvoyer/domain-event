@@ -19,6 +19,6 @@ final class CreateNewPostHandler
         $post = PostAggregate::draftPost($command->postId(), $command->title(), $command->blogId());
 
         $this->posts->savePost($post);
-        $this->publisher->publishChanges($post->uncommitedEvents());
+        $this->publisher->publish(...$post->uncommitedEvents());
     }
 }
