@@ -125,8 +125,6 @@ final class SomeListener implements EventListener
             SomethingWasDone::class => 'onSomethingWasDone',
         ];
     }
-
-
 }
 
 final class SomethingWasDone implements DomainEvent

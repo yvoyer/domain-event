@@ -4,7 +4,6 @@ namespace Star\Component\DomainEvent\Ports\Symfony;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
 use Star\Component\DomainEvent\BadMethodCallException;
 use Star\Component\DomainEvent\DomainEvent;
 use Star\Component\DomainEvent\DuplicatedListenerPriority;
