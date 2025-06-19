@@ -19,6 +19,6 @@ final class PublishPostHandler
         $post->publish($command->publishedAt(), $command->publishedBy());
 
         $this->posts->savePost($post);
-        $this->publisher->publishChanges($post->uncommitedEvents());
+        $this->publisher->publish(...$post->uncommitedEvents());
     }
 }

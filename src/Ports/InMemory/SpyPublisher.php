@@ -5,6 +5,7 @@ namespace Star\Component\DomainEvent\Ports\InMemory;
 use Star\Component\DomainEvent\DomainEvent;
 use Star\Component\DomainEvent\EventListener;
 use Star\Component\DomainEvent\EventPublisher;
+use function array_merge;
 
 final class SpyPublisher implements EventPublisher
 {
@@ -18,15 +19,10 @@ final class SpyPublisher implements EventPublisher
         throw new \RuntimeException(__METHOD__ . ' not implemented yet.');
     }
 
-    public function publish(DomainEvent $event): void
-    {
-        $this->events[] = $event;
-    }
-
-    public function publishChanges(array $events): void
+    public function publish(DomainEvent ...$events): void
     {
         foreach ($events as $event) {
-            $this->publish($event);
+            $this->events[] = $event;
         }
     }
 

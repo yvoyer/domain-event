@@ -51,11 +51,6 @@ $controller = new PostController($messageBus, $messageBus);
 // Requests made by a user to the server
 echo $controller->search('cqrs') . "\n";
 
-// @deprecate: remove condition in 3.0, since we no longer support 7.1
-if (version_compare(phpversion(), '7.2') === -1) {
-    ini_set('display_errors', 0);
-}
-
 $publisher->publish(new UserWasRegistered($blogName = 'my-blog'));
 
 echo $controller->createPost($blogName, ['data' => ['title' => 'DDD rocks !!!']]) . "\n"; // not published

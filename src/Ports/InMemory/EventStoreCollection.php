@@ -32,7 +32,7 @@ abstract class EventStoreCollection implements Countable
 
         $events = $aggregate->uncommitedEvents();
         $this->events[$id] = array_merge($this->events[$id], $events);
-        $this->publisher->publishChanges($events);
+        $this->publisher->publish(...$events);
     }
 
     final protected function loadAggregate(

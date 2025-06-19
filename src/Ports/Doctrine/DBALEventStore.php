@@ -6,9 +6,7 @@ use Assert\Assertion;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Result;
 use Doctrine\DBAL\Types\Types;
-use RuntimeException;
 use Star\Component\DomainEvent\AggregateRoot;
 use Star\Component\DomainEvent\DomainEvent;
 use Star\Component\DomainEvent\EventPublisher;
@@ -87,17 +85,15 @@ abstract class DBALEventStore
             $qb->addOrderBy($column, 'ASC');
         }
 
-        $result = $qb->execute();
-        if (! $result instanceof Result) {
-            throw new RuntimeException('An error occurred while executing statement.');
-        }
         /**
          * @var array<int, array{
          *    event_name: string,
          *    payload: string,
          * }> $stream
          */
-        $stream = $result->fetchAllAssociative();
+        $stream = $qb
+            ->executeQuery()
+            ->fetchAllAssociative();
 
         if (count($stream) === 0) {
             $this->handleNoEventFound($id);
@@ -182,7 +178,7 @@ abstract class DBALEventStore
         string $eventName,
         Payload $payload,
     ): void {
-        $expr = $this->connection->getExpressionBuilder();
+        $expr = $this->connection->createExpressionBuilder();
 
         /**
          * Subquery hack to allow update of same table in same query for Mysql
@@ -209,7 +205,7 @@ abstract class DBALEventStore
                 ],
                 [
                     'aggregate_id' => $id,
-                    'payload' => $payload->toArray(), // todo allow serialization in other format than array (JSON)
+                    'payload' => $payload->toArray(),
                     'event' => $eventName,
                     'pushed_on' => $pushedOn,
                 ],
@@ -240,7 +236,7 @@ abstract class DBALEventStore
                 $builder->buildTypes()
             )
             ->setParameter('aggregate_id', $id, Types::STRING)
-            ->execute();
+            ->executeStatement();
 
         $this->afterEventPersist(
             $id,

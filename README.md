@@ -122,7 +122,7 @@ $publisher = new class() implements EventPublisher {}; // your implementation ch
 $publisher->subscribe(new DoSomethingProductCreated()); // This is a subscriber that listens to the ProductWasCreated event
 
 $product = Product::draftProduct('lightsaber');
-$publisher->publishChanges($product->uncommitedEvents()); // will notify the listener and call the DoSomethingProductCreated::doSomething() method
+$publisher->publish(...$product->uncommitedEvents()); // will notify the listener and call the DoSomethingProductCreated::doSomething() method
 ```
 
 **Warning**: Be advised that events will be removed from aggregate once collected and published,

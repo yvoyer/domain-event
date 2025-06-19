@@ -8,16 +8,11 @@
 
 namespace Star\Component\DomainEvent;
 
-use Assert\Assertion;
 use function array_merge;
 use function array_pop;
-use function count;
 use function explode;
-use function func_get_args;
 use function get_class;
-use function is_array;
 use function method_exists;
-use function trigger_error;
 
 abstract class AggregateRoot
 {
@@ -53,36 +48,14 @@ abstract class AggregateRoot
     }
 
     /**
-     * @param DomainEvent[]|DomainEvent $events
-     *
      * @return static
-     * @deprecated Passing an array of event will be removed, consider passing events directly.
-     * @see https://github.com/yvoyer/domain-event/issues/55
      */
-    public static function fromStream($events): AggregateRoot
-    {
-        $args = func_get_args();
-        if (count($args) === 1 && is_array($args[0])) {
-            @trigger_error(
-                'Passing an array of DomainEvent to AggregateRoot::fromStream() will be removed in 3.0.' .
-                ' Pass them directly.',
-                E_USER_DEPRECATED
-            );
-            $events = $args[0];
-        } else {
-            $events = $args;
-        }
-        Assertion::allIsInstanceOf($events, DomainEvent::class);
-
-        /**
-         * @var static $aggregate
-         */
+    public static function fromStream(
+        DomainEvent ...$events,
+    ): AggregateRoot {
         $aggregate = new static();
-        foreach ($events as $event) {
-            /**
-             * @var DomainEvent $event
-             */
-            $aggregate->mutate($event);
+        if (count($events) > 0) {
+            $aggregate->mutate(...$events);
         }
 
         return $aggregate;
@@ -109,10 +82,6 @@ abstract class AggregateRoot
 
     /**
      * You can override this method to change the method format. Default: "onMyEvent" when $event class is "MyEvent".
-     *
-     * @param DomainEvent $event
-     *
-     * @return string
      */
     protected function getEventMethod(
         DomainEvent $event,
@@ -120,8 +89,7 @@ abstract class AggregateRoot
         $class = get_class($event);
         $parts = explode('\\', $class);
         $name = array_pop($parts);
-        $method = 'on' . $name;
 
-        return $method;
+        return 'on' . $name;
     }
 }

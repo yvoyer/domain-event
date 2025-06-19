@@ -16,7 +16,6 @@ use Star\Component\DomainEvent\DuplicatedListenerPriority;
 use Star\Component\DomainEvent\EventListener;
 use Star\Component\DomainEvent\EventPublisher;
 use function array_key_exists;
-use function array_merge;
 use function count;
 use function get_class;
 use function method_exists;
@@ -34,11 +33,8 @@ final class SymfonyPublisher implements EventPublisher
     ) {
     }
 
-    public function publish(
-        DomainEvent $event,
-        DomainEvent ...$others,
-    ): void {
-        $events = array_merge([$event], $others);
+    public function publish(DomainEvent ...$events): void
+    {
         foreach ($events as $event) {
             $this->dispatcher->dispatch(
                 new class($event) implements EventAdapter, StoppableEventInterface {
@@ -96,19 +92,8 @@ final class SymfonyPublisher implements EventPublisher
                 $eventClass,
                 $listener,
                 $method,
-                $bcBreakPriority // for BC. fixme remove on next major
+                $bcBreakPriority,
             );
-        }
-    }
-
-    /**
-     * @param array<int, DomainEvent> $events
-     */
-    public function publishChanges(
-        array $events,
-    ): void {
-        foreach ($events as $event) {
-            $this->publish($event);
         }
     }
 
