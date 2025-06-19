@@ -580,7 +580,7 @@ final class PostEventStore extends DBALEventStore
 
     protected function createAggregateFromStream(array $events): AggregateRoot
     {
-        return PostAggregate::fromStream($events);
+        return PostAggregate::fromStream(...$events);
     }
 
     protected function handleNoEventFound(string $id): void

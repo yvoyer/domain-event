@@ -27,7 +27,7 @@ final class EventStoreCollectionTest extends TestCase
 
         self::assertCount(0, $store);
 
-        $store->saveStub('id', StubAggregate::fromStream([new StubEvent()]));
+        $store->saveStub('id', StubAggregate::fromStream(new StubEvent()));
 
         self::assertCount(1, $store);
     }
@@ -41,13 +41,13 @@ final class EventStoreCollectionTest extends TestCase
             ->with(self::containsOnlyInstancesOf(StubEvent::class));
 
         $store = new StubCollection($publisher);
-        $store->saveStub('id', StubAggregate::fromStream([new StubEvent()]));
+        $store->saveStub('id', StubAggregate::fromStream(new StubEvent()));
     }
 
     public function test_it_should_load_aggregate(): void
     {
         $store = new StubCollection($this->createMock(EventPublisher::class));
-        $aggregate = StubAggregate::fromStream([]);
+        $aggregate = StubAggregate::fromStream();
 
         $store->saveStub('id', $aggregate);
         $aggregate = $store->getAggregate('id');
@@ -68,9 +68,9 @@ final class EventStoreCollectionTest extends TestCase
     public function test_it_should_allow_to_filter_result(): void
     {
         $collection = new StubCollection($this->createMock(EventPublisher::class));
-        $collection->saveStub('one', StubAggregate::fromStream([new StubEvent()]));
-        $collection->saveStub('two', StubAggregate::fromStream([new StubEvent(), new StubEvent()]));
-        $collection->saveStub('three', StubAggregate::fromStream([new StubEvent(), new StubEvent(), new StubEvent()]));
+        $collection->saveStub('one', StubAggregate::fromStream(new StubEvent()));
+        $collection->saveStub('two', StubAggregate::fromStream(new StubEvent(), new StubEvent()));
+        $collection->saveStub('three', StubAggregate::fromStream(new StubEvent(), new StubEvent(), new StubEvent()));
 
         self::assertCount(3, $collection);
         self::assertCount(1, $collection->filterByCount(2));
@@ -80,9 +80,9 @@ final class EventStoreCollectionTest extends TestCase
     public function test_it_should_allow_to_check_if_exists(): void
     {
         $collection = new StubCollection($this->createMock(EventPublisher::class));
-        $collection->saveStub('one', StubAggregate::fromStream([new StubEvent()]));
-        $collection->saveStub('two', StubAggregate::fromStream([new StubEvent(), new StubEvent()]));
-        $collection->saveStub('three', StubAggregate::fromStream([new StubEvent(), new StubEvent(), new StubEvent()]));
+        $collection->saveStub('one', StubAggregate::fromStream(new StubEvent()));
+        $collection->saveStub('two', StubAggregate::fromStream(new StubEvent(), new StubEvent()));
+        $collection->saveStub('three', StubAggregate::fromStream(new StubEvent(), new StubEvent(), new StubEvent()));
 
         self::assertTrue($collection->counterExists(3));
         self::assertFalse($collection->counterExists(99));
@@ -122,12 +122,12 @@ final class StubCollection extends EventStoreCollection
 
     protected function handleAggregateNotFound(string $id): void
     {
-        throw new \RuntimeException($id . ' not found.');
+        throw new RuntimeException($id . ' not found.');
     }
 
     protected function createAggregate(DomainEvent ...$events): AggregateRoot
     {
-        return StubAggregate::fromStream($events);
+        return StubAggregate::fromStream(...$events);
     }
 
     public function filterByCount(int $count): array

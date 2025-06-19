@@ -12,12 +12,12 @@ final class AggregateRootTest extends TestCase
         $this->expectExceptionMessage(
             "The mutation 'onMissingMethodEvent' do not exists on aggregate 'Star\Component\DomainEvent\StubAggregate'."
         );
-        StubAggregate::fromStream([new MissingMethodEvent()]);
+        StubAggregate::fromStream(new MissingMethodEvent());
     }
 
     public function test_it_should_reset_uncommited_events_when_fetched(): void
     {
-        $aggregate = StubAggregate::fromStream([new ValidEvent()]);
+        $aggregate = StubAggregate::fromStream(new ValidEvent());
         $events = $aggregate->uncommitedEvents();
         $this->assertCount(1, $events);
         $this->assertInstanceOf(ValidEvent::class, $events[0]);
@@ -26,7 +26,7 @@ final class AggregateRootTest extends TestCase
 
     public function test_it_should_apply_events_in_order_of_execution_when_event_triggers_another_event(): void
     {
-        $aggregate = StubAggregate::fromStream([new MultipleEventWereTriggered()]);
+        $aggregate = StubAggregate::fromStream(new MultipleEventWereTriggered());
 
         $events = $aggregate->uncommitedEvents();
         $this->assertCount(3, $events);
@@ -37,14 +37,14 @@ final class AggregateRootTest extends TestCase
 
     public function test_it_should_allow_child_class_to_call_construct(): void
     {
-        $root = RootWithConstruct::fromStream([]);
+        $root = RootWithConstruct::fromStream();
         $this->assertCount(0, $root->uncommitedEvents());
         $this->assertSame(12, $root->id);
     }
 
     public function test_it_should_allow_to_pass_multiple_events_on_mutate(): void
     {
-        $root = StubAggregate::fromStream([]);
+        $root = StubAggregate::fromStream();
         $root->addEvents(
             $one = new NamedEvent('one'),
             $two = new NamedEvent('two'),
@@ -131,7 +131,7 @@ final class NamedEvent implements DomainEvent
 
 final class RootWithConstruct extends AggregateRoot
 {
-    public $id;
+    public ?int $id;
 
     protected function configure(): void
     {
