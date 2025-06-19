@@ -5,13 +5,13 @@ namespace Star\Example\Blog\Domain\Event\Post;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Star\Component\DomainEvent\DomainEvent;
+use Star\Component\DomainEvent\Serialization\CreatedFromPayload;
 use Star\Component\DomainEvent\Serialization\SerializableDateTime;
-use Star\Component\DomainEvent\Serialization\CreatedFromTypedPayload;
 use Star\Component\DomainEvent\Serialization\Payload;
 use Star\Example\Blog\Domain\Model\Post\PostId;
 use Star\Example\Blog\Domain\Model\Post\PostTitle;
 
-final class PostTitleWasChanged implements CreatedFromTypedPayload
+final class PostTitleWasChanged implements CreatedFromPayload
 {
     private SerializableDateTime $changedAt;
 

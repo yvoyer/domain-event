@@ -7,9 +7,11 @@ use Star\Component\DomainEvent\DomainEvent;
 interface CreatedFromPayload extends DomainEvent
 {
     /**
-     * @param SerializableAttribute[]|string[]|int[]|bool[]|float[] $payload
-     * @return CreatedFromPayload
-     * @deprecated Class receive Payload class as argument in 3.0.
+     * Recreates the event from the Payload.
+     * Payload should contain keys with same name as property based on PayloadSerializer strategy.
+     *
+     * @see PayloadSerializer
+     * @since 3.0
      */
-    public static function fromPayload(array /* uncomment in 3.0: Payload */ $payload): CreatedFromPayload;
+    public static function fromPayload(Payload $payload): DomainEvent;
 }
