@@ -19,7 +19,6 @@ use Star\Component\DomainEvent\Serialization\PayloadSerializer;
 use function array_map;
 use function count;
 use function json_decode;
-use function trigger_error;
 
 abstract class DBALEventStore
 {
@@ -71,8 +70,6 @@ abstract class DBALEventStore
 
     protected function getAggregateWithId(string $id): AggregateRoot
     {
-        $this->ensureTableExists();
-
         $qb = $this->connection->createQueryBuilder();
         $expr = $qb->expr();
         $qb
@@ -132,8 +129,6 @@ abstract class DBALEventStore
         string $id,
         AggregateRoot $aggregate,
     ): void {
-        $this->ensureTableExists();
-
         $events = $aggregate->uncommitedEvents();
         foreach ($events as $event) {
             $this->persistEvent(
@@ -185,7 +180,7 @@ abstract class DBALEventStore
     private function persistEvent(
         string $id,
         string $eventName,
-        Payload $payload
+        Payload $payload,
     ): void {
         $expr = $this->connection->getExpressionBuilder();
 
@@ -288,55 +283,5 @@ abstract class DBALEventStore
         Payload $payload,
         DateTimeInterface $pushedOn
     ): void {
-    }
-
-    /**
-     * @deprecated Will be remove in 3.0
-     * @see https://github.com/yvoyer/domain-event/issues/54
-     */
-    private function ensureTableExists(): void
-    {
-        /** @deprecated remove this automatic stuff */
-        $manager = $this->connection->getSchemaManager();
-        if (!$manager->tablesExist([$this->tableName()])) {
-            @trigger_error(
-                'Automatic table creation will be removed in 3.0.' .
-                ' You need to create your schema before persisting events.' .
-                ' See: https://github.com/yvoyer/domain-event/issues/54',
-                E_USER_DEPRECATED
-            );
-            $originalSchema = $manager->createSchema();
-            $newSchema = $manager->createSchema();
-
-            $table = $newSchema->createTable($this->tableName());
-            $table->addColumn(
-                self::COLUMN_AGGREGATE_ID,
-                Types::STRING,
-                [
-                    'length' => 50,
-                ]
-            );
-            $table->addColumn(
-                self::COLUMN_EVENT_NAME,
-                Types::STRING
-            );
-            $table->addColumn(
-                self::COLUMN_PAYLOAD,
-                $this->getPayloadType()
-            );
-            $table->addColumn(
-                self::COLUMN_PUSHED_ON,
-                $this->getPushedOnType()
-            );
-            $table->addColumn(
-                self::COLUMN_VERSION,
-                Types::BIGINT
-            );
-
-            $sqlStrings = $originalSchema->getMigrateToSql($newSchema, $this->connection->getDatabasePlatform());
-            foreach ($sqlStrings as $sql) {
-                $this->connection->exec($sql);
-            }
-        }
     }
 }

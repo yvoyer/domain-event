@@ -47,6 +47,33 @@ final class DBALEventStoreTest extends TestCase
         );
     }
 
+    private function ensureTableExists(
+        string $payloadType = Types::JSON,
+        string $tableName = self::TABLE_NAME,
+    ): void {
+        $manager = $this->connection->createSchemaManager();
+        $originalSchema = $manager->introspectSchema();
+        $newSchema = $manager->introspectSchema();
+
+        $table = $newSchema->createTable($tableName);
+        $table->addColumn(
+            'aggregate_id',
+            Types::STRING,
+            [
+                'length' => 50,
+            ]
+        );
+        $table->addColumn('event_name', Types::STRING);
+        $table->addColumn('payload', $payloadType);
+        $table->addColumn('pushed_on', Types::DATETIME_IMMUTABLE);
+        $table->addColumn('version', Types::BIGINT);
+
+        $sqlStrings = $originalSchema->getMigrateToSql($newSchema, $this->connection->getDatabasePlatform());
+        foreach ($sqlStrings as $sql) {
+            $this->connection->executeStatement($sql);
+        }
+    }
+
     public function test_it_should_create_table_when_it_do_not_exists(): void
     {
         $store = new PostEventStore(
@@ -54,8 +81,7 @@ final class DBALEventStoreTest extends TestCase
             $this->createMock(EventPublisher::class),
             new PayloadFromReflection()
         );
-
-        self::assertFalse($this->connection->getSchemaManager()->tablesExist(self::TABLE_NAME));
+        $this->ensureTableExists();
 
         $store->saveAggregate(
             PostAggregate::draftPost(
@@ -65,10 +91,8 @@ final class DBALEventStoreTest extends TestCase
             )
         );
 
-        self::assertTrue($this->connection->getSchemaManager()->tablesExist(self::TABLE_NAME));
         $persisted = $store->loadAggregate($id->toString());
 
-        self::assertInstanceOf(PostAggregate::class, $persisted);
         self::assertCount(0, $persisted->uncommitedEvents());
         self::assertSame($id->toString(), $persisted->getId()->toString());
     }
@@ -80,6 +104,7 @@ final class DBALEventStoreTest extends TestCase
             $this->createMock(EventPublisher::class),
             new PayloadFromReflection()
         );
+        $this->ensureTableExists();
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Aggregate "not-found" not found.');
@@ -106,6 +131,7 @@ final class DBALEventStoreTest extends TestCase
             $this->createMock(EventPublisher::class),
             new PayloadFromReflection()
         );
+        $this->ensureTableExists();
         $store->saveAggregate($post);
 
         $qb = $this->connection->createQueryBuilder();
@@ -116,7 +142,7 @@ final class DBALEventStoreTest extends TestCase
             ->where($expr->like('payload', ':pattern'))
             ->setParameter('new_date', '2000-01-01 00:00:00')
             ->setParameter('pattern', '%Title in 2002%')
-            ->execute();
+            ->executeStatement();
 
         $storeByVersion = new PostEventStore(
             $this->connection,
@@ -182,6 +208,7 @@ final class DBALEventStoreTest extends TestCase
                 throw new RuntimeException(__METHOD__ . ' not implemented yet.');
             }
         };
+        $this->ensureTableExists();
 
         $post = PostAggregate::draftPost(
             PostId::asUUID(),
@@ -200,8 +227,8 @@ final class DBALEventStoreTest extends TestCase
         $result = $this->connection->createQueryBuilder()
             ->select('*')
             ->from(self::TABLE_NAME)
-            ->execute()
-            ->fetchAll();
+            ->executeQuery()
+            ->fetchAllAssociative();
         self::assertCount(2, $result);
         self::assertSame(PostWasDrafted::class, $result[0]['event_name']);
         self::assertSame(PostTitleWasChanged::class, $result[1]['event_name']);
@@ -215,6 +242,8 @@ final class DBALEventStoreTest extends TestCase
             $this->createMock(EventPublisher::class),
             new PayloadFromReflection()
         );
+        $this->ensureTableExists();
+
         $post = PostAggregate::draftPostFixture();
         $post->changeTitle('Change 1', new DateTimeImmutable());
         $post->publish(new DateTimeImmutable(), 'Joe');
@@ -228,7 +257,7 @@ final class DBALEventStoreTest extends TestCase
         $result = $this->connection->createQueryBuilder()
             ->select('*')
             ->from(self::TABLE_NAME)
-            ->execute()
+            ->executeQuery()
             ->fetchAllAssociative();
 
         self::assertSame(PostWasDrafted::class, $result[0]['event_name']);
@@ -260,7 +289,7 @@ final class DBALEventStoreTest extends TestCase
 
             protected function handleNoEventFound(string $id): void
             {
-                throw new RuntimeException(\sprintf('Aggregate "%s" not found.', $id));
+                throw new RuntimeException(sprintf('Aggregate "%s" not found.', $id));
             }
 
             public function saveAggregate(PostAggregate $post): void
@@ -291,6 +320,8 @@ final class DBALEventStoreTest extends TestCase
                 );
             }
         };
+        $this->ensureTableExists();
+
         $post = PostAggregate::draftPostFixture();
         $store->saveAggregate($post);
 
@@ -311,7 +342,7 @@ final class DBALEventStoreTest extends TestCase
         $result = $this->connection->createQueryBuilder()
             ->select('*')
             ->from(self::TABLE_NAME)
-            ->execute()
+            ->executeQuery()
             ->fetchAllAssociative();
 
         self::assertCount(2, $result);
@@ -338,7 +369,7 @@ final class DBALEventStoreTest extends TestCase
 
             protected function handleNoEventFound(string $id): void
             {
-                throw new RuntimeException(\sprintf('Aggregate "%s" not found.', $id));
+                throw new RuntimeException(sprintf('Aggregate "%s" not found.', $id));
             }
 
             public function saveAggregate(PostAggregate $post): void
@@ -369,6 +400,8 @@ final class DBALEventStoreTest extends TestCase
                 );
             }
         };
+        $this->ensureTableExists();
+
         $post = PostAggregate::draftPostFixture();
         $store->saveAggregate($post);
 
@@ -389,7 +422,7 @@ final class DBALEventStoreTest extends TestCase
         $result = $this->connection->createQueryBuilder()
             ->select('*')
             ->from(self::TABLE_NAME)
-            ->execute()
+            ->executeQuery()
             ->fetchAllAssociative();
 
         self::assertCount(2, $result);
@@ -416,7 +449,7 @@ final class DBALEventStoreTest extends TestCase
 
             protected function handleNoEventFound(string $id): void
             {
-                throw new RuntimeException(\sprintf('Aggregate "%s" not found.', $id));
+                throw new RuntimeException(sprintf('Aggregate "%s" not found.', $id));
             }
 
             public function saveAggregate(PostAggregate $post): void
@@ -449,6 +482,8 @@ final class DBALEventStoreTest extends TestCase
                 );
             }
         };
+        $this->ensureTableExists();
+
         $post = PostAggregate::draftPostFixture();
         $store->saveAggregate($post);
 
@@ -458,7 +493,7 @@ final class DBALEventStoreTest extends TestCase
         $result = $this->connection->createQueryBuilder()
             ->select('*')
             ->from(self::TABLE_NAME)
-            ->execute()
+            ->executeQuery()
             ->fetchAllAssociative();
 
         self::assertCount(1, $result);
@@ -472,6 +507,7 @@ final class DBALEventStoreTest extends TestCase
             $publisher = new SpyPublisher(),
             new PayloadFromReflection()
         );
+        $this->ensureTableExists();
 
         self::assertCount(0, $publisher->getPublishedEvents());
 
@@ -488,7 +524,7 @@ final class DBALEventStoreTest extends TestCase
     {
         $store = new class(
             $this->connection,
-            $publisher = $this->createMock(EventPublisher::class),
+            $this->createMock(EventPublisher::class),
             new PayloadFromReflection()
         ) extends DBALEventStore {
             protected function tableName(): string
@@ -503,7 +539,7 @@ final class DBALEventStoreTest extends TestCase
 
             protected function handleNoEventFound(string $id): void
             {
-                throw new \RuntimeException(__METHOD__ . ' not implemented yet.');
+                throw new RuntimeException(__METHOD__ . ' not implemented yet.');
             }
 
             protected function unserializePayloadColumn(string $data): array
@@ -526,6 +562,7 @@ final class DBALEventStoreTest extends TestCase
                 return $this->getAggregateWithId($postId->toString());
             }
         };
+        $this->ensureTableExists(Types::ARRAY, 'table_name');
 
         $store->saveAggregate($post = PostAggregate::draftPostFixture());
         $object = $store->getAggregate($post->getId());
@@ -548,7 +585,7 @@ final class PostEventStore extends DBALEventStore
 
     protected function handleNoEventFound(string $id): void
     {
-        throw new RuntimeException(\sprintf('Aggregate "%s" not found.', $id));
+        throw new RuntimeException(sprintf('Aggregate "%s" not found.', $id));
     }
 
     public function loadAggregate(string $id): PostAggregate
