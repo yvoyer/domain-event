@@ -52,7 +52,7 @@ final class SymfonyPublisherTest extends TestCase implements EventListener
         $this->triggered = true;
     }
 
-    public function listensTo(): array
+    public static function getListenedEvents(): array
     {
         return [
             SomethingOccurred::class => 'onEventOccurred',
@@ -112,7 +112,7 @@ final class SymfonyPublisherTest extends TestCase implements EventListener
                     $this->methodCalls[] = __FUNCTION__;
                 }
 
-                public function listensTo(): array
+                public static function getListenedEvents(): array
                 {
                     return [
                         SomethingOccurred::class => [
@@ -219,7 +219,7 @@ final class SymfonyPublisherTest extends TestCase implements EventListener
 
 final class MissingMethodListener implements EventListener
 {
-    public function listensTo(): array
+    public static function getListenedEvents(): array
     {
         return [
             PostWasDrafted::class => 'onBadMethodCall',
@@ -246,7 +246,7 @@ final class ListenerWithOldPriority implements EventListener
     {
     }
 
-    public function listensTo(): array
+    public static function getListenedEvents(): array
     {
         return [
             'old-event' => 'method',
@@ -260,7 +260,7 @@ final class ListenerWithNewPriority implements EventListener
     {
     }
 
-    public function listensTo(): array
+    public static function getListenedEvents(): array
     {
         return [
             'event' => [
@@ -313,10 +313,5 @@ final class ListenerWithMethod implements EventListener
                 -10 => 'methodMinusTen',
             ],
         ];
-    }
-
-    public function listensTo(): array
-    {
-        throw new RuntimeException(__METHOD__ . ' not implemented yet.');
     }
 }

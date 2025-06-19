@@ -83,7 +83,7 @@ When you wish to perform an operation after an event was dispatched by the `Even
 ```php
 class DoSomethingProductCreated implements EventListener
 {
-    // methods on listener can be anything, it is configured by listensTo
+    // methods on listener can be anything, it is configured by getListenedEvents
     public function doSomething(ProductWasCreated $event): void
     {
         // do something with the event
@@ -101,7 +101,7 @@ class DoSomethingProductCreated implements EventListener
     {
     }
     
-    public function listensTo(): array
+    public static function getListenedEvents(): array
     {
         return [
             ProductWasCreated::class => 'doSomething', // priority will be assigned at runtime

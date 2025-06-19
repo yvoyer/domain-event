@@ -20,10 +20,7 @@ use function array_merge;
 use function count;
 use function get_class;
 use function method_exists;
-use function property_exists;
 use function sprintf;
-use function trigger_error;
-use function uniqid;
 
 final class SymfonyPublisher implements EventPublisher
 {
@@ -82,57 +79,6 @@ final class SymfonyPublisher implements EventPublisher
     public function subscribe(
         EventListener $listener,
     ): void {
-        if (!method_exists($listener, 'getListenedEvents')) {
-            @trigger_error(
-                sprintf(
-                    '%s::listensTo() method is deprecated and will be removed in 3.0. '
-                    . 'Define the new static method "%s::getListenedEvents(): array" '
-                    . 'and move the content of "listensTo()" into it. '
-                    . 'See: https://github.com/yvoyer/domain-event/issues/62',
-                    EventListener::class,
-                    get_class($listener)
-                ),
-                E_USER_DEPRECATED
-            );
-            // todo remove eval in 3.0
-            $name = uniqid('listener');
-            $class = <<<CLASS
-use Star\Component\DomainEvent\EventListener;
-
-final class {$name} implements EventListener
-{
-    /**
-     * @var EventListener
-     */
-    public static \$listener;
-
-    public function __construct(EventListener \$listener)
-    {
-        self::\$listener = \$listener;
-    }
-
-    public function listensTo(): array
-    {
-        throw new \RuntimeException(__METHOD__ . " not implemented yet.");
-    }
-
-    public function __call(\$name, \$args): void
-    {
-        self::\$listener->{\$name}(...\$args);
-    }
-
-    public static function getListenedEvents(): array
-    {
-        return self::\$listener->listensTo();
-    }
-}
-
-CLASS;
-
-            eval($class);
-            $listener = new $name($listener);
-        }
-
         foreach ($listener::getListenedEvents() as $eventClass => $method) {
             if (is_array($method)) {
                 foreach ($method as $priority => $_method) {
@@ -177,12 +123,7 @@ CLASS;
         int $priority,
     ): void {
         $listenerClass = get_class($listener);
-        if (property_exists($listener, 'listener')) {
-            // todo remove condition in 3.0 We fetch the listener from the bridge
-            $listenerClass = get_class($listener::$listener);
-        }
-
-        if (! \method_exists($listenerClass, $method)) {
+        if (! method_exists($listenerClass, $method)) {
             throw BadMethodCallException::methodNotDefinedOnListener($method, $listenerClass);
         }
 

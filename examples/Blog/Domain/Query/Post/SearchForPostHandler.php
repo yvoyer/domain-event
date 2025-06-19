@@ -52,7 +52,7 @@ final class SearchForPostHandler implements EventListener
         $item->publishedBy = $event->publishedBy();
     }
 
-    public function listensTo(): array
+    public static function getListenedEvents(): array
     {
         return [
             PostWasDrafted::class => 'onPostDrafted',
