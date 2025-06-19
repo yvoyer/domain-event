@@ -6,7 +6,6 @@ use ArrayAccess;
 use Assert\Assertion;
 use DateTimeImmutable;
 use DateTimeInterface;
-use RuntimeException;
 use function array_filter;
 use function array_key_exists;
 use function in_array;
@@ -14,18 +13,17 @@ use function is_numeric;
 use function is_string;
 use function json_decode;
 use function sprintf;
-use function strpos;
-use function trigger_error;
+use function str_contains;
 
 /**
  * @implements ArrayAccess<string, SerializableAttribute|string|int|bool|float>
  */
-final class Payload implements ArrayAccess // todo ArrayAccess implement will be removed in 3.0 **/
+final class Payload
 {
     /**
      * @var array<string, SerializableAttribute|string|int|bool|float> $data
      */
-    private $data;
+    private array $data;
 
     /**
      * @param array<string, SerializableAttribute|string|int|bool|float> $data
@@ -46,7 +44,7 @@ final class Payload implements ArrayAccess // todo ArrayAccess implement will be
             array_filter(
                 $this->data,
                 function (string $key) use ($string): bool {
-                    return strpos($key, $string) !== false;
+                    return str_contains($key, $string);
                 },
                 ARRAY_FILTER_USE_KEY
             )
@@ -206,7 +204,7 @@ final class Payload implements ArrayAccess // todo ArrayAccess implement will be
     private function getValueWhereKeyContains(string $needle): mixed
     {
         foreach ($this->data as $key => $value) {
-            if (strpos($key, $needle) !== false) {
+            if (str_contains($key, $needle)) {
                 return $value;
             }
         }
@@ -263,79 +261,5 @@ final class Payload implements ArrayAccess // todo ArrayAccess implement will be
         $payload = json_decode($json, true);
 
         return self::fromArray($payload);
-    }
-
-    /**
-     * @param string $offset
-     * @deprecated Will be remove in 3.0, stop usage.
-     */
-    public function offsetExists($offset): bool
-    {
-        @trigger_error(
-            sprintf(
-                'Array access on "%s" will be removed in 3.0. Avoid using method "%s".',
-                self::class,
-                __METHOD__
-            ),
-            E_USER_DEPRECATED
-        );
-
-        return array_key_exists($offset, $this->data);
-    }
-
-    /**
-     * @param string $offset
-     * @return SerializableAttribute|string|int|bool|float
-     * @deprecated Will be remove in 3.0, stop usage.
-     */
-    #[\ReturnTypeWillChange]
-    public function offsetGet($offset)
-    {
-        @trigger_error(
-            sprintf(
-                'Array access on "%s" will be removed in 3.0. Avoid using method "%s".',
-                self::class,
-                __METHOD__
-            ),
-            E_USER_DEPRECATED
-        );
-        return $this->data[$offset];
-    }
-
-    /**
-     * @param string $offset
-     * @param SerializableAttribute|string|int|bool|float $value
-     * @return void
-     * @deprecated Will be remove in 3.0, stop usage.
-     */
-    public function offsetSet($offset, $value): void
-    {
-        @trigger_error(
-            sprintf(
-                'Array access on "%s" will be removed in 3.0. Avoid using method "%s".',
-                self::class,
-                __METHOD__
-            ),
-            E_USER_DEPRECATED
-        );
-        throw new RuntimeException(__METHOD__ . ' should never be invoked.');
-    }
-
-    /**
-     * @param string $offset
-     * @return void
-     * @deprecated Will be remove in 3.0, stop usage.
-     */
-    public function offsetUnset($offset): void
-    {
-        @trigger_error(
-            sprintf(
-                'Array access on "%s" will be removed in 3.0. Avoid using method "%s".',
-                self::class,
-                __METHOD__
-            ),
-            E_USER_DEPRECATED
-        );
-        throw new RuntimeException(__METHOD__ . ' should never be invoked.');
     }
 }

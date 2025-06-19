@@ -21,24 +21,24 @@ final class PayloadFromReflectionTest extends TestCase
         $serializer = new PayloadFromReflection();
         $payload = $serializer->createPayload($event);
 
-        $this->assertArrayHasKey('event_class', $payload);
-        $this->assertSame(get_class($event), $payload['event_class']);
+        self::assertTrue($payload->keyExists('event_class'));
+        self::assertSame(get_class($event), $payload->getString('event_class'));
     }
 
     public function test_should_serialize_event_with_int_attribute(): void
     {
         $serializer = new PayloadFromReflection();
         $payload = $serializer->createPayload(new MixedEvent(44));
-        $this->assertArrayHasKey('attribute', $payload);
-        $this->assertSame(44, $payload['attribute']);
+        self::assertTrue($payload->keyExists('attribute'));
+        self::assertSame(44, $payload->getInteger('attribute'));
     }
 
     public function test_should_serialize_event_with_string_attribute(): void
     {
         $serializer = new PayloadFromReflection();
         $payload = $serializer->createPayload(new MixedEvent('something'));
-        $this->assertArrayHasKey('attribute', $payload);
-        $this->assertSame('something', $payload['attribute']);
+        self::assertTrue($payload->keyExists('attribute'));
+        self::assertSame('something', $payload->getString('attribute'));
     }
 
     public function test_should_serialize_event_with_float_attribute(): void
@@ -50,10 +50,10 @@ final class PayloadFromReflectionTest extends TestCase
                 private string $as_string = '123.456';
             }
         );
-        $this->assertArrayHasKey('as_int', $payload);
-        $this->assertSame(123.456, $payload['as_int']);
-        $this->assertArrayHasKey('as_string', $payload);
-        $this->assertSame('123.456', $payload['as_string']);
+        self::assertTrue($payload->keyExists('as_int'));
+        self::assertSame(123.456, $payload->getFloat('as_int'));
+        self::assertTrue($payload->keyExists('as_string'));
+        self::assertSame('123.456', $payload->getString('as_string'));
     }
 
     public function test_should_serialize_event_with_bool_attribute(): void
@@ -65,10 +65,10 @@ final class PayloadFromReflectionTest extends TestCase
                 private bool $false = false;
             }
         );
-        $this->assertArrayHasKey('true', $payload);
-        $this->assertTrue($payload['true']);
-        $this->assertArrayHasKey('false', $payload);
-        $this->assertFalse($payload['false']);
+        self::assertTrue($payload->keyExists('true'));
+        self::assertTrue($payload->getBoolean('true'));
+        self::assertTrue($payload->keyExists('false'));
+        self::assertFalse($payload->getBoolean('false'));
     }
 
     public function test_should_not_allow_to_serialize_array(): void
@@ -102,8 +102,8 @@ final class PayloadFromReflectionTest extends TestCase
             new MixedEvent(PostId::fromString('id'))
         );
 
-        self::assertArrayHasKey('attribute', $payload);
-        self::assertSame('id', $payload['attribute']);
+        self::assertTrue($payload->keyExists('attribute'));
+        self::assertSame('id', $payload->getString('attribute'));
     }
 
     public function test_it_should_not_allow_event_class_that_are_not_created_from_payload(): void
@@ -145,7 +145,7 @@ final class PayloadFromReflectionTest extends TestCase
             new MixedEvent(new DateTimeImmutable('2000-01-01 12:34:56.0987'))
         );
 
-        self::assertSame('2000-01-01T12:34:56+0000', $payload['attribute']);
+        self::assertSame('2000-01-01T12:34:56+0000', $payload->getString('attribute'));
     }
 
     public function test_it_should_allow_serialization_of_date_time_to_custom_format(): void
@@ -157,7 +157,7 @@ final class PayloadFromReflectionTest extends TestCase
             new MixedEvent(new DateTimeImmutable('2000-01-01 12:34:56.0987'))
         );
 
-        self::assertSame('2000-01-01 12:34:56.098700', $payload['attribute']);
+        self::assertSame('2000-01-01 12:34:56.098700', $payload->getString('attribute'));
     }
 }
 
