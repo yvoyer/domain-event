@@ -59,7 +59,7 @@ final class Payload
     }
 
     /**
-     * Returns the first value where the $needle is found in key (case sensitive).
+     * Returns the first value where the $needle is found in key (case-sensitive).
      *
      * @throws PayloadKeyNotFound When no key with $needle could be found
      */
@@ -86,7 +86,7 @@ final class Payload
     }
 
     /**
-     * Returns the first value where the $needle is found in key (case sensitive).
+     * Returns the first value where the $needle is found in key (case-sensitive).
      *
      * @throws PayloadKeyNotFound When no key with $needle could be found
      */
@@ -113,7 +113,7 @@ final class Payload
     }
 
     /**
-     * Returns the first value where the $needle is found in key (case sensitive).
+     * Returns the first value where the $needle is found in key (case-sensitive).
      *
      * @throws PayloadKeyNotFound When no key with $needle could be found
      */
@@ -142,7 +142,7 @@ final class Payload
     }
 
     /**
-     * Returns the first value where the $needle is found in key (case sensitive).
+     * Returns the first value where the $needle is found in key (case-sensitive).
      *
      * @throws PayloadKeyNotFound When no key with $needle could be found
      */
@@ -172,7 +172,7 @@ final class Payload
     }
 
     /**
-     * Returns the first value where the $needle is found in key (case sensitive).
+     * Returns the first value where the $needle is found in key (case-sensitive).
      *
      * @throws PayloadKeyNotFound When no key with $needle could be found
      */
@@ -192,7 +192,7 @@ final class Payload
     }
 
     /**
-     * Returns the first value where the $needle is found in key (case sensitive).
+     * Returns the first value where the $needle is found in key (case-sensitive).
      *
      * @throws PayloadKeyNotFound When no key with $needle could be found
      * @return SerializableAttribute|string|int|bool|float

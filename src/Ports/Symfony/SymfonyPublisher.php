@@ -92,7 +92,7 @@ final class SymfonyPublisher implements EventPublisher
                 $eventClass,
                 $listener,
                 $method,
-                $bcBreakPriority // for BC. fixme remove on next major
+                $bcBreakPriority,
             );
         }
     }
