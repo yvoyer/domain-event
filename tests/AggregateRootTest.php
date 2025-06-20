@@ -19,9 +19,9 @@ final class AggregateRootTest extends TestCase
     {
         $aggregate = StubAggregate::fromStream(new ValidEvent());
         $events = $aggregate->uncommitedEvents();
-        $this->assertCount(1, $events);
-        $this->assertInstanceOf(ValidEvent::class, $events[0]);
-        $this->assertCount(0, $aggregate->uncommitedEvents());
+        self::assertCount(1, $events);
+        self::assertInstanceOf(ValidEvent::class, $events[0]);
+        self::assertCount(0, $aggregate->uncommitedEvents());
     }
 
     public function test_it_should_apply_events_in_order_of_execution_when_event_triggers_another_event(): void
@@ -29,17 +29,17 @@ final class AggregateRootTest extends TestCase
         $aggregate = StubAggregate::fromStream(new MultipleEventWereTriggered());
 
         $events = $aggregate->uncommitedEvents();
-        $this->assertCount(3, $events);
-        $this->assertInstanceOf(MultipleEventWereTriggered::class, $events[0]);
-        $this->assertInstanceOf(EventOneWasTriggered::class, $events[1]);
-        $this->assertInstanceOf(EventTwoWasTriggered::class, $events[2]);
+        self::assertCount(3, $events);
+        self::assertInstanceOf(MultipleEventWereTriggered::class, $events[0]);
+        self::assertInstanceOf(EventOneWasTriggered::class, $events[1]);
+        self::assertInstanceOf(EventTwoWasTriggered::class, $events[2]);
     }
 
     public function test_it_should_allow_child_class_to_call_construct(): void
     {
         $root = RootWithConstruct::fromStream();
-        $this->assertCount(0, $root->uncommitedEvents());
-        $this->assertSame(12, $root->id);
+        self::assertCount(0, $root->uncommitedEvents());
+        self::assertSame(12, $root->id);
     }
 
     public function test_it_should_allow_to_pass_multiple_events_on_mutate(): void
@@ -82,7 +82,7 @@ final class StubAggregate extends AggregateRoot
     {
     }
 
-    protected function onMultipleEventWereTriggered($event): void
+    protected function onMultipleEventWereTriggered(MultipleEventWereTriggered $event): void
     {
         $this->mutate(new EventOneWasTriggered());
     }
@@ -91,12 +91,12 @@ final class StubAggregate extends AggregateRoot
     {
     }
 
-    public function onEventOneWasTriggered($event): void
+    public function onEventOneWasTriggered(EventOneWasTriggered $event): void
     {
         $this->mutate(new EventTwoWasTriggered());
     }
 
-    public function onEventTwoWasTriggered($event): void
+    public function onEventTwoWasTriggered(EventTwoWasTriggered $event): void
     {
     }
 }
@@ -124,7 +124,7 @@ final class EventTwoWasTriggered implements DomainEvent
 final class NamedEvent implements DomainEvent
 {
     public function __construct(
-        private string $name = 'test',
+        public string $name = 'test',
     ) {
     }
 }

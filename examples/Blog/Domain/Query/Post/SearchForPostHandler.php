@@ -8,11 +8,12 @@ use Star\Example\Blog\Domain\Event\Post\PostWasPublished;
 use Star\Example\Blog\Domain\Query\Post\DataTransfer\PostListItem;
 use function array_filter;
 use function array_merge;
+use function stripos;
 
 final class SearchForPostHandler implements EventListener
 {
     /**
-     * @var PostListItem[]
+     * @var array<string, PostListItem>
      */
     private array $posts = [];
 
@@ -22,11 +23,14 @@ final class SearchForPostHandler implements EventListener
         foreach ($query->strings() as $pattern) {
             $items = array_filter(
                 $this->posts,
-                function (PostListItem $item) use ($pattern) {
-                    return false !== \stripos($item->title, $pattern) && $item->published;
+                function (PostListItem $item) use ($pattern): bool {
+                    return false !== stripos($item->title, $pattern) && $item->published;
                 }
             );
 
+            /**
+             * @var array<string, PostListItem> $result
+             */
             $result = array_merge($result, $items);
         }
 

@@ -4,10 +4,10 @@ namespace Star\Example\Blog\Domain\Query\Post\DataTransfer;
 
 final class PostListItem
 {
-    public $id;
-    public $title;
-    public $blogName;
-    public $published;
-    public $publishedAt;
-    public $publishedBy;
+    public ?string $id;
+    public string $title;
+    public ?string $blogName;
+    public ?bool $published;
+    public ?string $publishedAt;
+    public ?string $publishedBy;
 }

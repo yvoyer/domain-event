@@ -50,7 +50,7 @@ abstract class EventStoreCollection implements Countable
 
     /**
      * @param callable $callable
-     * @return AggregateRoot[] Indexed by id
+     * @return array<string, AggregateRoot> Indexed by id
      */
     protected function filter(
         callable $callable,
@@ -60,7 +60,12 @@ abstract class EventStoreCollection implements Countable
             $aggregates[$aggregateId] = $this->loadAggregate($aggregateId);
         }
 
-        return array_filter($aggregates, $callable);
+        /**
+         * @var array<string, AggregateRoot> $filtered
+         */
+        $filtered = array_filter($aggregates, $callable);
+
+        return $filtered;
     }
 
     protected function exists(

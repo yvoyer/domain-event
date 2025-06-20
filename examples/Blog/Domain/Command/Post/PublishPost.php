@@ -11,7 +11,7 @@ final class PublishPost implements Command
     public function __construct(
         private PostId $postId,
         private DateTimeInterface $publishedAt,
-        private $publishedBy,
+        private string $publishedBy,
     ) {
     }
 

@@ -31,7 +31,7 @@ final class QueryBusPassTest extends TestCase
          * @var QueryController $controller
          */
         $controller = $builder->get(QueryController::class);
-        $this->assertSame('result', $controller->searchStuff());
+        self::assertSame('result', $controller->searchStuff());
     }
 
     public function test_it_should_throw_exception_when_handler_is_missing_handler_suffix(): void
@@ -72,15 +72,18 @@ final class QueryBusPassTest extends TestCase
 
     public function test_it_should_allow_custom_class_message(): void
     {
-        $query = new class implements Query {
-            private $result;
+        $query = new class implements QueryWithResult {
+            private string $result;
 
+            /**
+             * @param string $result
+             */
             public function __invoke($result): void
             {
                 $this->result = $result;
             }
 
-            public function getResult()
+            public function getResult(): string
             {
                 return $this->result;
             }
@@ -100,10 +103,15 @@ final class QueryBusPassTest extends TestCase
          * @var QueryController $controller
          */
         $controller = $builder->get(QueryController::class);
-        $controller->dispatchQuery($query);
+        self::assertSame('result', $controller->dispatchQuery($query));
         self::assertSame('result', $query->getResult());
     }
 }
+interface QueryWithResult extends Query
+{
+    public function getResult(): string;
+}
+
 final class QueryController
 {
     public function __construct(
@@ -116,42 +124,34 @@ final class QueryController
         return $this->dispatchQuery(new SearchStuff());
     }
 
-    public function dispatchQuery($query)
+    public function dispatchQuery(QueryWithResult $query): string
     {
         $this->queryBus->dispatchQuery($query);
 
         return $query->getResult();
     }
 }
-final class SearchStuff implements Query
+final class SearchStuff implements QueryWithResult
 {
-    private mixed $result;
+    public string $result;
 
+    /**
+     * @param string $result
+     */
     public function __invoke($result): void
     {
         $this->result = $result;
     }
 
-    public function getResult()
+    public function getResult(): string
     {
         return $this->result;
     }
 }
 final class SearchStuffHandler
 {
-    public function __invoke($query): void
+    public function __invoke(Query $query): void
     {
         $query('result');
-    }
-}
-final class WillThrowExceptionForInvalidFormat implements Query {
-    public function __invoke($result): void
-    {
-        throw new RuntimeException('Method ' . __METHOD__ . ' not implemented yet.');
-    }
-
-    public function getResult()
-    {
-        throw new RuntimeException('Method ' . __METHOD__ . ' not implemented yet.');
     }
 }

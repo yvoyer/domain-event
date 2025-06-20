@@ -18,7 +18,10 @@ final class EventPublisherPassTest extends TestCase
         $builder = new ContainerBuilder();
         $builder->register('event_dispatcher', EventDispatcher::class);
         $builder->addCompilerPass(new EventPublisherPass());
-        $builder->register(SomeListener::class, SomeListener::class)->addTag('star.event_listener');
+        $builder
+            ->register(SomeListener::class, SomeListener::class)
+            ->setPublic(true)
+            ->addTag('star.event_listener');
         $builder->register(MyController::class, MyController::class)
             ->addArgument(new Reference(EventPublisher::class))
             ->setPublic(true);
@@ -78,6 +81,10 @@ final class EventPublisherPassTest extends TestCase
         $service = $builder->get(MyController::class);
         $service->doAction('My blog');
 
+        /**
+         * @var ListenerV3 $listener
+         */
+        $listener = $builder->get(ListenerV3::class);
         self::assertInstanceOf(SomethingWasDone::class, $listener->event);
     }
 }

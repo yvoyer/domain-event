@@ -1,5 +1,21 @@
 # Release notes
 
+# 3.0.0 
+
+Includes all code from [2.6.x](/RELEASE.md#261)
+
+* [#62](https://github.com/yvoyer/domain-event/pull/62) Move EventPublisher method to staticBC break
+* [#55](https://github.com/yvoyer/domain-event/pull/55) Pass events as splat operator in AggregateRoot::fromStream()Enhancement
+* [#54](https://github.com/yvoyer/domain-event/pull/54) Remove automatic creation of tablesBC break 
+* [#52](https://github.com/yvoyer/domain-event/pull/52) Remove support to EventPublisher::publishChanges in favor of splat operator in publishEnhancement
+* [#50](https://github.com/yvoyer/domain-event/pull/50) Remove support to Base Query classesBC break
+* [#48](https://github.com/yvoyer/domain-event/pull/48) Replace any reference to array payload to use Payload objectBC break
+* [#47](https://github.com/yvoyer/domain-event/pull/47) Force type hint to EventDispatcherInterface in SymfonyDispatcherBC break
+* [#46](https://github.com/yvoyer/domain-event/pull/46) Support only php 8.0BC break
+* [#45](https://github.com/yvoyer/domain-event/pull/45) Deprecate All components in prepartion for support of version 3.0BC break
+* [#31](https://github.com/yvoyer/domain-event/pull/31) Switch payload in event to use json instead of serialized arrayBC break
+* [#18](https://github.com/yvoyer/domain-event/pull/18) Remove dependency to EventDispatcher <=4.4BC break
+
 # 2.6.1
 
 * [#68](https://github.com/yvoyer/domain-event/pull/68) Unserialization error when using other type than default

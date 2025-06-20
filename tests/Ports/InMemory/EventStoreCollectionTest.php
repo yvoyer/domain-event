@@ -2,6 +2,7 @@
 
 namespace Star\Component\DomainEvent\Ports\InMemory;
 
+use Assert\Assertion;
 use RuntimeException;
 use Star\Component\DomainEvent\AggregateRoot;
 use Star\Component\DomainEvent\DomainEvent;
@@ -112,7 +113,10 @@ final class StubCollection extends EventStoreCollection
 {
     public function getAggregate(string $id): StubAggregate
     {
-        return $this->loadAggregate($id);
+        $aggregate = $this->loadAggregate($id);
+        Assertion::isInstanceOf($aggregate, StubAggregate::class);
+
+        return $aggregate;
     }
 
     public function saveStub(string $id, StubAggregate $aggregate): void
@@ -130,6 +134,9 @@ final class StubCollection extends EventStoreCollection
         return StubAggregate::fromStream(...$events);
     }
 
+    /**
+     * @return array<string, AggregateRoot>
+     */
     public function filterByCount(int $count): array
     {
         return $this->filter(function (StubAggregate $aggregate) use ($count): bool {

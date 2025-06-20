@@ -12,6 +12,7 @@
 
     <file>src/</file>
     <file>tests/</file>
+    <file>examples/</file>
     <exclude-pattern>Test.php</exclude-pattern>
 
 </ruleset>

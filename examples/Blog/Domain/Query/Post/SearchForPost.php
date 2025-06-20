@@ -9,12 +9,12 @@ use Star\Example\Blog\Domain\Query\Post\DataTransfer\PostListItem;
 final class SearchForPost implements Query
 {
     /**
-     * @var string[]
+     * @var array<int|string, string>
      */
     private array $strings;
 
     /**
-     * @var array<int, PostListItem>
+     * @var array<string, PostListItem>
      */
     private array $result;
 
@@ -23,19 +23,25 @@ final class SearchForPost implements Query
         $this->strings = $strings;
     }
 
+    /**
+     * @return array<int|string, string>
+     */
     public function strings(): array
     {
         return $this->strings;
     }
 
-    public function __invoke($result): void
+    /**
+     * @param array<string, PostListItem> $result
+     */
+    public function __invoke(mixed $result): void
     {
         Assertion::allIsInstanceOf($result, PostListItem::class);
         $this->result = $result;
     }
 
     /**
-     * @return PostListItem[]
+     * @return array<string, PostListItem>
      */
     public function getResult(): array
     {

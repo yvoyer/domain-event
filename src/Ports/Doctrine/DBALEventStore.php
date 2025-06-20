@@ -102,7 +102,7 @@ abstract class DBALEventStore
         $callback = function (array $eventRow): DomainEvent {
             /**
              * @var array{
-             *     event_name: string|class-string<DomainEvent>,
+             *     event_name: class-string<DomainEvent>,
              *     payload: string,
              * } $eventRow
              */
