@@ -3,6 +3,7 @@
 namespace Star\Component\DomainEvent\Messaging;
 
 use PHPUnit\Framework\TestCase;
+use function get_class;
 
 final class MessageMapBusTest extends TestCase
 {
@@ -17,13 +18,14 @@ final class MessageMapBusTest extends TestCase
     {
         $message = $this->createMock(Command::class);
         $triggered = false;
-        $this->bus->registerHandler(\get_class($message), function () use (&$triggered) { $triggered = true; });
-
-        $this->assertFalse($triggered);
+        $this->bus->registerHandler(
+            get_class($message),
+            function () use (&$triggered) { $triggered = true; }
+        );
 
         $this->bus->dispatchCommand($message);
 
-        $this->assertTrue($triggered);
+        self::assertTrue($triggered);
     }
 
     public function test_it_should_throw_exception_when_command_not_supported(): void
@@ -38,13 +40,11 @@ final class MessageMapBusTest extends TestCase
     {
         $message = $this->createMock(Query::class);
         $triggered = false;
-        $this->bus->registerHandler(\get_class($message), function () use (&$triggered) { $triggered = true; });
-
-        $this->assertFalse($triggered);
+        $this->bus->registerHandler(get_class($message), function () use (&$triggered) { $triggered = true; });
 
         $this->bus->dispatchQuery($message);
 
-        $this->assertTrue($triggered);
+        self::assertTrue($triggered);
     }
 
     public function test_it_should_throw_exception_when_query_not_supported(): void

@@ -128,7 +128,7 @@ final class DoStuff implements Command
 {}
 final class DoStuffHandler
 {
-    public function __invoke($command): void
+    public function __invoke(Command $command): void
     {
         throw new RuntimeException('Command: ' . get_class($command));
     }

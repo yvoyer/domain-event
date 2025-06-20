@@ -2,6 +2,7 @@
 
 namespace Star\Example\Blog\Application\Http\Controller;
 
+use DateTime;
 use Star\Example\Blog\Domain\Command\Post\CreateNewPost;
 use Star\Component\DomainEvent\Messaging\CommandBus;
 use Star\Component\DomainEvent\Messaging\QueryBus;
@@ -27,10 +28,10 @@ final class PostController
     public function publish(int $postId): string
     {
         $this->commandBus->dispatchCommand(
-            new PublishPost(PostId::fromInt($postId), new \DateTime('2000-01-01'), 'username')
+            new PublishPost(PostId::fromInt($postId), new DateTime('2000-01-01'), 'username')
         );
 
-        return json_encode(['success' => true]);
+        return (string) json_encode(['success' => true]);
     }
 
     public function search(string ...$patterns): string
@@ -40,11 +41,22 @@ final class PostController
 
         $this->queryBus->dispatchQuery($query);
 
-        return json_encode($query->getResult());
+        return (string) json_encode($query->getResult());
     }
 
-    public function createPost(string $blogId, array $request): string
-    {
+    /**
+     * @param string $blogId
+     * @param array{
+     *     data: array{
+     *         title: string,
+     *     },
+     * } $request
+     * @return string
+     */
+    public function createPost(
+        string $blogId,
+        array $request,
+    ): string {
         $this->i ++;
         $this->commandBus->dispatchCommand(
             new CreateNewPost(
@@ -54,7 +66,7 @@ final class PostController
             )
         );
 
-        return json_encode(
+        return (string) json_encode(
             [
                 'id' => $id->toString(),
             ]

@@ -2,6 +2,7 @@
 
 namespace Star\Component\DomainEvent\Ports\Doctrine;
 
+use Assert\Assertion;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Doctrine\DBAL\Connection;
@@ -184,6 +185,11 @@ final class DBALEventStoreTest extends TestCase
                 $this->persistAggregate($aggregate->getId()->toString(), $aggregate);
             }
 
+            /**
+             * @param array{
+             *     changedAt?: string,
+             * } $payload
+             */
             protected function createPushedOnDateFromPayload(array $payload): DateTimeImmutable
             {
                 if (key_exists('changedAt', $payload)) {
@@ -337,7 +343,9 @@ final class DBALEventStoreTest extends TestCase
         $store->saveAggregate($post);
 
         /**
-         * @var array<int, array{ new_column: null|string }> $result
+         * @var array<int, array{
+         *     same_as_name: null|string,
+         * }> $result
          */
         $result = $this->connection->createQueryBuilder()
             ->select('*')
@@ -417,7 +425,9 @@ final class DBALEventStoreTest extends TestCase
         $store->saveAggregate($post);
 
         /**
-         * @var array<int, array{ new_column: null|string }> $result
+         * @var array<int, array{
+         *     matching_pattern: null|string,
+         * }> $result
          */
         $result = $this->connection->createQueryBuilder()
             ->select('*')
@@ -488,7 +498,9 @@ final class DBALEventStoreTest extends TestCase
         $store->saveAggregate($post);
 
         /**
-         * @var array<int, array{ new_column: null|string }> $result
+         * @var array<int, array{
+         *    version: int,
+         * }> $result
          */
         $result = $this->connection->createQueryBuilder()
             ->select('*')
@@ -508,8 +520,6 @@ final class DBALEventStoreTest extends TestCase
             new PayloadFromReflection()
         );
         $this->ensureTableExists();
-
-        self::assertCount(0, $publisher->getPublishedEvents());
 
         $store->saveAggregate(PostAggregate::draftPostFixture());
 
@@ -544,7 +554,7 @@ final class DBALEventStoreTest extends TestCase
 
             protected function unserializePayloadColumn(string $data): array
             {
-                return json_decode($data, true);
+                return (array) json_decode($data, true); // @phpstan-ignore-line
             }
 
             protected function getPayloadType(): string
@@ -559,7 +569,10 @@ final class DBALEventStoreTest extends TestCase
 
             public function getAggregate(PostId $postId): PostAggregate
             {
-                return $this->getAggregateWithId($postId->toString());
+                $aggregate = $this->getAggregateWithId($postId->toString());
+                Assertion::isInstanceOf($aggregate, PostAggregate::class);
+
+                return $aggregate;
             }
         };
         $this->ensureTableExists(Types::ARRAY, 'table_name');
@@ -590,7 +603,10 @@ final class PostEventStore extends DBALEventStore
 
     public function loadAggregate(string $id): PostAggregate
     {
-        return $this->getAggregateWithId($id);
+        $aggregate = $this->getAggregateWithId($id);
+        Assertion::isInstanceOf($aggregate, PostAggregate::class);
+
+        return $aggregate;
     }
 
     public function saveAggregate(PostAggregate $post): void

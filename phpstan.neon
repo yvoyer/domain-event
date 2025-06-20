@@ -5,6 +5,6 @@ includes:
 parameters:
     paths:
         - src
+        - tests
+        - examples
     level: max
-    excludePaths:
-        - src/Ports/Symfony/SymfonyPublisher.php

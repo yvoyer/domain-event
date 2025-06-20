@@ -11,7 +11,7 @@ interface PayloadSerializer
     public function createPayload(DomainEvent $event): Payload;
 
     /**
-     * @param string|class-string<DomainEvent> $eventName
+     * @param class-string<DomainEvent> $eventName
      */
     public function createEvent(
         string $eventName,

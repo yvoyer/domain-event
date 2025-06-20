@@ -8,13 +8,13 @@
 
 namespace Star\Component\DomainEvent\Ports\Symfony;
 
-use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\EventDispatcher\StoppableEventInterface;
 use Star\Component\DomainEvent\BadMethodCallException;
 use Star\Component\DomainEvent\DomainEvent;
 use Star\Component\DomainEvent\DuplicatedListenerPriority;
 use Star\Component\DomainEvent\EventListener;
 use Star\Component\DomainEvent\EventPublisher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use function array_key_exists;
 use function count;
 use function get_class;
@@ -24,7 +24,7 @@ use function sprintf;
 final class SymfonyPublisher implements EventPublisher
 {
     /**
-     * @var array<class-string<DomainEvent>, array<int, class-string>
+     * @var array<class-string<DomainEvent>, array<int, string>>
      */
     private array $priorityMap = [];
 

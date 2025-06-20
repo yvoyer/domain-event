@@ -46,8 +46,8 @@ final class PayloadFromReflectionTest extends TestCase
         $serializer = new PayloadFromReflection();
         $payload = $serializer->createPayload(
             new class implements DomainEvent {
-                private float $as_int = 123.456;
-                private string $as_string = '123.456';
+                private float $as_int = 123.456; // @phpstan-ignore-line
+                private string $as_string = '123.456'; // @phpstan-ignore-line
             }
         );
         self::assertTrue($payload->keyExists('as_int'));
@@ -61,8 +61,8 @@ final class PayloadFromReflectionTest extends TestCase
         $serializer = new PayloadFromReflection();
         $payload = $serializer->createPayload(
             new class implements DomainEvent {
-                private bool $true = true;
-                private bool $false = false;
+                private bool $true = true; // @phpstan-ignore-line
+                private bool $false = false; // @phpstan-ignore-line
             }
         );
         self::assertTrue($payload->keyExists('true'));
@@ -117,7 +117,7 @@ final class PayloadFromReflectionTest extends TestCase
                 CreatedFromPayload::class,
             )
         );
-        $serializer->createEvent(stdClass::class, Payload::fromArray([]));
+        $serializer->createEvent(stdClass::class, Payload::fromArray([])); // @phpstan-ignore-line
     }
 
     public function test_it_should_allow_creating_event_using_new_payload_object(): void

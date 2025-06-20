@@ -51,7 +51,7 @@ final class AlwaysThrowExceptionOnFailure implements PayloadFailureStrategy
     /**
      * @param string $value
      */
-    public function transformRawValueToString($value): string
+    public function transformRawValueToString(mixed $value): string
     {
         Assertion::string($value);
         return (string) $value;
@@ -60,7 +60,7 @@ final class AlwaysThrowExceptionOnFailure implements PayloadFailureStrategy
     /**
      * @param float|int|string $value
      */
-    public function transformRawValueToInt($value): int
+    public function transformRawValueToInt(mixed $value): int
     {
         Assertion::numeric($value);
         return (int) $value;
@@ -69,7 +69,7 @@ final class AlwaysThrowExceptionOnFailure implements PayloadFailureStrategy
     /**
      * @param int|float|string $value
      */
-    public function transformRawValueToFloat($value): float
+    public function transformRawValueToFloat(mixed $value): float
     {
         Assertion::numeric($value);
         return (float) $value;
@@ -78,7 +78,7 @@ final class AlwaysThrowExceptionOnFailure implements PayloadFailureStrategy
     /**
      * @param string|int|bool $value
      */
-    public function transformRawValueToBoolean($value): bool
+    public function transformRawValueToBoolean(mixed $value): bool
     {
         Assertion::inArray($value, ['0', '1', 0, 1, true, false]);
         return (bool) $value;
@@ -87,7 +87,7 @@ final class AlwaysThrowExceptionOnFailure implements PayloadFailureStrategy
     /**
      * @param string $value
      */
-    public function transformRawValueToDateTime($value): DateTimeInterface
+    public function transformRawValueToDateTime(mixed $value): DateTimeInterface
     {
         Assertion::string($value);
         return new DateTimeImmutable($value);

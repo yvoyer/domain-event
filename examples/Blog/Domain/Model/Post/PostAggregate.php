@@ -25,6 +25,11 @@ final class PostAggregate extends AggregateRoot
         return $this->title;
     }
 
+    final public function getBlogId(): BlogId
+    {
+        return $this->blog;
+    }
+
     public function publish(DateTimeInterface $publishedAt, string $publishedBy): void
     {
         $this->mutate(new PostWasPublished($this->id, $publishedAt, $publishedBy));
