@@ -72,11 +72,9 @@ abstract class DBALEventStore
         $expr = $qb->expr();
         $qb
             ->select(
-                [
-                    'alias.' . self::COLUMN_AGGREGATE_ID,
-                    'alias.' . self::COLUMN_EVENT_NAME,
-                    'alias.' . self::COLUMN_PAYLOAD,
-                ]
+                'alias.' . self::COLUMN_AGGREGATE_ID,
+                'alias.' . self::COLUMN_EVENT_NAME,
+                'alias.' . self::COLUMN_PAYLOAD,
             )
             ->from($this->tableName(), 'alias')
             ->andWhere($expr->eq('alias.' . self::COLUMN_AGGREGATE_ID, ':aggregate_id'))
